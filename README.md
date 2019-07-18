@@ -13,12 +13,12 @@ This plugin can be enabled with the following configuration in your `settings.js
   ...
   "plugins": {
     ...
-    "csp-lod-planets": {
+    "csp-lod-bodies": {
       "maxGPUTilesColor": <int>,                // The maximum allowed colored tiles.
       "maxGPUTilesGray": <int>,                 // The maximum allowed gray tiles.
       "maxGPUTilesDEM": <int>,                  // The maximum allowed elevation tiles.
       "mapCache": <path to map cache folder>,
-      "planets": {
+      "bodies": {
         <anchor name>: {
           "imgDatasets": [
             {
@@ -43,7 +43,7 @@ This plugin can be enabled with the following configuration in your `settings.js
             ... <more elevation datasets> ...
           ]
         },
-        ... <more planets> ...
+        ... <more bodies> ...
       }
     }
   }
