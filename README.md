@@ -1,6 +1,8 @@
 # Level-of-detail bodies for CosmoScout VR
 
-A CosmoScout VR plugin wich draws WMS based level-of-detail planets and moons. This plugin is built as part of CosmoScout's build process. See the [main repository](https://github.com/cosmoscout/cosmoscout-vr) for instructions.
+A CosmoScout VR plugin wich draws level-of-detail planets and moons. This plugin supports the visualization of entire planets in a 1:1 scale. The data is streamed via Web-Map-Services (WMS) over the internet. A dedicated MapServer is required to use this plugin.
+
+This plugin is built as part of CosmoScout's build process. See the [main repository](https://github.com/cosmoscout/cosmoscout-vr) for instructions.
 
 ## Configuration
 
