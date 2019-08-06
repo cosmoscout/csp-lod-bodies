@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col s5">
+        Automatic LOD
+    </div>
+    <div class="col s1">
+        <label class="tooltipped" data-tooltip='Select level-of-detail automatically'>
+            <input class="filled-in simple-value-checkbox" type="checkbox"
+                   id="set_enable_auto_terrain_lod" checked/>
+            <span></span>
+        </label>
+    </div>
+    <div class="col s6">
+        <div id="set_terrain_lod" class="unresponsive">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s7 offset-s5">
+        <label>
+            <input class="filled-in simple-value-checkbox" type="checkbox"
+                   id="set_enable_tiles_debug"/>
+            <span>Show Terrain LOD</span>
+        </label>
+    </div>
+    <div class="col s7 offset-s5">
+        <label>
+            <input class="filled-in simple-value-checkbox" type="checkbox"
+                   id="set_enable_tiles_freeze"/>
+            <span>Freeze Terrain LOD</span>
+        </label>
+    </div>
+    <div class="col s7 offset-s5">
+        <label>
+            <input class="filled-in simple-value-checkbox" type="checkbox"
+                   id="set_enable_wireframe"/>
+            <span>Wireframe Planets</span>
+        </label>
+    </div>
+</div>
+<div class="row">
+    <div class="col s5">
+        Projection Type
+    </div>
+    <div class="col s7">
+        <label>
+            <input class="filled-in simple-value-radio" name="terrain_projection"
+                   type="radio"
+                   id="set_terrain_projection_mode_0"/>
+            <span>HEALPix</span>
+        </label>
+    </div>
+    <div class="col s7 offset-s5">
+        <label>
+            <input class="filled-in simple-value-radio" name="terrain_projection"
+                   type="radio"
+                   id="set_terrain_projection_mode_1"/>
+            <span>Linear Interpolation</span>
+        </label>
+    </div>
+    <div class="col s7 offset-s5">
+        <label>
+            <input class="filled-in simple-value-radio" name="terrain_projection"
+                   type="radio"
+                   id="set_terrain_projection_mode_2" checked/>
+            <span>Hybrid</span>
+        </label>
+    </div>
+</div>

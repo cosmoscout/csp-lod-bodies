@@ -1,0 +1,130 @@
+<div class="strike">
+    <span>Dataset Selection</span>
+</div>
+
+<div class="row">
+    <div class="col s5">
+        Image Channel
+    </div>
+    <div class="col s1">
+        <i class="material-icons" id="img-data-copyright">info</i>
+    </div>
+    <div class="col s6">
+        <select id="set_tiles_img" class="simple-value-dropdown">
+            <!-- Filled by JavaScript Function called from DataBase Manager -->
+            <option value="-1">None</option>
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col s5">
+        Elevation Channel
+    </div>
+    <div class="col s1">
+        <i class="material-icons" id="dem-data-copyright">info</i>
+    </div>
+    <div class="col s6">
+        <select id="set_tiles_dem" class="simple-value-dropdown">
+            <!-- Filled by JavaScript Function called from DataBase Manager -->
+        </select>
+    </div>
+</div>
+
+
+<div class="strike">
+    <span>Color Mapping</span>
+</div>
+
+<div class="row">
+    <div class="col s6">
+        Colormap
+    </div>
+    <div class="col s6">
+        <select id="set_colormap" class="simple-value-dropdown">
+            <!-- Filled by JavaScript Function -->
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col s6">
+        <label>
+            <input class="filled-in simple-value-radio" name="surface_coloring" type="radio"
+                   id="set_surface_coloring_mode_0" checked/>
+            <span>Off</span>
+        </label>
+    </div>
+    <div class="col s6">
+        <label>
+            <input class="filled-in simple-value-checkbox" type="checkbox" id="set_enable_color_mixing"
+                   checked/>
+            <span>Mix with IMG</span>
+        </label>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col s6">
+        <label>
+            <input class="filled-in simple-value-radio" name="surface_coloring" type="radio"
+                   id="set_surface_coloring_mode_1"/>
+            <span>Map on Height [km]</span>
+        </label>
+    </div>
+    <div class="col s6">
+        <div id="set_height_range"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col s6">
+        <label>
+            <input class="filled-in simple-value-radio" name="surface_coloring" type="radio"
+                   id="set_surface_coloring_mode_2"/>
+            <span>Map on Slope [°]</span>
+        </label>
+    </div>
+    <div class="col s6">
+        <div id="set_slope_range"></div>
+    </div>
+</div>
+
+<div class="strike">
+    <span>Terrain Visualization</span>
+</div>
+
+<div class="row">
+    <div class="col s6">
+        <label>
+            <input class="filled-in simple-value-checkbox" type="checkbox"
+                   id="set_enable_lat_long_grid"/>
+            <span>Coordinate System</span>
+        </label>
+    </div>
+    <div class="col s6">
+        <label>
+            <input class="filled-in simple-value-checkbox" type="checkbox" id="set_enable_heightlines"/>
+            <span>Contourlines</span>
+        </label>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col s6">
+        Texture Gamma
+    </div>
+    <div class="col s6">
+        <div id="set_texture_gamma">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s6">
+        Height Exaggeration
+    </div>
+    <div class="col s6">
+        <div id="set_terrain_height">
+        </div>
+    </div>
+</div>
