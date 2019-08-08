@@ -4,12 +4,12 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_BOUNDINGBOX_HPP
-#define CSP_LOD_PLANET_BOUNDINGBOX_HPP
+#ifndef CSP_LOD_BODIES_BOUNDINGBOX_HPP
+#define CSP_LOD_BODIES_BOUNDINGBOX_HPP
 
 #include <glm/glm.hpp>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// An axis aligned bounding box to calculate intersection. It is defined by the minimum and
 /// maximum points.
@@ -167,6 +167,6 @@ bool BoundingBox<FloatT>::GetIntersectionDistance(glm::tvec3<FloatT> origin,
   return true;
 }
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_BOUNDINGBOX_HPP
+#endif // CSP_LOD_BODIES_BOUNDINGBOX_HPP

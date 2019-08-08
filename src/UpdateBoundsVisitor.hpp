@@ -4,12 +4,12 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_UPDATEBOUNDSVISITOR_HPP
-#define CSP_LOD_PLANET_UPDATEBOUNDSVISITOR_HPP
+#ifndef CSP_LOD_BODIES_UPDATEBOUNDSVISITOR_HPP
+#define CSP_LOD_BODIES_UPDATEBOUNDSVISITOR_HPP
 
 #include "TileVisitor.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 struct PlanetParameters;
 class TreeManagerBase;
@@ -30,6 +30,6 @@ class UpdateBoundsVisitor : public TileVisitor<UpdateBoundsVisitor> {
   PlanetParameters const* mParams;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_UPDATEBOUNDSVISITOR_HPP
+#endif // CSP_LOD_BODIES_UPDATEBOUNDSVISITOR_HPP

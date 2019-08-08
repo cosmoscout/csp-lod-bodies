@@ -4,15 +4,15 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_RENDERDATA_HPP
-#define CSP_LOD_PLANET_RENDERDATA_HPP
+#ifndef CSP_LOD_BODIES_RENDERDATA_HPP
+#define CSP_LOD_BODIES_RENDERDATA_HPP
 
 #include "TileBounds.hpp"
 #include "TileId.hpp"
 
 #include <boost/noncopyable.hpp>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class TileNode;
 
@@ -50,6 +50,6 @@ class RenderData : private boost::noncopyable {
   int       mLastFrame;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_RENDERDATA_HPP
+#endif // CSP_LOD_BODIES_RENDERDATA_HPP

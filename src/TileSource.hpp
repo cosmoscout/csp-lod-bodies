@@ -4,13 +4,13 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILESOURCE_HPP
-#define CSP_LOD_PLANET_TILESOURCE_HPP
+#ifndef CSP_LOD_BODIES_TILESOURCE_HPP
+#define CSP_LOD_BODIES_TILESOURCE_HPP
 
 #include "TileDataType.hpp"
 #include "TileId.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class TileNode;
 
@@ -73,6 +73,6 @@ class TileSource {
   std::string mName;
   std::string mCopyright;
 };
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILESOURCE_HPP
+#endif // CSP_LOD_BODIES_TILESOURCE_HPP

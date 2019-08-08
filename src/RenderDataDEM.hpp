@@ -4,13 +4,13 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_RENDERDATADEM_HPP
-#define CSP_LOD_PLANET_RENDERDATADEM_HPP
+#ifndef CSP_LOD_BODIES_RENDERDATADEM_HPP
+#define CSP_LOD_BODIES_RENDERDATADEM_HPP
 
 #include "RenderData.hpp"
 #include "TileBounds.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Render data for elevation. It also holds additional information about the edges to prevent
 /// elevation jumps due to different resolutions.
@@ -54,6 +54,6 @@ RenderDataDEM::Flags operator~(RenderDataDEM::Flags lhs);
 
 std::ostream& operator<<(std::ostream& os, RenderDataDEM::Flags flags);
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_RENDERDATADEM_HPP
+#endif // CSP_LOD_BODIES_RENDERDATADEM_HPP

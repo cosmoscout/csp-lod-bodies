@@ -16,7 +16,7 @@
 #include <VistaOGLExt/VistaOGLUtils.h>
 #include <VistaOGLExt/VistaShaderRegistry.h>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ std::map<std::string, cs::graphics::ColorMap> PlanetShader::mColorMaps;
 PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
     std::shared_ptr<Plugin::Properties> const&                              pProperties,
     std::shared_ptr<cs::core::GuiManager> const&                            pGuiManager)
-    : csp::lodplanets::TerrainShader()
+    : csp::lodbodies::TerrainShader()
     , mGraphicsEngine(graphicsEngine)
     , mProperties(pProperties)
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
@@ -207,4 +207,4 @@ void PlanetShader::release() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies

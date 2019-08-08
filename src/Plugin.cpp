@@ -6,7 +6,7 @@
 
 #include "Plugin.hpp"
 
-#include "LodPlanet.hpp"
+#include "LodBody.hpp"
 #include "TileSourceDB.hpp"
 #include "TileSourceWebMapService.hpp"
 
@@ -23,7 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN cs::core::PluginBase* create() {
-  return new csp::lodplanets::Plugin;
+  return new csp::lodbodies::Plugin;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +45,7 @@ void from_json(const nlohmann::json& j, Plugin::Settings::Dataset& o) {
   o.mFiles           = j.at("files").get<std::vector<std::string>>();
 }
 
-void from_json(const nlohmann::json& j, Plugin::Settings::Planet& o) {
+void from_json(const nlohmann::json& j, Plugin::Settings::Body& o) {
   o.mDemDatasets = j.at("demDatasets").get<std::vector<Plugin::Settings::Dataset>>();
   o.mImgDatasets = j.at("imgDatasets").get<std::vector<Plugin::Settings::Dataset>>();
 }
@@ -55,7 +55,7 @@ void from_json(const nlohmann::json& j, Plugin::Settings& o) {
   o.mMaxGPUTilesGray  = j.at("maxGPUTilesGray").get<uint32_t>();
   o.mMaxGPUTilesDEM   = j.at("maxGPUTilesDEM").get<uint32_t>();
   o.mMapCache         = j.at("mapCache").get<std::string>();
-  o.mPlanets          = j.at("planets").get<std::map<std::string, Plugin::Settings::Planet>>();
+  o.mBodies           = j.at("bodies").get<std::map<std::string, Plugin::Settings::Body>>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,15 +67,15 @@ Plugin::Plugin()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::init() {
-  std::cout << "Loading: CosmoScout VR Plugin LodPlanets" << std::endl;
+  std::cout << "Loading: CosmoScout VR Plugin Lod-Bodies" << std::endl;
 
-  mPluginSettings = mAllSettings->mPlugins.at("csp-lod-planets");
+  mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
 
   mGuiManager->addPluginTabToSideBarFromHTML(
-      "LOD Planet", "landscape", "../share/resources/gui/lod_planet_tab.html");
+      "Body Settings", "landscape", "../share/resources/gui/lod_bodies_tab.html");
   mGuiManager->addSettingsSectionToSideBarFromHTML(
-      "LOD Planet", "landscape", "../share/resources/gui/lod_planet_settings.html");
-  mGuiManager->addScriptToSideBarFromJS("../share/resources/gui/js/lod_planet_settings.js");
+      "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
+  mGuiManager->addScriptToSideBarFromJS("../share/resources/gui/js/lod_body_settings.js");
 
   mGuiManager->getSideBar()->registerCallback<bool>("set_enable_tiles_freeze",
       ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
@@ -150,15 +150,15 @@ void Plugin::init() {
     mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
   }));
 
-  mGLResources = std::make_shared<csp::lodplanets::GLResources>(mPluginSettings.mMaxGPUTilesDEM,
+  mGLResources = std::make_shared<csp::lodbodies::GLResources>(mPluginSettings.mMaxGPUTilesDEM,
       mPluginSettings.mMaxGPUTilesGray, mPluginSettings.mMaxGPUTilesColor);
 
-  for (auto const& planetSettings : mPluginSettings.mPlanets) {
-    auto anchor = mAllSettings->mAnchors.find(planetSettings.first);
+  for (auto const& bodySettings : mPluginSettings.mBodies) {
+    auto anchor = mAllSettings->mAnchors.find(bodySettings.first);
 
     if (anchor == mAllSettings->mAnchors.end()) {
       throw std::runtime_error(
-          "There is no Anchor \"" + planetSettings.first + "\" defined in the settings.");
+          "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
     }
 
     double tStartExistence = cs::utils::convert::toSpiceTime(anchor->second.mStartExistence);
@@ -166,7 +166,7 @@ void Plugin::init() {
 
     std::vector<std::shared_ptr<TileSource>> DEMs;
     std::vector<std::shared_ptr<TileSource>> IMGs;
-    for (auto const& dataset : planetSettings.second.mDemDatasets) {
+    for (auto const& dataset : bodySettings.second.mDemDatasets) {
       if (dataset.mIsWebMapService) {
         auto dem = std::make_shared<TileSourceWebMapService>(
             dataset.mFiles.front(), mPluginSettings.mMapCache);
@@ -181,7 +181,7 @@ void Plugin::init() {
       }
     }
 
-    for (auto const& dataset : planetSettings.second.mImgDatasets) {
+    for (auto const& dataset : bodySettings.second.mImgDatasets) {
       if (dataset.mIsWebMapService) {
         auto img = std::make_shared<TileSourceWebMapService>(
             dataset.mFiles.front(), mPluginSettings.mMapCache);
@@ -204,26 +204,26 @@ void Plugin::init() {
       }
     }
 
-    auto planet = std::make_shared<LodPlanet>(mGraphicsEngine, mProperties, mGuiManager,
-        anchor->second.mCenter, anchor->second.mFrame, mGLResources, DEMs, IMGs, tStartExistence,
-        tEndExistence);
+    auto body =
+        std::make_shared<LodBody>(mGraphicsEngine, mProperties, mGuiManager, anchor->second.mCenter,
+            anchor->second.mFrame, mGLResources, DEMs, IMGs, tStartExistence, tEndExistence);
 
-    mSolarSystem->registerBody(planet);
+    mSolarSystem->registerBody(body);
 
-    planet->setSun(mSolarSystem->getSun());
-    auto parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), planet.get());
+    body->setSun(mSolarSystem->getSun());
+    auto parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), body.get());
     VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
         parent, static_cast<int>(cs::utils::DrawOrder::ePlanets));
 
-    mInputManager->registerSelectable(planet);
-    mLodPlanets.push_back(planet);
+    mInputManager->registerSelectable(body);
+    mLodBodies.push_back(body);
   }
 
   mSolarSystem->pActiveBody.onChange().connect(
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
-        auto planet = std::dynamic_pointer_cast<LodPlanet>(body);
+        auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
-        if (!planet) {
+        if (!lodBody) {
           return;
         }
 
@@ -231,8 +231,8 @@ void Plugin::init() {
         mGuiManager->getSideBar()->callJavascript("clear_container", "set_tiles_dem");
         mGuiManager->getSideBar()->callJavascript(
             "add_dropdown_value", "set_tiles_img", "None", "None", false);
-        for (auto const& source : planet->getIMGtileSources()) {
-          bool active = source->getName() == planet->pActiveTileSourceIMG.get();
+        for (auto const& source : lodBody->getIMGtileSources()) {
+          bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
           mGuiManager->getSideBar()->callJavascript(
               "add_dropdown_value", "set_tiles_img", source->getName(), source->getName(), active);
           if (active) {
@@ -240,8 +240,8 @@ void Plugin::init() {
                 "set_map_data_copyright", source->getCopyright());
           }
         }
-        for (auto const& source : planet->getDEMtileSources()) {
-          bool active = source->getName() == planet->pActiveTileSourceDEM.get();
+        for (auto const& source : lodBody->getDEMtileSources()) {
+          bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
           mGuiManager->getSideBar()->callJavascript(
               "add_dropdown_value", "set_tiles_dem", source->getName(), source->getName(), active);
           if (active) {
@@ -253,17 +253,17 @@ void Plugin::init() {
 
   mGuiManager->getSideBar()->registerCallback<std::string>(
       "set_tiles_img", ([this](std::string const& name) {
-        auto planet = std::dynamic_pointer_cast<LodPlanet>(mSolarSystem->pActiveBody.get());
-        if (planet) {
-          planet->pActiveTileSourceIMG = name;
+        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
+        if (body) {
+          body->pActiveTileSourceIMG = name;
         }
       }));
 
   mGuiManager->getSideBar()->registerCallback<std::string>(
       "set_tiles_dem", ([this](std::string const& name) {
-        auto planet = std::dynamic_pointer_cast<LodPlanet>(mSolarSystem->pActiveBody.get());
-        if (planet) {
-          planet->pActiveTileSourceDEM = name;
+        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
+        if (body) {
+          body->pActiveTileSourceDEM = name;
         }
       }));
 
@@ -284,14 +284,14 @@ void Plugin::init() {
     }
   });
 
-  mSolarSystem->pActiveBody = mLodPlanets[0];
+  mSolarSystem->pActiveBody = mLodBodies[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
-  for (auto const& planet : mLodPlanets) {
-    mInputManager->unregisterSelectable(planet);
+  for (auto const& body : mLodBodies) {
+    mInputManager->unregisterSelectable(body);
   }
 
   mGuiManager->getSideBar()->unregisterCallback("set_enable_tiles_freeze");
@@ -340,4 +340,4 @@ void Plugin::update() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies

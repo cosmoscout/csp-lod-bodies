@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILEVISITOR_HPP
-#define CSP_LOD_PLANET_TILEVISITOR_HPP
+#ifndef CSP_LOD_BODIES_TILEVISITOR_HPP
+#define CSP_LOD_BODIES_TILEVISITOR_HPP
 
 #include "HEALPix.hpp"
 #include "TileId.hpp"
@@ -13,7 +13,7 @@
 
 #include <boost/assert.hpp>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class TileNode;
 
@@ -345,6 +345,6 @@ typename TileVisitor<DerivedT>::StateBase const& TileVisitor<DerivedT>::getState
   return mDummyState;
 }
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILEVISITOR_HPP
+#endif // CSP_LOD_BODIES_TILEVISITOR_HPP

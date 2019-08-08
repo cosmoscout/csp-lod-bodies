@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_LODVISITOR_HPP
-#define CSP_LOD_PLANET_LODVISITOR_HPP
+#ifndef CSP_LOD_BODIES_LODVISITOR_HPP
+#define CSP_LOD_BODIES_LODVISITOR_HPP
 
 #include "Frustum.hpp"
 #include "RenderData.hpp"
@@ -15,7 +15,7 @@
 
 #include <vector>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 struct PlanetParameters;
 class RenderDataDEM;
@@ -170,6 +170,6 @@ class LODVisitor : public TileVisitor<LODVisitor> {
   bool mUpdateCulling;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_LODVISITOR_HPP
+#endif // CSP_LOD_BODIES_LODVISITOR_HPP

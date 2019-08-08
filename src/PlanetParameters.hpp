@@ -4,10 +4,10 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_PLANETPARAMETERS_HPP
-#define CSP_LOD_PLANET_PLANETPARAMETERS_HPP
+#ifndef CSP_LOD_BODIES_PLANETPARAMETERS_HPP
+#define CSP_LOD_BODIES_PLANETPARAMETERS_HPP
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Holds values describing a planets parameters.
 struct PlanetParameters {
@@ -20,6 +20,6 @@ struct PlanetParameters {
   int mMinLevel = 0; ///< The minimum LOD level.
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_PLANETPARAMETERS_HPP
+#endif // CSP_LOD_BODIES_PLANETPARAMETERS_HPP

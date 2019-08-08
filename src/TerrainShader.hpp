@@ -4,15 +4,15 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TERRAINSHADER_HPP
-#define CSP_LOD_PLANET_TERRAINSHADER_HPP
+#ifndef CSP_LOD_BODIES_TERRAINSHADER_HPP
+#define CSP_LOD_BODIES_TERRAINSHADER_HPP
 
 #include <memory>
 #include <string>
 
 class VistaGLSLShader;
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// The base class for the PlanetShader. It builds the shader from various sources and links it.
 class TerrainShader {
@@ -36,6 +36,6 @@ class TerrainShader {
   VistaGLSLShader* mShader = nullptr;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TERRAINSHADER_HPP
+#endif // CSP_LOD_BODIES_TERRAINSHADER_HPP

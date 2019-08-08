@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILEBASE_HPP
-#define CSP_LOD_PLANET_TILEBASE_HPP
+#ifndef CSP_LOD_BODIES_TILEBASE_HPP
+#define CSP_LOD_BODIES_TILEBASE_HPP
 
 #include "MinMaxPyramid.hpp"
 #include "TileDataType.hpp"
@@ -14,7 +14,7 @@
 #include <boost/noncopyable.hpp>
 #include <typeinfo>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Abstract base class for data tiles in the HEALPix scheme. A tile stores data samples for a
 /// HEALPix patch at a given subdivision level. Actual data is held by classes derived from this
@@ -75,6 +75,6 @@ T const* TileBase::getTypedPtr() const {
   return static_cast<T const*>(getDataPtr());
 }
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILEBASE_HPP
+#endif // CSP_LOD_BODIES_TILEBASE_HPP

@@ -4,15 +4,15 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TESTTILEVISITOR_HPP
-#define CSP_LOD_PLANET_TESTTILEVISITOR_HPP
+#ifndef CSP_LOD_BODIES_TESTTILEVISITOR_HPP
+#define CSP_LOD_BODIES_TESTTILEVISITOR_HPP
 
 #include "TileId.hpp"
 #include "TileVisitor.hpp"
 
 #include <vector>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// DocTODO it isn't used anywhere...
 class TestTileVisitor : public TileVisitor<TestTileVisitor> {
@@ -38,6 +38,6 @@ class TestTileVisitor : public TileVisitor<TestTileVisitor> {
   friend class TileVisitor<TestTileVisitor>;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TESTTILEVISITOR_HPP
+#endif // CSP_LOD_BODIES_TESTTILEVISITOR_HPP

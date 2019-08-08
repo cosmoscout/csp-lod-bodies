@@ -4,12 +4,12 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILEQUADTREE_HPP
-#define CSP_LOD_PLANET_TILEQUADTREE_HPP
+#ifndef CSP_LOD_BODIES_TILEQUADTREE_HPP
+#define CSP_LOD_BODIES_TILEQUADTREE_HPP
 
 #include "TileNode.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Stores root nodes of 12 quad trees (i.e. it follows the HEALPix scheme).
 class TileQuadTree {
@@ -40,6 +40,6 @@ bool insertNode(TileQuadTree* tree, TileNode* node);
 /// a valid parent and is not a root.
 bool removeNode(TileQuadTree* tree, TileNode* node);
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILEQUADTREE_HPP
+#endif // CSP_LOD_BODIES_TILEQUADTREE_HPP

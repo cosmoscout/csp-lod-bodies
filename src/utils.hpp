@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_UTIL_HPP
-#define CSP_LOD_PLANET_UTIL_HPP
+#ifndef CSP_LOD_BODIES_UTIL_HPP
+#define CSP_LOD_BODIES_UTIL_HPP
 
 #define _USE_MATH_DEFINES // Use Math.h defines like M_PI
 #include <glm/glm.hpp>
@@ -15,7 +15,7 @@
 class VistaTransformNode;
 class VistaOpenGLNode;
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class VistaPlanet;
 class TileNode;
@@ -53,6 +53,6 @@ bool intersectTileBounds(TileNode const* tileNode, VistaPlanet const* planet,
 
 } // namespace utils
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_UTIL_HPP
+#endif // CSP_LOD_BODIES_UTIL_HPP

@@ -4,12 +4,12 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILE_HPP
-#define CSP_LOD_PLANET_TILE_HPP
+#ifndef CSP_LOD_BODIES_TILE_HPP
+#define CSP_LOD_BODIES_TILE_HPP
 
 #include "TileBase.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Concrete class storing data samples of the template argument type T.
 template <typename T>
@@ -107,6 +107,6 @@ typename Tile<T>::Storage& Tile<T>::data() {
   return mData;
 }
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILE_HPP
+#endif // CSP_LOD_BODIES_TILE_HPP

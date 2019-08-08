@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_VISTAPLANET_HPP
-#define CSP_LOD_PLANET_VISTAPLANET_HPP
+#ifndef CSP_LOD_BODIES_VISTAPLANET_HPP
+#define CSP_LOD_BODIES_VISTAPLANET_HPP
 
 #include "LODVisitor.hpp"
 #include "PlanetParameters.hpp"
@@ -18,7 +18,7 @@
 class VistaGLSLShader;
 class VistaSystem;
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class TileBase;
 class TileNode;
@@ -148,5 +148,5 @@ class VistaPlanet : public IVistaOpenGLDraw, public cs::graphics::ShadowCaster {
 
   glm::uint8 mFlags;
 };
-} // namespace csp::lodplanets
-#endif // CSP_LOD_PLANET_VISTAPLANET_HPP
+} // namespace csp::lodbodies
+#endif // CSP_LOD_BODIES_VISTAPLANET_HPP

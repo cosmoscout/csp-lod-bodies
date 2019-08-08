@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TREEMANAGERBASE_HPP
-#define CSP_LOD_PLANET_TREEMANAGERBASE_HPP
+#ifndef CSP_LOD_BODIES_TREEMANAGERBASE_HPP
+#define CSP_LOD_BODIES_TREEMANAGERBASE_HPP
 
 #include "TileId.hpp"
 #include "TileQuadTree.hpp"
@@ -18,7 +18,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 struct PlanetParameters;
 class TileNode;
@@ -207,6 +207,6 @@ RDataT* TreeManagerBase::find(TileId const& tileId) {
   return dynamic_cast<RDataT*>(findRData(tileId));
 }
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TREEMANAGERBASE_HPP
+#endif // CSP_LOD_BODIES_TREEMANAGERBASE_HPP

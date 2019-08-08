@@ -4,12 +4,12 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_RENDERDATAIMG_HPP
-#define CSP_LOD_PLANET_RENDERDATAIMG_HPP
+#ifndef CSP_LOD_BODIES_RENDERDATAIMG_HPP
+#define CSP_LOD_BODIES_RENDERDATAIMG_HPP
 
 #include "RenderData.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Render data for image data.
 class RenderDataImg : public RenderData {
@@ -20,6 +20,6 @@ class RenderDataImg : public RenderData {
   virtual ~RenderDataImg();
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_RENDERDATAIMG_HPP
+#endif // CSP_LOD_BODIES_RENDERDATAIMG_HPP

@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_THREADPOOL_HPP
-#define CSP_LOD_PLANET_THREADPOOL_HPP
+#ifndef CSP_LOD_BODIES_THREADPOOL_HPP
+#define CSP_LOD_BODIES_THREADPOOL_HPP
 
 #include <condition_variable>
 #include <functional>
@@ -17,7 +17,7 @@
 #include <thread>
 #include <vector>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// This is based on https://github.com/progschj/ThreadPool
 class ThreadPool {
@@ -69,6 +69,6 @@ class ThreadPool {
   int                               mRunningTasks = 0;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_THREADPOOL_HPP
+#endif // CSP_LOD_BODIES_THREADPOOL_HPP

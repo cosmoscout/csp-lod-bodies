@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_HEALPIX_HPP
-#define CSP_LOD_PLANET_HEALPIX_HPP
+#ifndef CSP_LOD_BODIES_HEALPIX_HPP
+#define CSP_LOD_BODIES_HEALPIX_HPP
 
 #include "TileId.hpp"
 
@@ -14,7 +14,7 @@
 /// Framework for High-Resolution Discretization and fast Analysis of Data Distributed on the
 /// Sphere" by K.M. Gorski et al.
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class HEALPix;
 
@@ -200,6 +200,6 @@ class HEALPix {
  private:
   static std::array<HEALPixLevel, 20> const sLevels;
 };
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_HEALPIX_HPP
+#endif // CSP_LOD_BODIES_HEALPIX_HPP

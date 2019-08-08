@@ -15,7 +15,7 @@
 #include <VistaBase/VistaStreamUtils.h>
 #include <glm/gtc/matrix_inverse.hpp>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -618,7 +618,7 @@ bool LODVisitor::testVisible(TileId const& tileId, TreeManagerBase* treeMgrDEM) 
 
         // Calculate an optimistic bounding box from the the height values in range of the
         // IMG tile
-        tb = csp::lodplanets::calcTileBounds(minHeight, maxHeight, lvl, tileId.patchIdx(),
+        tb = csp::lodbodies::calcTileBounds(minHeight, maxHeight, lvl, tileId.patchIdx(),
             mParams->mEquatorialRadius, mParams->mPolarRadius, mParams->mHeightScale);
 
         // Save for renderBounds() in TileRenderer
@@ -887,4 +887,4 @@ LODVisitor::LODState const& LODVisitor::getLODState(int level /*= -1*/) const {
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies

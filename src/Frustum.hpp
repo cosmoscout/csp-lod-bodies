@@ -4,14 +4,14 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_FRUSTUM_HPP
-#define CSP_LOD_PLANET_FRUSTUM_HPP
+#ifndef CSP_LOD_BODIES_FRUSTUM_HPP
+#define CSP_LOD_BODIES_FRUSTUM_HPP
 
 #include <glm/glm.hpp>
 
 #include <array>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 enum class FrustumPlaneIdx { eLeft = 0, eRight = 1, eBottom = 2, eTop = 3, eNear = 4, eFar = 5 };
 
@@ -44,6 +44,6 @@ class Frustum {
 
 std::ostream& operator<<(std::ostream& os, Frustum const& frustum);
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_FRUSTUM_HPP
+#endif // CSP_LOD_BODIES_FRUSTUM_HPP

@@ -4,14 +4,14 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILEID_HPP
-#define CSP_LOD_PLANET_TILEID_HPP
+#ifndef CSP_LOD_BODIES_TILEID_HPP
+#define CSP_LOD_BODIES_TILEID_HPP
 
 #include <boost/functional/hash/hash.hpp>
 #include <functional>
 #include <glm/glm.hpp>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Identifier for a tile, consisting of a level and a patch index within that level.
 class TileId {
@@ -40,13 +40,13 @@ bool isSameLevel(TileId const& lhs, TileId const& rhs);
 bool operator==(TileId const& lhs, TileId const& rhs);
 
 std::ostream& operator<<(std::ostream& os, TileId const& tileId);
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
 namespace std {
 
 template <>
-struct hash<csp::lodplanets::TileId> {
-  std::size_t operator()(csp::lodplanets::TileId const& tileId) const {
+struct hash<csp::lodbodies::TileId> {
+  std::size_t operator()(csp::lodbodies::TileId const& tileId) const {
     std::size_t result = 0;
     boost::hash_combine(result, tileId.level());
     boost::hash_combine(result, tileId.patchIdx());
@@ -57,4 +57,4 @@ struct hash<csp::lodplanets::TileId> {
 
 } // namespace std
 
-#endif // CSP_LOD_PLANET_TILEID_HPP
+#endif // CSP_LOD_BODIES_TILEID_HPP

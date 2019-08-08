@@ -4,12 +4,12 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILEDATATYPE_HPP
-#define CSP_LOD_PLANET_TILEDATATYPE_HPP
+#ifndef CSP_LOD_BODIES_TILEDATATYPE_HPP
+#define CSP_LOD_BODIES_TILEDATATYPE_HPP
 
 #include <iosfwd>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Contains an enumeration of data types that can be stored in a Tile.
 enum class TileDataType {
@@ -24,6 +24,6 @@ enum class TileDataType {
 std::ostream& operator<<(std::ostream& os, TileDataType tdt);
 
 std::istream& operator>>(std::istream& is, TileDataType& tdt);
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILEDATATYPE_HPP
+#endif // CSP_LOD_BODIES_TILEDATATYPE_HPP

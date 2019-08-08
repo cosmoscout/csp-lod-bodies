@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILETEXTUREARRAY_HPP
-#define CSP_LOD_PLANET_TILETEXTUREARRAY_HPP
+#ifndef CSP_LOD_BODIES_TILETEXTUREARRAY_HPP
+#define CSP_LOD_BODIES_TILETEXTUREARRAY_HPP
 
 #include "TileDataType.hpp"
 
@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class TileNode;
 class RenderData;
@@ -94,6 +94,6 @@ class GLResources {
  private:
   std::array<std::unique_ptr<TileTextureArray>, 3> mextureArrays;
 };
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILETEXTUREARRAY_HPP
+#endif // CSP_LOD_BODIES_TILETEXTUREARRAY_HPP

@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILESOURCEDB_HPP
-#define CSP_LOD_PLANET_TILESOURCEDB_HPP
+#ifndef CSP_LOD_BODIES_TILESOURCEDB_HPP
+#define CSP_LOD_BODIES_TILESOURCEDB_HPP
 
 #include "Tile.hpp"
 #include "TileSource.hpp"
@@ -16,7 +16,7 @@
 #include <thread>
 #include <unordered_map>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class TileNode;
 
@@ -90,6 +90,6 @@ class TileSourceDB : public TileSource {
   std::vector<Channel>    mecChannels;
   TileDataType            m_eDataType;
 };
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILESOURCEDB_HPP
+#endif // CSP_LOD_BODIES_TILESOURCEDB_HPP

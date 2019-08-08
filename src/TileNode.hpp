@@ -4,14 +4,14 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILENODE_HPP
-#define CSP_LOD_PLANET_TILENODE_HPP
+#ifndef CSP_LOD_BODIES_TILENODE_HPP
+#define CSP_LOD_BODIES_TILENODE_HPP
 
 #include "TileBase.hpp"
 
 #include <boost/move/utility.hpp>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Node in a quad tree of tiles. It stores pointers to its four child nodes (if present), the
 /// parent TileNode (unless it is a root node) and to the tile of data associated with this node.
@@ -89,6 +89,6 @@ bool isInner(TileNode const& node);
 /// Returns if the @a node is refined, i.e. if its children are loaded.
 bool isRefined(TileNode const& node);
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILENODE_HPP
+#endif // CSP_LOD_BODIES_TILENODE_HPP

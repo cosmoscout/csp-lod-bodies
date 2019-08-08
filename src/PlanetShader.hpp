@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_PLANET_SHADER_HPP
-#define CSP_LOD_PLANET_PLANET_SHADER_HPP
+#ifndef CSP_LOD_BODIES_PLANET_SHADER_HPP
+#define CSP_LOD_BODIES_PLANET_SHADER_HPP
 
 #include "../../../src/cs-graphics/ColorMap.hpp"
 #include "../../../src/cs-utils/Property.hpp"
@@ -26,7 +26,7 @@ namespace cs::graphics {
 class GraphicsEngine;
 } // namespace cs::graphics
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// The shader for rendering a planet.
 class PlanetShader : public TerrainShader {
@@ -57,6 +57,6 @@ class PlanetShader : public TerrainShader {
   static std::map<std::string, cs::graphics::ColorMap> mColorMaps;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
 #endif // CS_CORE_PLANET_SHADER_HPP

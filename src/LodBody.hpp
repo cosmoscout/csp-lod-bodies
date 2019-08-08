@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_LOD_PLANET_HPP
-#define CSP_LOD_PLANET_LOD_PLANET_HPP
+#ifndef CSP_LOD_BODIES_LOD_PLANET_HPP
+#define CSP_LOD_BODIES_LOD_PLANET_HPP
 
 #include "../../../src/cs-graphics/Shadows.hpp"
 #include "../../../src/cs-scene/CelestialBody.hpp"
@@ -27,16 +27,16 @@ class GraphicsEngine;
 class GuiManager;
 } // namespace cs::core
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
-/// An LodPlanet renders a planet from databases of hierarchical tiles. The tile data consists of
+/// An LodBody renders a planet from databases of hierarchical tiles. The tile data consists of
 /// two components. Image data which determines the texture of the tiles and elevation data
 /// (Digital Elevation Model or DEM) which determines the height map of each tile.
 ///
 /// Each planet can make use of multiple data sources for image and elevation data. The user can
 /// choose at runtime which data source should be used.
 // DocTODO There probably are a thousand more things to explain.
-class LodPlanet : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
+class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
  public:
   /// The currently selected data source for elevation data.
   cs::utils::Property<std::string> pActiveTileSourceDEM;
@@ -44,14 +44,14 @@ class LodPlanet : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   /// The currently selected data source for image data.
   cs::utils::Property<std::string> pActiveTileSourceIMG;
 
-  LodPlanet(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<Plugin::Properties> const&             pProperties,
+  LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+      std::shared_ptr<Plugin::Properties> const&           pProperties,
       std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
       std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
       std::vector<std::shared_ptr<TileSource>> const& dems,
       std::vector<std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
       double tEndExistence);
-  virtual ~LodPlanet();
+  virtual ~LodBody();
 
   PlanetShader const& getShader() const;
 
@@ -87,6 +87,6 @@ class LodPlanet : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   std::vector<std::shared_ptr<TileSource>> mIMGtileSources;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_LOD_PLANET_HPP
+#endif // CSP_LOD_BODIES_LOD_PLANET_HPP

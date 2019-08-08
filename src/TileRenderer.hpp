@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILERENDERER_HPP
-#define CSP_LOD_PLANET_TILERENDERER_HPP
+#ifndef CSP_LOD_BODIES_TILERENDERER_HPP
+#define CSP_LOD_BODIES_TILERENDERER_HPP
 
 #include "TerrainShader.hpp"
 #include "TileId.hpp"
@@ -20,7 +20,7 @@ namespace cs::graphics {
 class ShadowMap;
 }
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 struct PlanetParameters;
 class TileNode;
@@ -147,6 +147,6 @@ class TileRenderer : private boost::noncopyable {
   bool mEnableFaceCulling;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILERENDERER_HPP
+#endif // CSP_LOD_BODIES_TILERENDERER_HPP

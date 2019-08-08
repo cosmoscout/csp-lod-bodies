@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILESOURCEWMS_HPP
-#define CSP_LOD_PLANET_TILESOURCEWMS_HPP
+#ifndef CSP_LOD_BODIES_TILESOURCEWMS_HPP
+#define CSP_LOD_BODIES_TILESOURCEWMS_HPP
 
 #include "ThreadPool.hpp"
 #include "Tile.hpp"
@@ -14,7 +14,7 @@
 #include <cstdio>
 #include <string>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// The data of the tiles is fetched via a web map service.
 class TileSourceWebMapService : public TileSource {
@@ -61,6 +61,6 @@ class TileSourceWebMapService : public TileSource {
   TileDataType mFormat   = TileDataType::eU8Vec3;
   int          mMaxLevel = 10;
 };
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILESOURCEWMS_HPP
+#endif // CSP_LOD_BODIES_TILESOURCEWMS_HPP

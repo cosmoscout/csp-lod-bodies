@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TREEMANAGER_HPP
-#define CSP_LOD_PLANET_TREEMANAGER_HPP
+#ifndef CSP_LOD_BODIES_TREEMANAGER_HPP
+#define CSP_LOD_BODIES_TREEMANAGER_HPP
 
 #include "RenderDataDEM.hpp"
 #include "RenderDataImg.hpp"
@@ -14,7 +14,7 @@
 #include <boost/cast.hpp>
 #include <boost/pool/object_pool.hpp>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Implements management of a TileQuadTree with associated data of type RDataT (which must be
 /// derived from RenderData). Almost all functionality is implemented in the base class
@@ -66,6 +66,6 @@ template <typename RDataT>
   mPool.destroy(rd);
 }
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TREEMANAGER_HPP
+#endif // CSP_LOD_BODIES_TREEMANAGER_HPP

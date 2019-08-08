@@ -4,7 +4,7 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "LodPlanet.hpp"
+#include "LodBody.hpp"
 
 #include "../../../src/cs-core/GraphicsEngine.hpp"
 #include "../../../src/cs-core/GuiManager.hpp"
@@ -14,12 +14,12 @@
 
 #include "utils.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-LodPlanet::LodPlanet(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-    std::shared_ptr<Plugin::Properties> const&                        pProperties,
+LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+    std::shared_ptr<Plugin::Properties> const&                    pProperties,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
     std::vector<std::shared_ptr<TileSource>> const& dems,
@@ -102,56 +102,56 @@ LodPlanet::LodPlanet(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEn
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-LodPlanet::~LodPlanet() {
+LodBody::~LodBody() {
   mGraphicsEngine->unregisterCaster(&mPlanet);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PlanetShader const& LodPlanet::getShader() const {
+PlanetShader const& LodBody::getShader() const {
   return mShader;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void LodPlanet::setSun(std::shared_ptr<const cs::scene::CelestialObject> const& sun) {
+void LodBody::setSun(std::shared_ptr<const cs::scene::CelestialObject> const& sun) {
   mSun = sun;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool LodPlanet::getIntersection(
+bool LodBody::getIntersection(
     glm::dvec3 const& rayPos, glm::dvec3 const& rayDir, glm::dvec3& pos) const {
   return utils::intersectPlanet(&mPlanet, rayPos, rayDir, pos);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double LodPlanet::getHeight(glm::dvec2 lngLat) const {
+double LodBody::getHeight(glm::dvec2 lngLat) const {
   return utils::getHeight(&mPlanet, HeightSamplePrecision::eActual, lngLat);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::dvec3 LodPlanet::getRadii() const {
+glm::dvec3 LodBody::getRadii() const {
   return mRadii;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::shared_ptr<TileSource>> const& LodPlanet::getDEMtileSources() const {
+std::vector<std::shared_ptr<TileSource>> const& LodBody::getDEMtileSources() const {
   return mDEMtileSources;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::shared_ptr<TileSource>> const& LodPlanet::getIMGtileSources() const {
+std::vector<std::shared_ptr<TileSource>> const& LodBody::getIMGtileSources() const {
   return mIMGtileSources;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void LodPlanet::update(double tTime, cs::scene::CelestialObserver const& oObs) {
+void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
   cs::scene::CelestialObject::update(tTime, oObs);
 
   if (getIsInExistence() && pVisible.get()) {
@@ -167,9 +167,9 @@ void LodPlanet::update(double tTime, cs::scene::CelestialObserver const& oObs) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool LodPlanet::Do() {
+bool LodBody::Do() {
   if (getIsInExistence() && pVisible.get()) {
-    cs::utils::FrameTimings::ScopedTimer timer("Planet " + getCenterName());
+    cs::utils::FrameTimings::ScopedTimer timer("LoD-Body " + getCenterName());
     mPlanet.Do();
   }
 
@@ -178,10 +178,10 @@ bool LodPlanet::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool LodPlanet::GetBoundingBox(VistaBoundingBox& bb) {
+bool LodBody::GetBoundingBox(VistaBoundingBox& bb) {
   return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies

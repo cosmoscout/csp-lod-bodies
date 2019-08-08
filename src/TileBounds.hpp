@@ -4,13 +4,13 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_TILEBOUNDS_HPP
-#define CSP_LOD_PLANET_TILEBOUNDS_HPP
+#ifndef CSP_LOD_BODIES_TILEBOUNDS_HPP
+#define CSP_LOD_BODIES_TILEBOUNDS_HPP
 
 #include "BoundingBox.hpp"
 #include "Tile.hpp"
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Returns the bounds of tile for a planet of the given equatorial radius radiusE, polar radius
 /// radiusP, and heightScale.
@@ -21,6 +21,6 @@ BoundingBox<double> calcTileBounds(
 
 BoundingBox<double> calcTileBounds(double tmin, double tmax, int tileLevel, glm::int64 patchIdx,
     double radiusE = 1.f, double radiusP = 1.f, double heightScale = 1.f);
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_TILEBOUNDS_HPP
+#endif // CSP_LOD_BODIES_TILEBOUNDS_HPP

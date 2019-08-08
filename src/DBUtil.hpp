@@ -4,15 +4,15 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_DBUTIL_HPP
-#define CSP_LOD_PLANET_DBUTIL_HPP
+#ifndef CSP_LOD_BODIES_DBUTIL_HPP
+#define CSP_LOD_BODIES_DBUTIL_HPP
 
 #include "TileId.hpp"
 
 #include <cstdio>
 #include <unordered_map>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 /// Helper functions for reading MarsVis DB files (see MarsTileSourceBase for a description of the
 /// format).
@@ -42,6 +42,6 @@ glm::int64 lookupIndex(
     TileId const& tileId, std::unordered_map<TileId, glm::int64> const& indexMap);
 
 } // namespace DBUtil
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_DBUTIL_HPP
+#endif // CSP_LOD_BODIES_DBUTIL_HPP

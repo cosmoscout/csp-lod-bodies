@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_PLANET_PLUGIN_HPP
-#define CSP_LOD_PLANET_PLUGIN_HPP
+#ifndef CSP_LOD_BODIES_PLUGIN_HPP
+#define CSP_LOD_BODIES_PLUGIN_HPP
 
 #include "../../../src/cs-core/PluginBase.hpp"
 #include "../../../src/cs-utils/Property.hpp"
@@ -13,10 +13,10 @@
 #include <glm/gtc/constants.hpp>
 #include <vector>
 
-namespace csp::lodplanets {
+namespace csp::lodbodies {
 
 class GLResources;
-class LodPlanet;
+class LodBody;
 
 /// This plugin provides planets with level of detail data. It uses separate image and elevation
 /// data from either files or web map services to display the information onto the surface.
@@ -61,16 +61,16 @@ class Plugin : public cs::core::PluginBase {
     };
 
     /// The startup settings for a planet.
-    struct Planet {
+    struct Body {
       std::vector<Dataset> mDemDatasets; ///< The data sets containing elevation data.
       std::vector<Dataset> mImgDatasets; ///< The data sets containing image data.
     };
 
-    uint32_t                      mMaxGPUTilesColor; ///< The maximum allowed colored tiles.
-    uint32_t                      mMaxGPUTilesGray;  ///< The maximum allowed gray tiles.
-    uint32_t                      mMaxGPUTilesDEM;   ///< The maximum allowed elevation tiles.
-    std::string                   mMapCache;         ///< Path to the map cache folder.
-    std::map<std::string, Planet> mPlanets;          ///< A list of planets with their anchor names.
+    uint32_t                    mMaxGPUTilesColor; ///< The maximum allowed colored tiles.
+    uint32_t                    mMaxGPUTilesGray;  ///< The maximum allowed gray tiles.
+    uint32_t                    mMaxGPUTilesDEM;   ///< The maximum allowed elevation tiles.
+    std::string                 mMapCache;         ///< Path to the map cache folder.
+    std::map<std::string, Body> mBodies;           ///< A list of planets with their anchor names.
   };
 
   Plugin();
@@ -81,13 +81,13 @@ class Plugin : public cs::core::PluginBase {
   void update() override;
 
  private:
-  Settings                                mPluginSettings;
-  std::shared_ptr<GLResources>            mGLResources;
-  std::vector<std::shared_ptr<LodPlanet>> mLodPlanets;
-  std::shared_ptr<Properties>             mProperties;
-  float                                   mNonAutoLod;
+  Settings                              mPluginSettings;
+  std::shared_ptr<GLResources>          mGLResources;
+  std::vector<std::shared_ptr<LodBody>> mLodBodies;
+  std::shared_ptr<Properties>           mProperties;
+  float                                 mNonAutoLod;
 };
 
-} // namespace csp::lodplanets
+} // namespace csp::lodbodies
 
-#endif // CSP_LOD_PLANET_PLUGIN_HPP
+#endif // CSP_LOD_BODIES_PLUGIN_HPP
