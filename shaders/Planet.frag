@@ -112,6 +112,7 @@ void main()
   fragColor = fragColor * uSun.w;
 
   float directLight = 1.0;
+  float ambientLight = ambientBrightness;
 
   #if $ENABLE_SHADOWS
     directLight *= VP_getShadow(fsIn.position);
@@ -120,12 +121,13 @@ void main()
   #if $ENABLE_LIGHTING
     // hill shading / pseudo ambient occlusion
     const float hillShadingIntensity = 0.5;
-    float ambientLight = ambientBrightness * mix(1.0, max(0, dot(idealNormal, surfaceNormal)), hillShadingIntensity);
+    ambientLight *= mix(1.0, max(0, dot(idealNormal, surfaceNormal)), hillShadingIntensity);
     
     vec3 sunDir = normalize(uSun.xyz);
     directLight *= max(dot(surfaceNormal, sunDir), 0.0);
-    fragColor = mix(fragColor*ambientLight, fragColor, directLight);
   #endif
+
+  fragColor = mix(fragColor*ambientLight, fragColor, directLight);
 
   #if $SHOW_TILE_BORDER
     // color area by level
