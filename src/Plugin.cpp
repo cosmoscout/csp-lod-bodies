@@ -72,7 +72,7 @@ void Plugin::init() {
   mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
 
   mGuiManager->addPluginTabToSideBarFromHTML(
-      "Body Settings", "landscape", "../share/resources/gui/lod_bodies_tab.html");
+      "Body Settings", "landscape", "../share/resources/gui/lod_body_tab.html");
   mGuiManager->addSettingsSectionToSideBarFromHTML(
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
   mGuiManager->addScriptToSideBarFromJS("../share/resources/gui/js/lod_body_settings.js");
