@@ -20,7 +20,6 @@ out VS_OUT
     vec2  lngLat;
     float height;
     vec2  vertexPosition;
-    vec3  sunDir;
 } vsOut;
 
 // main
@@ -39,7 +38,6 @@ void main(void)
         #elif $LIGHTING_QUALITY > 1
             vsOut.normal         = VP_getVertexNormalLow(vsOut.position, VP_iPosition, $TERRAIN_PROJECTION_TYPE);
         #endif
-        vsOut.sunDir         = (VP_matModelView * vec4(uSunDir, 0)).xyz;
         vsOut.planetCenter   = (VP_matModelView * vec4(0,0,0,1)).xyz;
         vsOut.texcoords      = VP_getTexCoordIMG(VP_iPosition);
         vsOut.height         = VP_getVertexHeight(VP_iPosition);

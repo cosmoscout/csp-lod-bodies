@@ -204,9 +204,9 @@ void Plugin::init() {
       }
     }
 
-    auto body =
-        std::make_shared<LodBody>(mGraphicsEngine, mProperties, mGuiManager, anchor->second.mCenter,
-            anchor->second.mFrame, mGLResources, DEMs, IMGs, tStartExistence, tEndExistence);
+    auto body = std::make_shared<LodBody>(mGraphicsEngine, mSolarSystem, mProperties, mGuiManager,
+        anchor->second.mCenter, anchor->second.mFrame, mGLResources, DEMs, IMGs, tStartExistence,
+        tEndExistence);
 
     mSolarSystem->registerBody(body);
 

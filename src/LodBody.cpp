@@ -19,6 +19,7 @@ namespace csp::lodbodies {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+    std::shared_ptr<cs::core::SolarSystem> const&                 solarSystem,
     std::shared_ptr<Plugin::Properties> const&                    pProperties,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
@@ -27,6 +28,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     double tEndExistence)
     : cs::scene::CelestialBody(sCenterName, sFrameName, tStartExistence, tEndExistence)
     , mGraphicsEngine(graphicsEngine)
+    , mSolarSystem(solarSystem)
     , mProperties(pProperties)
     , mGuiManager(pGuiManager)
     , mPlanet(glResources)
@@ -158,9 +160,16 @@ void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
     mPlanet.setWorldTransform(getWorldTransform());
 
     if (mSun) {
-      auto sunDir = glm::normalize(
-          glm::inverse(matWorldTransform) * (mSun->getWorldPosition() - getWorldPosition()));
-      mShader.setSunDirection(VistaVector3D(sunDir[0], sunDir[1], sunDir[2]));
+      auto   sunDirection = mSolarSystem->pSunPosition.get() - glm::dvec3(getWorldTransform()[3]);
+      double sunDist      = glm::length(sunDirection);
+      double sunIlluminance =
+          mSolarSystem->pSunLuminousPower.get() / (sunDist * sunDist * 4.0 * glm::pi<double>());
+
+      if (!mGraphicsEngine->pEnableHDR.get()) {
+        sunIlluminance = 1.0;
+      }
+
+      mShader.setSun(sunDirection.xyz() / sunDist, sunIlluminance);
     }
   }
 }
