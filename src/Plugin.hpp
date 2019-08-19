@@ -10,6 +10,8 @@
 #include "../../../src/cs-core/PluginBase.hpp"
 #include "../../../src/cs-utils/Property.hpp"
 
+#include "TileDataType.hpp"
+
 #include <glm/gtc/constants.hpp>
 #include <vector>
 
@@ -53,11 +55,12 @@ class Plugin : public cs::core::PluginBase {
 
     /// A single data set containing either elevation or image data.
     struct Dataset {
-      std::string mName;               ///< The name of the data set.
-      std::string mCopyright;          ///< The copyright holder of the data set.
-      bool        mIsWebMapService;    ///< If true the data can be fetched from a web
-                                       ///< server, otherwise from the file system.
-      std::vector<std::string> mFiles; ///< The files/WMS with the data.
+      std::string  mURL;       ///< The URL of the mapserver including the "SERVICE=wms" parameter.
+      TileDataType mFormat;    ///< In the config either "Float32", "UInt8" or "U8Vec3".
+      std::string  mName;      ///< The name of the data set as shown in the UI.
+      std::string  mCopyright; ///< The copyright holder of the data set (also shown in the UI).
+      std::string  mLayers;    ///< A comma,seperated list of WMS layers.
+      uint32_t     mMaxLevel;  ///< The maximum quadtree depth to load.
     };
 
     /// The startup settings for a planet.
