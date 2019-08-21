@@ -14,31 +14,31 @@ This plugin can be enabled with the following configuration in your `settings.js
   "plugins": {
     ...
     "csp-lod-bodies": {
-      "maxGPUTilesColor": <int>,                // The maximum allowed colored tiles.
-      "maxGPUTilesGray": <int>,                 // The maximum allowed gray tiles.
-      "maxGPUTilesDEM": <int>,                  // The maximum allowed elevation tiles.
-      "mapCache": <path to map cache folder>,
+      "maxGPUTilesColor": <int>,     // The maximum allowed colored tiles.
+      "maxGPUTilesGray": <int>,      // The maximum allowed gray tiles.
+      "maxGPUTilesDEM": <int>,       // The maximum allowed elevation tiles.
+      "mapCache": <string>,          // The path to map cache folder>.
       "bodies": {
         <anchor name>: {
           "imgDatasets": [
             {
-              "name": <name of dataset>,
-              "copyright": <name of copyright holder>,
-              "files": [
-                <path to image data config xml>
-              ],
-              "wms": <bool>                     // If the provided data is a web map service.
+              "name": <string>,      // The name of the data set as shown in the UI.
+              "copyright": <string>, // The copyright holder of the data set (also shown in the UI).
+              "format": <string>,    // "Float32", "UInt8" or "U8Vec3".
+              "url": <string>,       // The URL of the mapserver including the "SERVICE=wms" parameter.
+              "layers": <string>,    // A comma,seperated list of WMS layers.
+              "maxLevel": <int>      // The maximum quadtree depth to load.
             },
             ... <more image datasets> ...
           ],
           "demDatasets": [
             {
-              "name": <name of dataset>,
-              "copyright": <name of copyright holder>,
-              "files": [
-                <path to elevation data config xml>
-              ],
-              "wms": <bool>                     // If the provided data is a web map service.
+              "name": <string>,      // The name of the data set as shown in the UI.
+              "copyright": <string>, // The copyright holder of the data set (also shown in the UI).
+              "format": <string>,    // "Float32", "UInt8" or "U8Vec3".
+              "url": <string>,       // The URL of the mapserver including the "SERVICE=wms" parameter.
+              "layers": <string>,    // A comma,seperated list of WMS layers.
+              "maxLevel": <int>      // The maximum quadtree depth to load.
             },
             ... <more elevation datasets> ...
           ]
