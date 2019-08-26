@@ -14,9 +14,9 @@ $('#set_enable_auto_terrain_lod').change(function () {
 
 
 function set_map_data_copyright(text) {
-    $("#img-data-copyright").tooltip({title: "© " + text, placement: "top"});
+    $("#img-data-copyright").tooltip({ title: "© " + text, placement: "top" });
 }
 
 function set_elevation_data_copyright(text) {
-    $("#dem-data-copyright").tooltip({title: "© " + text, placement: "bottom"});
+    $("#dem-data-copyright").tooltip({ title: "© " + text, placement: "bottom" });
 }
