@@ -19,29 +19,35 @@ namespace csp::lodbodies {
 /// The data of the tiles is fetched via a web map service.
 class TileSourceWebMapService : public TileSource {
  public:
-  explicit TileSourceWebMapService(
-      std::string const& xmlConfigFile, std::string const& cacheDirectory);
+  TileSourceWebMapService();
   virtual ~TileSourceWebMapService() {
   }
 
-  virtual void init() {
+  void init() override {
   }
 
-  virtual void fini() {
+  void fini() override {
   }
 
-  virtual TileNode* loadTile(int level, glm::int64 patchIdx);
+  TileNode* loadTile(int level, glm::int64 patchIdx) override;
 
-  virtual void loadTileAsync(int level, glm::int64 patchIdx, OnLoadCallback cb);
-  virtual int  getPendingRequests();
+  void loadTileAsync(int level, glm::int64 patchIdx, OnLoadCallback cb) override;
+  int  getPendingRequests();
 
-  virtual TileDataType getDataType() const {
-    return mFormat;
-  }
+  void     setMaxLevel(uint32_t maxLevel);
+  uint32_t getMaxLevel() const;
 
-  int getMaxLevel() const {
-    return mMaxLevel;
-  }
+  void               setCacheDirectory(std::string const& cacheDirectory);
+  std::string const& getCacheDirectory() const;
+
+  void               setLayers(std::string const& layers);
+  std::string const& getLayers() const;
+
+  void               setUrl(std::string const& url);
+  std::string const& getUrl() const;
+
+  void         setDataType(TileDataType type);
+  TileDataType getDataType() const override;
 
   /// These can be used to pre-populate the local cache, returns true if the tile is on the diagonal
   /// of base patch 4 (the one which is cut in two halves).
@@ -59,7 +65,7 @@ class TileSourceWebMapService : public TileSource {
   std::string  mLayers;
   std::string  mStyles;
   TileDataType mFormat   = TileDataType::eU8Vec3;
-  int          mMaxLevel = 10;
+  uint32_t     mMaxLevel = 10;
 };
 } // namespace csp::lodbodies
 

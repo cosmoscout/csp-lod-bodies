@@ -9,8 +9,6 @@
 #include "HEALPix.hpp"
 #include "TileNode.hpp"
 
-#include <VistaTools/tinyXML/tinyxml.h>
-
 #include <boost/filesystem.hpp>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Info.hpp>
@@ -138,7 +136,7 @@ void fillDiagonal(TileNode* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-TileNode* loadImpl(TileSourceWebMapService* source, int level, glm::int64 patchIdx) {
+TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 patchIdx) {
   TileNode* node = new TileNode();
 
   node->setTile(new Tile<T>(level, patchIdx));
@@ -232,50 +230,9 @@ std::mutex TileSourceWebMapService::mTileSystemMutex;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TileSourceWebMapService::TileSourceWebMapService(
-    std::string const& xmlConfigFile, std::string const& cacheDirectory)
+TileSourceWebMapService::TileSourceWebMapService()
     : TileSource()
-    , mThreadPool(32)
-    , mCache(cacheDirectory) {
-  VistaXML::TiXmlDocument xDoc(xmlConfigFile);
-  if (!xDoc.LoadFile()) {
-    std::cout << "Failed to load IMG config file " << xmlConfigFile << ": "
-              << "Cannont open file!" << std::endl;
-    return;
-  }
-
-  const VistaXML::TiXmlElement* pRoot(xDoc.FirstChildElement());
-  // Read Data
-  if (std::string(pRoot->Value()) != "WMSConfig") {
-    std::cout << "Failed to read WMS img config file " << xmlConfigFile << "!" << std::endl;
-    return;
-  }
-
-  const VistaXML::TiXmlElement* pProperty(pRoot->FirstChildElement());
-  while (pProperty != NULL) {
-    if (std::string(pProperty->Value()) == "Property") {
-      std::string       sName(pProperty->Attribute("Name"));
-      std::stringstream ssValue(pProperty->Attribute("Value"));
-      if (sName == "URL")
-        ssValue >> mUrl;
-      else if (sName == "Layers")
-        ssValue >> mLayers;
-      else if (sName == "Styles")
-        ssValue >> mStyles;
-      else if (sName == "Format")
-        ssValue >> mFormat;
-      else if (sName == "MaxLevel")
-        ssValue >> mMaxLevel;
-      else {
-        std::cout << "Ignoring invalid entity " << sName << " while reading WMS IMG config file "
-                  << xmlConfigFile << "!" << std::endl;
-      }
-    } else {
-      std::cout << "Ignoring invalid entity " << pProperty->Value()
-                << " while reading WMS IMG config file " << xmlConfigFile << "!" << std::endl;
-    }
-    pProperty = pProperty->NextSiblingElement();
-  }
+    , mThreadPool(32) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,6 +384,55 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 
 int TileSourceWebMapService::getPendingRequests() {
   return mThreadPool.PendingTaskCount() + mThreadPool.RunningTaskCount();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void TileSourceWebMapService::setMaxLevel(uint32_t maxLevel) {
+  mMaxLevel = maxLevel;
+}
+
+uint32_t TileSourceWebMapService::getMaxLevel() const {
+  return mMaxLevel;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void TileSourceWebMapService::setCacheDirectory(std::string const& cacheDirectory) {
+  mCache = cacheDirectory;
+}
+
+std::string const& TileSourceWebMapService::getCacheDirectory() const {
+  return mCache;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void TileSourceWebMapService::setLayers(std::string const& layers) {
+  mLayers = layers;
+}
+
+std::string const& TileSourceWebMapService::getLayers() const {
+  return mLayers;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void TileSourceWebMapService::setUrl(std::string const& url) {
+  mUrl = url;
+}
+
+std::string const& TileSourceWebMapService::getUrl() const {
+  return mUrl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void TileSourceWebMapService::setDataType(TileDataType type) {
+  mFormat = type;
+}
+
+TileDataType TileSourceWebMapService::getDataType() const {
+  return mFormat;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
