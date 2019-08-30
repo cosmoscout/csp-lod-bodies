@@ -16,6 +16,7 @@
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
 #include <fstream>
+#include <sstream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
