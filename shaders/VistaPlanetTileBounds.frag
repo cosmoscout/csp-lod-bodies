@@ -4,7 +4,7 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#version 400
+#version 330
 
 in vec3 position;
 

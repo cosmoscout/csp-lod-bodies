@@ -1,4 +1,4 @@
-#version 450 compatibility
+#version 330
 
 #define SHOW_TEXTURE_RGB  0
 

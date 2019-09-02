@@ -1,4 +1,4 @@
-#version 400 compatibility
+#version 330
 
 // ==========================================================================
 // include helper functions/declarations from VistaPlanet
