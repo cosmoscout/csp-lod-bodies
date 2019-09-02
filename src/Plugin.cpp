@@ -66,21 +66,18 @@ void from_json(const nlohmann::json& j, Plugin::Settings::Dataset& o) {
 }
 
 void from_json(const nlohmann::json& j, Plugin::Settings::Body& o) {
-  cs::core::parseSettingsSection("demDatasets",
-      [&] { o.mDemDatasets = j.at("demDatasets").get<std::vector<Plugin::Settings::Dataset>>(); });
-
-  cs::core::parseSettingsSection("demDatasets",
-      [&] { o.mImgDatasets = j.at("imgDatasets").get<std::vector<Plugin::Settings::Dataset>>(); });
+  o.mDemDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("demDatasets", j);
+  o.mImgDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("imgDatasets", j);
 }
 
 void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  cs::core::parseSettingsSection("csp-lod-bodies", [&] {
+  cs::core::parseSection("csp-lod-bodies", [&] {
     o.mMaxGPUTilesColor = cs::core::parseProperty<uint32_t>("maxGPUTilesColor", j);
     o.mMaxGPUTilesGray  = cs::core::parseProperty<uint32_t>("maxGPUTilesGray", j);
     o.mMaxGPUTilesDEM   = cs::core::parseProperty<uint32_t>("maxGPUTilesDEM", j);
     o.mMapCache         = cs::core::parseProperty<std::string>("mapCache", j);
-    cs::core::parseSettingsSection("bodies",
-        [&] { o.mBodies = j.at("bodies").get<std::map<std::string, Plugin::Settings::Body>>(); });
+
+    o.mBodies = cs::core::parseMap<std::string, Plugin::Settings::Body>("bodies", j);
   });
 }
 
