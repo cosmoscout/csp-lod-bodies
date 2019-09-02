@@ -67,8 +67,8 @@ void main()
   #if $LIGHTING_QUALITY > 1
     vec3 surfaceNormal = normalize(fsIn.normal);
   #else
-    vec3 dx = dFdxFine(fsIn.position);
-    vec3 dy = dFdyFine(fsIn.position);
+    vec3 dx = dFdx(fsIn.position);
+    vec3 dy = dFdy(fsIn.position);
     vec3 surfaceNormal = normalize(cross(dx, dy));
   #endif
 
@@ -129,7 +129,7 @@ void main()
     const float maxLevel = 15;
     const float brightness = 0.5;
 
-    float level = clamp(log2(VP_tileOffsetScale.z), minLevel, maxLevel);
+    float level = clamp(log2(float(VP_tileOffsetScale.z)), minLevel, maxLevel);
     vec4 debugColor = vec4(heat((level - minLevel)/(maxLevel-minLevel)), 0.5);
     debugColor.rgb = mix(debugColor.rgb, vec3(1), brightness);
 
