@@ -12,7 +12,6 @@
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/InputManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
-#include "../../../src/cs-gui/GuiItem.hpp"
 #include "../../../src/cs-utils/convert.hpp"
 
 #include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
@@ -184,7 +183,7 @@ void Plugin::init() {
           "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
     }
 
-    auto   existence       = cs::utils::convert::getExistenceFromSettings(*anchor);
+    auto   existence       = cs::core::getExistenceFromSettings(*anchor);
     double tStartExistence = existence.first;
     double tEndExistence   = existence.second;
 
