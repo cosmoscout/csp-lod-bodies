@@ -12,7 +12,6 @@
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/InputManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
-#include "../../../src/cs-gui/GuiItem.hpp"
 #include "../../../src/cs-utils/convert.hpp"
 
 #include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
@@ -57,25 +56,28 @@ void from_json(const nlohmann::json& j, TileDataType& o) {
 }
 
 void from_json(const nlohmann::json& j, Plugin::Settings::Dataset& o) {
-  o.mFormat    = j.at("format").get<TileDataType>();
-  o.mName      = j.at("name").get<std::string>();
-  o.mCopyright = j.at("copyright").get<std::string>();
-  o.mLayers    = j.at("layers").get<std::string>();
-  o.mMaxLevel  = j.at("maxLevel").get<uint32_t>();
-  o.mURL       = j.at("url").get<std::string>();
+  o.mFormat    = cs::core::parseProperty<TileDataType>("format", j);
+  o.mName      = cs::core::parseProperty<std::string>("name", j);
+  o.mCopyright = cs::core::parseProperty<std::string>("copyright", j);
+  o.mLayers    = cs::core::parseProperty<std::string>("layers", j);
+  o.mMaxLevel  = cs::core::parseProperty<uint32_t>("maxLevel", j);
+  o.mURL       = cs::core::parseProperty<std::string>("url", j);
 }
 
 void from_json(const nlohmann::json& j, Plugin::Settings::Body& o) {
-  o.mDemDatasets = j.at("demDatasets").get<std::vector<Plugin::Settings::Dataset>>();
-  o.mImgDatasets = j.at("imgDatasets").get<std::vector<Plugin::Settings::Dataset>>();
+  o.mDemDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("demDatasets", j);
+  o.mImgDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("imgDatasets", j);
 }
 
 void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  o.mMaxGPUTilesColor = j.at("maxGPUTilesColor").get<uint32_t>();
-  o.mMaxGPUTilesGray  = j.at("maxGPUTilesGray").get<uint32_t>();
-  o.mMaxGPUTilesDEM   = j.at("maxGPUTilesDEM").get<uint32_t>();
-  o.mMapCache         = j.at("mapCache").get<std::string>();
-  o.mBodies           = j.at("bodies").get<std::map<std::string, Plugin::Settings::Body>>();
+  cs::core::parseSection("csp-lod-bodies", [&] {
+    o.mMaxGPUTilesColor = cs::core::parseProperty<uint32_t>("maxGPUTilesColor", j);
+    o.mMaxGPUTilesGray  = cs::core::parseProperty<uint32_t>("maxGPUTilesGray", j);
+    o.mMaxGPUTilesDEM   = cs::core::parseProperty<uint32_t>("maxGPUTilesDEM", j);
+    o.mMapCache         = cs::core::parseProperty<std::string>("mapCache", j);
+
+    o.mBodies = cs::core::parseMap<std::string, Plugin::Settings::Body>("bodies", j);
+  });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,8 +183,9 @@ void Plugin::init() {
           "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
     }
 
-    double tStartExistence = cs::utils::convert::toSpiceTime(anchor->second.mStartExistence);
-    double tEndExistence   = cs::utils::convert::toSpiceTime(anchor->second.mEndExistence);
+    auto   existence       = cs::core::getExistenceFromSettings(*anchor);
+    double tStartExistence = existence.first;
+    double tEndExistence   = existence.second;
 
     std::vector<std::shared_ptr<TileSource>> DEMs;
     std::vector<std::shared_ptr<TileSource>> IMGs;
