@@ -7,7 +7,6 @@
 #include "Plugin.hpp"
 
 #include "LodBody.hpp"
-#include "TileSourceDB.hpp"
 #include "TileSourceWebMapService.hpp"
 
 #include "../../../src/cs-core/GuiManager.hpp"
@@ -38,11 +37,32 @@ namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void from_json(const nlohmann::json& j, TileDataType& o) {
+  if (j.get<std::string>() == "Float32") {
+    o = TileDataType::eFloat32;
+    return;
+  }
+
+  if (j.get<std::string>() == "UInt8") {
+    o = TileDataType::eUInt8;
+    return;
+  }
+
+  if (j.get<std::string>() == "U8Vec3") {
+    o = TileDataType::eU8Vec3;
+    return;
+  }
+
+  throw std::runtime_error("Invalid data set format \"" + j.get<std::string>() + "\" in config!");
+}
+
 void from_json(const nlohmann::json& j, Plugin::Settings::Dataset& o) {
-  o.mName            = j.at("name").get<std::string>();
-  o.mCopyright       = j.at("copyright").get<std::string>();
-  o.mIsWebMapService = j.at("wms").get<bool>();
-  o.mFiles           = j.at("files").get<std::vector<std::string>>();
+  o.mFormat    = j.at("format").get<TileDataType>();
+  o.mName      = j.at("name").get<std::string>();
+  o.mCopyright = j.at("copyright").get<std::string>();
+  o.mLayers    = j.at("layers").get<std::string>();
+  o.mMaxLevel  = j.at("maxLevel").get<uint32_t>();
+  o.mURL       = j.at("url").get<std::string>();
 }
 
 void from_json(const nlohmann::json& j, Plugin::Settings::Body& o) {
@@ -167,41 +187,27 @@ void Plugin::init() {
     std::vector<std::shared_ptr<TileSource>> DEMs;
     std::vector<std::shared_ptr<TileSource>> IMGs;
     for (auto const& dataset : bodySettings.second.mDemDatasets) {
-      if (dataset.mIsWebMapService) {
-        auto dem = std::make_shared<TileSourceWebMapService>(
-            dataset.mFiles.front(), mPluginSettings.mMapCache);
-        dem->setName(dataset.mName);
-        dem->setCopyright(dataset.mCopyright);
-        DEMs.push_back(dem);
-      } else {
-        auto dem = std::make_shared<TileSourceDB>(TileDataType::eFloat32, dataset.mFiles.front());
-        dem->setName(dataset.mName);
-        dem->setCopyright(dataset.mCopyright);
-        DEMs.push_back(dem);
-      }
+      auto dem = std::make_shared<TileSourceWebMapService>();
+      dem->setCacheDirectory(mPluginSettings.mMapCache);
+      dem->setMaxLevel(dataset.mMaxLevel);
+      dem->setLayers(dataset.mLayers);
+      dem->setUrl(dataset.mURL);
+      dem->setDataType(dataset.mFormat);
+      dem->setName(dataset.mName);
+      dem->setCopyright(dataset.mCopyright);
+      DEMs.push_back(dem);
     }
 
     for (auto const& dataset : bodySettings.second.mImgDatasets) {
-      if (dataset.mIsWebMapService) {
-        auto img = std::make_shared<TileSourceWebMapService>(
-            dataset.mFiles.front(), mPluginSettings.mMapCache);
-        img->setName(dataset.mName);
-        img->setCopyright(dataset.mCopyright);
-        IMGs.push_back(img);
-      } else {
-        if (dataset.mFiles.size() == 1) {
-          auto img = std::make_shared<TileSourceDB>(TileDataType::eUInt8, dataset.mFiles.front());
-          img->setName(dataset.mName);
-          img->setCopyright(dataset.mCopyright);
-          IMGs.push_back(img);
-        } else {
-          auto img = std::make_shared<TileSourceDB>(TileDataType::eU8Vec3,
-              std::array<std::string, 3>{dataset.mFiles[0], dataset.mFiles[1], dataset.mFiles[2]});
-          img->setName(dataset.mName);
-          img->setCopyright(dataset.mCopyright);
-          IMGs.push_back(img);
-        }
-      }
+      auto img = std::make_shared<TileSourceWebMapService>();
+      img->setCacheDirectory(mPluginSettings.mMapCache);
+      img->setMaxLevel(dataset.mMaxLevel);
+      img->setLayers(dataset.mLayers);
+      img->setUrl(dataset.mURL);
+      img->setDataType(dataset.mFormat);
+      img->setName(dataset.mName);
+      img->setCopyright(dataset.mCopyright);
+      IMGs.push_back(img);
     }
 
     auto body = std::make_shared<LodBody>(mGraphicsEngine, mSolarSystem, mProperties, mGuiManager,
@@ -321,7 +327,7 @@ void Plugin::deInit() {
 void Plugin::update() {
   if (mProperties->mAutoLOD.get()) {
 
-    double minLODFactor = 10.0;
+    double minLODFactor = 15.0;
     double maxLODFactor = 50.0;
     double minTime      = 13.5;
     double maxTime      = 14.5;
