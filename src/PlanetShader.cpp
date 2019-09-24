@@ -10,6 +10,7 @@
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-gui/GuiItem.hpp"
 #include "../../../src/cs-utils/convert.hpp"
+#include "../../../src/cs-utils/filesystem.hpp"
 #include "../../../src/cs-utils/utils.hpp"
 
 #include <VistaOGLExt/VistaGLSLShader.h>
@@ -72,7 +73,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
 
   // TODO: color map mangement could be done in a separate class
   if (mColorMaps.empty()) {
-    auto files(cs::utils::listFiles("../share/resources/colormaps"));
+    auto files(cs::utils::filesystem::listFiles("../share/resources/colormaps"));
 
     bool first = true;
     for (auto file : files) {

@@ -17,9 +17,6 @@ add_library(csp-lod-bodies SHARED
 target_link_libraries(csp-lod-bodies
   PUBLIC
     cs-core
-    curl::curl
-    curlpp::curlpp
-    c-ares::c-ares
     Threads::Threads
 )
 
