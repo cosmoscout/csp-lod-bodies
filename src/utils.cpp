@@ -34,7 +34,6 @@ double getHeight(
 
   int rootIndex = HEALPix::convertLngLat2Base(lngLat); //!< Patch Index of Root
 
-  // glm::vec2 relative1;                                  //!< Relative Coordinates in a Patch
   glm::dvec2 relative1; //!< Relative Coordinates in a Patch
   glm::dvec2 relative2; //!< Relative Coordinates in a Patch before change
 
