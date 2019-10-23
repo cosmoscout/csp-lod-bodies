@@ -568,8 +568,8 @@ glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) co
   double _f1 = HEALPixLevel::sF1LUT[basePatchIdx];
   double _f2 = HEALPixLevel::sF2LUT[basePatchIdx];
 
-  double x = lngLat.x / glm::pi<double>() + 1.0;
-  double y = std::sin(lngLat.y); //!< Ranges from -1 to 1
+  double x = std::fmod(lngLat.x / glm::pi<double>() + 1.0, 2.0); //!< Ranges from  0 to 2
+  double y = std::sin(lngLat.y);                                 //!< Ranges from -1 to 1
 
   double ySep = 2.0 / 3.0;
 
