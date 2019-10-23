@@ -365,7 +365,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 
 /* virtual */ void TileSourceWebMapService::loadTileAsync(
     int level, glm::int64 patchIdx, OnLoadCallback cb) {
-  mThreadPool.Enqueue([=]() {
+  mThreadPool.enqueue([=]() {
     auto n = loadTile(level, patchIdx);
     cb(this, level, patchIdx, n);
   });
@@ -374,7 +374,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int TileSourceWebMapService::getPendingRequests() {
-  return mThreadPool.PendingTaskCount() + mThreadPool.RunningTaskCount();
+  return mThreadPool.getPendingTaskCount() + mThreadPool.getRunningTaskCount();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

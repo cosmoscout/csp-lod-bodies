@@ -7,7 +7,7 @@
 #ifndef CSP_LOD_BODIES_TILESOURCEWMS_HPP
 #define CSP_LOD_BODIES_TILESOURCEWMS_HPP
 
-#include "ThreadPool.hpp"
+#include "../../../src/cs-utils/ThreadPool.hpp"
 #include "Tile.hpp"
 #include "TileSource.hpp"
 
@@ -57,8 +57,8 @@ class TileSourceWebMapService : public TileSource {
  private:
   static std::mutex mTileSystemMutex;
 
-  ThreadPool  mThreadPool;
-  std::string mConfig;
+  cs::utils::ThreadPool mThreadPool;
+  std::string           mConfig;
 
   std::string  mUrl;
   std::string  mCache = "cache/img";
