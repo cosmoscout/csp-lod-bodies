@@ -9,6 +9,8 @@
 #include "HEALPix.hpp"
 #include "TileNode.hpp"
 
+#include "../../../src/cs-utils/filesystem.hpp"
+
 #include <boost/filesystem.hpp>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Info.hpp>
@@ -33,19 +35,6 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class CopyPixels { eAll, eAboveDiagonal, eBelowDiagonal };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void createDirectoryRecursively(
-    boost::filesystem::path const& path, boost::filesystem::perms permissions) {
-
-  if (!boost::filesystem::exists(path.parent_path())) {
-    createDirectoryRecursively(path.parent_path(), permissions);
-  }
-
-  boost::filesystem::create_directory(path);
-  boost::filesystem::permissions(path, permissions);
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -326,7 +315,8 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
     auto cacheDirPath(boost::filesystem::absolute(boost::filesystem::path(cacheDir.str())));
     if (!(boost::filesystem::exists(cacheDirPath))) {
       try {
-        createDirectoryRecursively(cacheDirPath, boost::filesystem::perms::all_all);
+        cs::utils::filesystem::createDirectoryRecursively(
+            cacheDirPath, boost::filesystem::perms::all_all);
       } catch (std::exception& e) {
         std::cerr << "Failed to create cache directory: " << e.what() << std::endl;
       }
@@ -343,9 +333,9 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
     }
 
     curlpp::Easy request;
-    request.setOpt(new curlpp::options::Url(url.str()));
-    request.setOpt(new curlpp::options::WriteStream(&out));
-    request.setOpt(new curlpp::options::NoSignal(1));
+    request.setOpt(curlpp::options::Url(url.str()));
+    request.setOpt(curlpp::options::WriteStream(&out));
+    request.setOpt(curlpp::options::NoSignal(true));
 
     request.perform();
 
@@ -375,7 +365,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 
 /* virtual */ void TileSourceWebMapService::loadTileAsync(
     int level, glm::int64 patchIdx, OnLoadCallback cb) {
-  mThreadPool.Enqueue([=]() {
+  mThreadPool.enqueue([=]() {
     auto n = loadTile(level, patchIdx);
     cb(this, level, patchIdx, n);
   });
@@ -384,7 +374,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int TileSourceWebMapService::getPendingRequests() {
-  return mThreadPool.PendingTaskCount() + mThreadPool.RunningTaskCount();
+  return mThreadPool.getPendingTaskCount() + mThreadPool.getRunningTaskCount();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

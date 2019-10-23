@@ -4,6 +4,12 @@
 #                         Copyright: (c) 2019 German Aerospace Center (DLR)                        #
 # ------------------------------------------------------------------------------------------------ #
 
+option(CSP_LOD_BODIES "Enable compilation of this plugin" ON)
+
+if (NOT CSP_LOD_BODIES)
+  return()
+endif()
+
 # build plugin -------------------------------------------------------------------------------------
 
 file(GLOB SOURCE_FILES src/*.cpp)
@@ -17,9 +23,6 @@ add_library(csp-lod-bodies SHARED
 target_link_libraries(csp-lod-bodies
   PUBLIC
     cs-core
-    curl::curl
-    curlpp::curlpp
-    c-ares::c-ares
     Threads::Threads
 )
 
