@@ -160,16 +160,14 @@ void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
     mPlanet.setWorldTransform(getWorldTransform());
 
     if (mSun) {
-      auto   sunDirection = mSolarSystem->pSunPosition.get() - glm::dvec3(getWorldTransform()[3]);
-      double sunDist      = glm::length(sunDirection);
-      double sunIlluminance =
-          mSolarSystem->pSunLuminousPower.get() / (sunDist * sunDist * 4.0 * glm::pi<double>());
-
-      if (!mGraphicsEngine->pEnableHDR.get()) {
-        sunIlluminance = 1.0;
+      double sunIlluminance = 1.0;
+      if (mGraphicsEngine->pEnableHDR.get()) {
+        sunIlluminance = mSolarSystem->getSunIlluminance(getWorldTransform()[3]);
       }
 
-      mShader.setSun(sunDirection.xyz() / sunDist, sunIlluminance);
+      auto sunDirection = mSolarSystem->getSunDirection(getWorldTransform()[3]);
+
+      mShader.setSun(sunDirection, sunIlluminance);
     }
   }
 }
