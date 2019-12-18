@@ -236,14 +236,14 @@ void Plugin::init() {
           return;
         }
 
-        mGuiManager->getSideBar()->callJavascript("clear_container", "set_tiles_img");
-        mGuiManager->getSideBar()->callJavascript("clear_container", "set_tiles_dem");
+        mGuiManager->getSideBar()->callJavascript("CosmoScout.call", "sidebar", "clearContainer", "set_tiles_img");
+        mGuiManager->getSideBar()->callJavascript("CosmoScout.call", "sidebar", "clearContainer", "set_tiles_dem");
         mGuiManager->getSideBar()->callJavascript(
-            "add_dropdown_value", "set_tiles_img", "None", "None", false);
+            "CosmoScout.call", "sidebar", "addDropdownValue", "set_tiles_img", "None", "None", false);
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
           mGuiManager->getSideBar()->callJavascript(
-              "add_dropdown_value", "set_tiles_img", source->getName(), source->getName(), active);
+              "CosmoScout.call", "sidebar", "addDropdownValue", "set_tiles_img", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getSideBar()->callJavascript(
                 "set_map_data_copyright", source->getCopyright());
@@ -252,7 +252,7 @@ void Plugin::init() {
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
           mGuiManager->getSideBar()->callJavascript(
-              "add_dropdown_value", "set_tiles_dem", source->getName(), source->getName(), active);
+              "CosmoScout.call", "sidebar", "addDropdownValue", "set_tiles_dem", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getSideBar()->callJavascript(
                 "set_elevation_data_copyright", source->getCopyright());
@@ -283,13 +283,13 @@ void Plugin::init() {
       mNonAutoLod = mProperties->mLODFactor.get();
     } else {
       mProperties->mLODFactor = mNonAutoLod;
-      mGuiManager->getSideBar()->callJavascript("set_slider_value", "set_terrain_lod", mNonAutoLod);
+      mGuiManager->getSideBar()->callJavascript("CosmoScout.setSliderValue", "set_terrain_lod", mNonAutoLod);
     }
   });
 
   mProperties->mLODFactor.onChange().connect([this](float value) {
     if (mProperties->mAutoLOD()) {
-      mGuiManager->getSideBar()->callJavascript("set_slider_value", "set_terrain_lod", value);
+      mGuiManager->getSideBar()->callJavascript("CosmoScout.setSliderValue", "set_terrain_lod", value);
     }
   });
 

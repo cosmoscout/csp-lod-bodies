@@ -85,7 +85,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
 
       mColorMaps.insert(std::make_pair(name, cs::graphics::ColorMap(file)));
       pGuiManager->getSideBar()->callJavascript(
-          "add_dropdown_value", "set_colormap", name, name, first);
+          "CosmoScout.call", "sidebar", "addDropdownValue", "set_colormap", name, name, first);
       if (first) {
         first                         = false;
         mProperties->mTerrainColorMap = name;
