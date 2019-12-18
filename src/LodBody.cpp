@@ -83,7 +83,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
   });
 
   // scene-wide settings -----------------------------------------------------
-  mGraphicsEngine->pHeightScale.onChange().connect(
+  mHeightScaleConnection = mGraphicsEngine->pHeightScale.onChange().connect(
       [this](float val) { mPlanet.setHeightScale(val); });
 
   mProperties->mLODFactor.onChange().connect([this](float val) { mPlanet.setLODFactor(val); });
@@ -104,6 +104,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
 
 LodBody::~LodBody() {
   mGraphicsEngine->unregisterCaster(&mPlanet);
+  mGraphicsEngine->pHeightScale.onChange().disconnect(mHeightScaleConnection);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

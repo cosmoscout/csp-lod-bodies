@@ -85,6 +85,7 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   VistaPlanet  mPlanet;
   PlanetShader mShader;
   glm::dvec3   mRadii;
+  int          mHeightScaleConnection = -1;
 };
 
 } // namespace csp::lodbodies
