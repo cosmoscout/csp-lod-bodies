@@ -111,11 +111,10 @@ void Plugin::init() {
   mGuiManager->getGui()->registerCallback<bool>("set_enable_heightlines",
       ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "set_enable_lat_long_grid", ([this](bool enable) {
-        mProperties->mEnableLatLongGrid       = enable;
-        mProperties->mEnableLatLongGridLabels = enable;
-      }));
+  mGuiManager->getGui()->registerCallback<bool>("set_enable_lat_long_grid", ([this](bool enable) {
+    mProperties->mEnableLatLongGrid       = enable;
+    mProperties->mEnableLatLongGridLabels = enable;
+  }));
 
   mGuiManager->getGui()->registerCallback<bool>("set_enable_lat_long_grid_labels",
       ([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
@@ -236,23 +235,25 @@ void Plugin::init() {
           return;
         }
 
-        mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "clearContainer", "set_tiles_img");
-        mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "clearContainer", "set_tiles_dem");
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.call", "sidebar", "addDropdownValue", "set_tiles_img", "None", "None", false);
+            "CosmoScout.call", "sidebar", "clearContainer", "set_tiles_img");
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.call", "sidebar", "clearContainer", "set_tiles_dem");
+        mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "addDropdownValue",
+            "set_tiles_img", "None", "None", false);
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
-          mGuiManager->getGui()->callJavascript(
-              "CosmoScout.call", "sidebar", "addDropdownValue", "set_tiles_img", source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "addDropdownValue",
+              "set_tiles_img", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                    "CosmoScout.call", "sidebar", "setMapDataCopyright", source->getCopyright());
+                "CosmoScout.call", "sidebar", "setMapDataCopyright", source->getCopyright());
           }
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
-          mGuiManager->getGui()->callJavascript(
-              "CosmoScout.call", "sidebar", "addDropdownValue", "set_tiles_dem", source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "addDropdownValue",
+              "set_tiles_dem", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
                 "CosmoScout.call", "sidebar", "setElevationDataCopyright", source->getCopyright());
@@ -283,7 +284,8 @@ void Plugin::init() {
       mNonAutoLod = mProperties->mLODFactor.get();
     } else {
       mProperties->mLODFactor = mNonAutoLod;
-      mGuiManager->getGui()->callJavascript("CosmoScout.setSliderValue", "set_terrain_lod", mNonAutoLod);
+      mGuiManager->getGui()->callJavascript(
+          "CosmoScout.setSliderValue", "set_terrain_lod", mNonAutoLod);
     }
   });
 
