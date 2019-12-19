@@ -11,12 +11,3 @@ $('#set_enable_auto_terrain_lod').change(function () {
     else
         $("#set_terrain_lod").removeClass("unresponsive");
 });
-
-
-function set_map_data_copyright(text) {
-    CosmoScout.call('sidebar', 'setMapDataCopyright', text);
-}
-
-function set_elevation_data_copyright(text) {
-    CosmoScout.call('sidebar', 'setElevationDataCopyright', text);
-}

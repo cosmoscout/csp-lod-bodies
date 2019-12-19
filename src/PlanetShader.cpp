@@ -84,7 +84,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
       }
 
       mColorMaps.insert(std::make_pair(name, cs::graphics::ColorMap(file)));
-      pGuiManager->getSideBar()->callJavascript(
+      pGuiManager->getGui()->callJavascript(
           "CosmoScout.call", "sidebar", "addDropdownValue", "set_colormap", name, name, first);
       if (first) {
         first                         = false;
@@ -92,7 +92,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
       }
     }
 
-    pGuiManager->getSideBar()->registerCallback<std::string>("set_colormap",
+    pGuiManager->getGui()->registerCallback<std::string>("set_colormap",
         ([this](std::string const& name) { mProperties->mTerrainColorMap = name; }));
   }
 }

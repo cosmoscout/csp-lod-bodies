@@ -57,7 +57,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     for (auto const& s : mDEMtileSources) {
       if (s->getName() == val) {
         mPlanet.setDEMSource(s.get());
-        mGuiManager->getSideBar()->callJavascript(
+        mGuiManager->getGui()->callJavascript(
             "CosmoScout.call", "sidebar", "setElevationDataCopyright", s->getCopyright());
         break;
       }
@@ -68,14 +68,14 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     if (val == "None") {
       mShader.pEnableTexture = false;
       mPlanet.setIMGSource(nullptr);
-      mGuiManager->getSideBar()->callJavascript("CosmoScout.call", "sidebar", "setMapDataCopyright", "");
+      mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "setMapDataCopyright", "");
     } else {
       for (auto const& s : mIMGtileSources) {
         if (s->getName() == val) {
           mShader.pEnableTexture = true;
           mShader.pTextureIsRGB  = (s->getDataType() == TileDataType::eU8Vec3);
           mPlanet.setIMGSource(s.get());
-          mGuiManager->getSideBar()->callJavascript("CosmoScout.call", "sidebar", "setMapDataCopyright", s->getCopyright());
+          mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "setMapDataCopyright", s->getCopyright());
           break;
         }
       }
