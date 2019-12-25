@@ -4,8 +4,8 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "../../../src/cs-utils/doctest.hpp"
 #include "../src/HEALPix.hpp"
+#include "../../../src/cs-utils/doctest.hpp"
 
 namespace csp::lodbodies {
 TEST_CASE("csp::lodbodies::HEALPIX") {
