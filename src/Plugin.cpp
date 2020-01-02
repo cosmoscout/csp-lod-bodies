@@ -97,7 +97,7 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_tab.html");
   mGuiManager->addSettingsSectionToSideBarFromHTML(
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
-    mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/lod_body.js");
+  mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/lod_body.js");
 
   mGuiManager->getGui()->registerCallback<bool>("set_enable_tiles_freeze",
       ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
@@ -235,16 +235,14 @@ void Plugin::init() {
           return;
         }
 
+        mGuiManager->getGui()->callJavascript("CosmoScout.clearHtml", "set_tiles_img");
+        mGuiManager->getGui()->callJavascript("CosmoScout.clearHtml", "set_tiles_dem");
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.clearHtml", "set_tiles_img");
-        mGuiManager->getGui()->callJavascript(
-            "CosmoScout.clearHtml", "set_tiles_dem");
-        mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue",
-            "set_tiles_img", "None", "None", false);
+            "CosmoScout.addDropdownValue", "set_tiles_img", "None", "None", false);
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue",
-              "set_tiles_img", source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue", "set_tiles_img",
+              source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
                 "CosmoScout.lodBody.setMapDataCopyright", source->getCopyright());
@@ -252,8 +250,8 @@ void Plugin::init() {
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue",
-              "set_tiles_dem", source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue", "set_tiles_dem",
+              source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
                 "CosmoScout.lodBody.setElevationDataCopyright", source->getCopyright());

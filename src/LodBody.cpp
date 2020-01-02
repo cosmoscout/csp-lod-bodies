@@ -68,8 +68,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     if (val == "None") {
       mShader.pEnableTexture = false;
       mPlanet.setIMGSource(nullptr);
-      mGuiManager->getGui()->callJavascript(
-          "CosmoScout.lodBody.setMapDataCopyright", "");
+      mGuiManager->getGui()->callJavascript("CosmoScout.lodBody.setMapDataCopyright", "");
     } else {
       for (auto const& s : mIMGtileSources) {
         if (s->getName() == val) {
