@@ -247,7 +247,7 @@ void Plugin::init() {
               "set_tiles_img", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.call", "sidebar", "setMapDataCopyright", source->getCopyright());
+                "CosmoScout.sidebar.setMapDataCopyright", source->getCopyright());
           }
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
@@ -256,7 +256,7 @@ void Plugin::init() {
               "set_tiles_dem", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.call", "sidebar", "setElevationDataCopyright", source->getCopyright());
+                "CosmoScout.sidebar.setElevationDataCopyright", source->getCopyright());
           }
         }
       });
