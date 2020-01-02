@@ -1,6 +1,17 @@
+/* global IApi, CosmoScout, $ */
+
+/**
+ * LOD Bodies Api
+ */
 class LODBodyApi extends IApi {
+  /**
+   * @inheritDoc
+   */
   name = 'lodBody';
 
+  /**
+   * @inheritDoc
+   */
   init() {
     CosmoScout.initSlider('set_terrain_height', 1.0, 20.0, 0.1, [1]);
     CosmoScout.initSlider('set_height_range', -12.0, 21.0, 0.1, [-8, 12]);
@@ -29,6 +40,7 @@ class LODBodyApi extends IApi {
    *
    * @param copyright {string}
    */
+  // eslint-disable-next-line class-methods-use-this
   setElevationDataCopyright(copyright) {
     $('#img-data-copyright').tooltip({ title: `© ${copyright}`, placement: 'top' });
   }
@@ -39,11 +51,13 @@ class LODBodyApi extends IApi {
    *
    * @param copyright {string}
    */
+  // eslint-disable-next-line class-methods-use-this
   setMapDataCopyright(copyright) {
     $('#dem-data-copyright').tooltip({ title: `© ${copyright}`, placement: 'bottom' });
   }
 }
 
-(function () {
+// Init Class on file load
+(() => {
   CosmoScout.init(LODBodyApi);
-}());
+})();
