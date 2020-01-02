@@ -97,7 +97,7 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_tab.html");
   mGuiManager->addSettingsSectionToSideBarFromHTML(
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
-  mGuiManager->addScriptToSideBarFromJS("../share/resources/gui/js/lod_body_settings.js");
+    mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/lod_body_settings.js");
 
   mGuiManager->getGui()->registerCallback<bool>("set_enable_tiles_freeze",
       ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
