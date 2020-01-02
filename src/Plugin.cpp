@@ -236,14 +236,14 @@ void Plugin::init() {
         }
 
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.call", "sidebar", "clearContainer", "set_tiles_img");
+            "CosmoScout.clearHtml", "set_tiles_img");
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.call", "sidebar", "clearContainer", "set_tiles_dem");
-        mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "addDropdownValue",
+            "CosmoScout.clearHtml", "set_tiles_dem");
+        mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue",
             "set_tiles_img", "None", "None", false);
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "addDropdownValue",
+          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue",
               "set_tiles_img", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
@@ -252,7 +252,7 @@ void Plugin::init() {
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.call", "sidebar", "addDropdownValue",
+          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue",
               "set_tiles_dem", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
