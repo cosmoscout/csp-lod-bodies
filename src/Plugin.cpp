@@ -97,7 +97,7 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_tab.html");
   mGuiManager->addSettingsSectionToSideBarFromHTML(
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
-    mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/lod_body_settings.js");
+    mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/lod_body.js");
 
   mGuiManager->getGui()->registerCallback<bool>("set_enable_tiles_freeze",
       ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
@@ -247,7 +247,7 @@ void Plugin::init() {
               "set_tiles_img", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.sidebar.setMapDataCopyright", source->getCopyright());
+                "CosmoScout.lodBody.setMapDataCopyright", source->getCopyright());
           }
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
@@ -256,7 +256,7 @@ void Plugin::init() {
               "set_tiles_dem", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.sidebar.setElevationDataCopyright", source->getCopyright());
+                "CosmoScout.lodBody.setElevationDataCopyright", source->getCopyright());
           }
         }
       });

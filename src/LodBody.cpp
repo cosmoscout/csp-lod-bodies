@@ -58,7 +58,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
       if (s->getName() == val) {
         mPlanet.setDEMSource(s.get());
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.sidebar.setElevationDataCopyright", s->getCopyright());
+            "CosmoScout.lodBody.setElevationDataCopyright", s->getCopyright());
         break;
       }
     }
@@ -69,7 +69,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
       mShader.pEnableTexture = false;
       mPlanet.setIMGSource(nullptr);
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.sidebar.setMapDataCopyright", "");
+          "CosmoScout.lodBody.setMapDataCopyright", "");
     } else {
       for (auto const& s : mIMGtileSources) {
         if (s->getName() == val) {
@@ -77,7 +77,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
           mShader.pTextureIsRGB  = (s->getDataType() == TileDataType::eU8Vec3);
           mPlanet.setIMGSource(s.get());
           mGuiManager->getGui()->callJavascript(
-              "CosmoScout.sidebar.setMapDataCopyright", s->getCopyright());
+              "CosmoScout.lodBody.setMapDataCopyright", s->getCopyright());
           break;
         }
       }
