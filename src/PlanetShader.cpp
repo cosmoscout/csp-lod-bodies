@@ -53,13 +53,13 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
         [this](Plugin::Properties::ColorMappingType) { mShaderDirty = true; });
     mProperties->mTerrainProjectionType.onChange().connect(
         [this](Plugin::Properties::TerrainProjectionType) { mShaderDirty = true; });
-    mGraphicsEngine->pEnableLighting.onChange().connect(
+    mEnableLightingConnection = mGraphicsEngine->pEnableLighting.onChange().connect(
         [this](bool) { mShaderDirty = true; });
-    mGraphicsEngine->pEnableShadowsDebug.onChange().connect(
+    mEnableShadowsDebugConnection = mGraphicsEngine->pEnableShadowsDebug.onChange().connect(
         [this](bool) { mShaderDirty = true; });
-    mGraphicsEngine->pEnableShadows.onChange().connect(
+    mEnableShadowsConnection = mGraphicsEngine->pEnableShadows.onChange().connect(
         [this](bool) { mShaderDirty = true; });
-    mGraphicsEngine->pLightingQuality.onChange().connect(
+    mLightingQualityConnection = mGraphicsEngine->pLightingQuality.onChange().connect(
         [this](int) { mShaderDirty = true; });
     mProperties->mEnableTilesDebug.onChange().connect(
         [this](bool) { mShaderDirty = true; });
@@ -101,6 +101,10 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
 
 PlanetShader::~PlanetShader() {
   delete mFontTexture;
+  mGraphicsEngine->pEnableLighting.onChange().disconnect(mEnableLightingConnection);
+  mGraphicsEngine->pEnableShadowsDebug.onChange().disconnect(mEnableShadowsDebugConnection);
+  mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
+  mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

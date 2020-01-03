@@ -49,10 +49,14 @@ class PlanetShader : public TerrainShader {
 
   std::shared_ptr<cs::core::GraphicsEngine> mGraphicsEngine;
   std::shared_ptr<Plugin::Properties>       mProperties;
-  bool                                      mColorscaleTextureDirty = true;
-  VistaVector3D                             mSunDirection           = VistaVector3D(0, 1, 0);
-  VistaTexture*                             mFontTexture            = nullptr;
-  unsigned                                  mLutTexID               = 0;
+  bool                                      mColorscaleTextureDirty       = true;
+  VistaVector3D                             mSunDirection                 = VistaVector3D(0, 1, 0);
+  VistaTexture*                             mFontTexture                  = nullptr;
+  unsigned                                  mLutTexID                     = 0;
+  int                                       mEnableLightingConnection     = -1;
+  int                                       mEnableShadowsDebugConnection = -1;
+  int                                       mEnableShadowsConnection      = -1;
+  int                                       mLightingQualityConnection    = -1;
 
   static std::map<std::string, cs::graphics::ColorMap> mColorMaps;
 };

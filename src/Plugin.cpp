@@ -301,6 +301,7 @@ void Plugin::init() {
 void Plugin::deInit() {
   for (auto const& body : mLodBodies) {
     mInputManager->unregisterSelectable(body);
+    mSolarSystem->unregisterBody(body);
   }
 
   mGuiManager->getGui()->unregisterCallback("set_enable_tiles_freeze");
