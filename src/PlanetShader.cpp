@@ -39,6 +39,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
     std::shared_ptr<cs::core::GuiManager> const&                            pGuiManager)
     : csp::lodbodies::TerrainShader()
     , mGraphicsEngine(graphicsEngine)
+    , mGuiManager(pGuiManager)
     , mProperties(pProperties)
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
   // clang-format off
@@ -105,6 +106,8 @@ PlanetShader::~PlanetShader() {
   mGraphicsEngine->pEnableShadowsDebug.onChange().disconnect(mEnableShadowsDebugConnection);
   mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
   mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
+
+  mGuiManager->getGui()->unregisterCallback("set_colormap");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

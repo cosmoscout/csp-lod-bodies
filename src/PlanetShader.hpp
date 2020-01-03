@@ -48,6 +48,7 @@ class PlanetShader : public TerrainShader {
   void compile() override;
 
   std::shared_ptr<cs::core::GraphicsEngine> mGraphicsEngine;
+  std::shared_ptr<cs::core::GuiManager>     mGuiManager;
   std::shared_ptr<Plugin::Properties>       mProperties;
   bool                                      mColorscaleTextureDirty       = true;
   VistaVector3D                             mSunDirection                 = VistaVector3D(0, 1, 0);
