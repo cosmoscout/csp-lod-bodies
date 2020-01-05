@@ -56,7 +56,7 @@ bool loadImpl(
     TIFFSetWarningHandler(nullptr);
     auto data = TIFFOpen(cacheFile.c_str(), "r");
     if (!data) {
-      spdlog::error("Failed to load {}", cacheFile);
+      spdlog::error("Tile loading failed: Cannot open '{}' with libtiff!", cacheFile);
       return false;
     }
 
@@ -87,7 +87,7 @@ bool loadImpl(
     auto data = reinterpret_cast<T*>(stbi_load(cacheFile.c_str(), &width, &height, &bpp, channels));
 
     if (!data) {
-      spdlog::error("Failed to load {}", cacheFile);
+      spdlog::error("Tile loading failed: Cannot open '{}' with stbi!", cacheFile);
       return false;
     }
 
@@ -330,7 +330,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
     out.open(cacheFile.str(), std::ofstream::out | std::ofstream::binary);
 
     if (!out) {
-      spdlog::error("Failed to open {} for writing!", cacheFile.str());
+      spdlog::error("Failed to download tile data: Cannot open '{}' for writing!", cacheFile.str());
     }
 
     curlpp::Easy request;
