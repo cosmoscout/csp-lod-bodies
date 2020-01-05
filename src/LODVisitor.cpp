@@ -14,6 +14,7 @@
 
 #include <VistaBase/VistaStreamUtils.h>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <spdlog/spdlog.h>
 
 namespace csp::lodbodies {
 
@@ -625,7 +626,7 @@ bool LODVisitor::testVisible(TileId const& tileId, TreeManagerBase* treeMgrDEM) 
         state.mRdIMG->setBounds(tb);
       }
     } else {
-      std::cout << "Error: Unknown tile template type!" << std::endl;
+      spdlog::error("Error: Unknown tile template type!");
     }
 
     result = testInFrustum(mCullData.mFrustumMS, tb);
