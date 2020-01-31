@@ -235,10 +235,10 @@ void Plugin::init() {
           return;
         }
 
-        mGuiManager->getGui()->callJavascript("CosmoScout.clearHtml", "set_tiles_img");
-        mGuiManager->getGui()->callJavascript("CosmoScout.clearHtml", "set_tiles_dem");
+        mGuiManager->getGui()->callJavascript("CosmoScout.clearDropdown", "set_tiles_img");
+        mGuiManager->getGui()->callJavascript("CosmoScout.clearDropdown", "set_tiles_dem");
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.addDropdownValue", "set_tiles_img", "None", "None", false);
+            "CosmoScout.addDropdownValue", "set_tiles_img", "None", "None", "false");
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
           mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue", "set_tiles_img",
