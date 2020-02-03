@@ -231,6 +231,9 @@ void Plugin::init() {
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
         auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.sidebar.setTabEnabled", "collapse-Body-Settings", lodBody);
+
         if (!lodBody) {
           return;
         }
