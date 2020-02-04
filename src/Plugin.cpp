@@ -97,45 +97,44 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_tab.html");
   mGuiManager->addSettingsSectionToSideBarFromHTML(
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
-  mGuiManager->addScriptToSideBarFromJS("../share/resources/gui/js/lod_body_settings.js");
+  mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/csp-lod-bodies.js");
 
-  mGuiManager->getSideBar()->registerCallback<bool>("set_enable_tiles_freeze",
+  mGuiManager->getGui()->registerCallback<bool>("set_enable_tiles_freeze",
       ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
 
-  mGuiManager->getSideBar()->registerCallback<bool>(
+  mGuiManager->getGui()->registerCallback<bool>(
       "set_enable_tiles_debug", ([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
 
-  mGuiManager->getSideBar()->registerCallback<bool>(
+  mGuiManager->getGui()->registerCallback<bool>(
       "set_enable_wireframe", ([this](bool enable) { mProperties->mEnableWireframe = enable; }));
 
-  mGuiManager->getSideBar()->registerCallback<bool>("set_enable_heightlines",
+  mGuiManager->getGui()->registerCallback<bool>("set_enable_heightlines",
       ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
-  mGuiManager->getSideBar()->registerCallback<bool>(
-      "set_enable_lat_long_grid", ([this](bool enable) {
-        mProperties->mEnableLatLongGrid       = enable;
-        mProperties->mEnableLatLongGridLabels = enable;
-      }));
+  mGuiManager->getGui()->registerCallback<bool>("set_enable_lat_long_grid", ([this](bool enable) {
+    mProperties->mEnableLatLongGrid       = enable;
+    mProperties->mEnableLatLongGridLabels = enable;
+  }));
 
-  mGuiManager->getSideBar()->registerCallback<bool>("set_enable_lat_long_grid_labels",
+  mGuiManager->getGui()->registerCallback<bool>("set_enable_lat_long_grid_labels",
       ([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
 
-  mGuiManager->getSideBar()->registerCallback<bool>("set_enable_color_mixing",
+  mGuiManager->getGui()->registerCallback<bool>("set_enable_color_mixing",
       ([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
 
-  mGuiManager->getSideBar()->registerCallback<double>("set_terrain_lod", ([this](double value) {
+  mGuiManager->getGui()->registerCallback<double>("set_terrain_lod", ([this](double value) {
     if (!mProperties->mAutoLOD.get()) {
       mProperties->mLODFactor = value;
     }
   }));
 
-  mGuiManager->getSideBar()->registerCallback<bool>(
+  mGuiManager->getGui()->registerCallback<bool>(
       "set_enable_auto_terrain_lod", ([this](bool enable) { mProperties->mAutoLOD = enable; }));
 
-  mGuiManager->getSideBar()->registerCallback<double>(
+  mGuiManager->getGui()->registerCallback<double>(
       "set_texture_gamma", ([this](double value) { mProperties->mTextureGamma = value; }));
 
-  mGuiManager->getSideBar()->registerCallback<double, double>(
+  mGuiManager->getGui()->registerCallback<double, double>(
       "set_height_range", ([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mHeightMin = val * 1000;
@@ -143,7 +142,7 @@ void Plugin::init() {
           mProperties->mHeightMax = val * 1000;
       }));
 
-  mGuiManager->getSideBar()->registerCallback<double, double>(
+  mGuiManager->getGui()->registerCallback<double, double>(
       "set_slope_range", ([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mSlopeMin = cs::utils::convert::toRadians(val);
@@ -151,24 +150,24 @@ void Plugin::init() {
           mProperties->mSlopeMax = cs::utils::convert::toRadians(val);
       }));
 
-  mGuiManager->getSideBar()->registerCallback("set_surface_coloring_mode_0",
+  mGuiManager->getGui()->registerCallback("set_surface_coloring_mode_0",
       ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eNone; }));
 
-  mGuiManager->getSideBar()->registerCallback("set_surface_coloring_mode_1",
+  mGuiManager->getGui()->registerCallback("set_surface_coloring_mode_1",
       ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eHeight; }));
 
-  mGuiManager->getSideBar()->registerCallback("set_surface_coloring_mode_2",
+  mGuiManager->getGui()->registerCallback("set_surface_coloring_mode_2",
       ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eSlope; }));
 
-  mGuiManager->getSideBar()->registerCallback("set_terrain_projection_mode_0", ([this]() {
+  mGuiManager->getGui()->registerCallback("set_terrain_projection_mode_0", ([this]() {
     mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
   }));
 
-  mGuiManager->getSideBar()->registerCallback("set_terrain_projection_mode_1", ([this]() {
+  mGuiManager->getGui()->registerCallback("set_terrain_projection_mode_1", ([this]() {
     mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
   }));
 
-  mGuiManager->getSideBar()->registerCallback("set_terrain_projection_mode_2", ([this]() {
+  mGuiManager->getGui()->registerCallback("set_terrain_projection_mode_2", ([this]() {
     mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
   }));
 
@@ -232,35 +231,38 @@ void Plugin::init() {
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
         auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.sidebar.setTabEnabled", "collapse-Body-Settings", lodBody);
+
         if (!lodBody) {
           return;
         }
 
-        mGuiManager->getSideBar()->callJavascript("clear_container", "set_tiles_img");
-        mGuiManager->getSideBar()->callJavascript("clear_container", "set_tiles_dem");
-        mGuiManager->getSideBar()->callJavascript(
-            "add_dropdown_value", "set_tiles_img", "None", "None", false);
+        mGuiManager->getGui()->callJavascript("CosmoScout.clearDropdown", "set_tiles_img");
+        mGuiManager->getGui()->callJavascript("CosmoScout.clearDropdown", "set_tiles_dem");
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.addDropdownValue", "set_tiles_img", "None", "None", "false");
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
-          mGuiManager->getSideBar()->callJavascript(
-              "add_dropdown_value", "set_tiles_img", source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue", "set_tiles_img",
+              source->getName(), source->getName(), active);
           if (active) {
-            mGuiManager->getSideBar()->callJavascript(
-                "set_map_data_copyright", source->getCopyright());
+            mGuiManager->getGui()->callJavascript(
+                "CosmoScout.lodBody.setMapDataCopyright", source->getCopyright());
           }
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
-          mGuiManager->getSideBar()->callJavascript(
-              "add_dropdown_value", "set_tiles_dem", source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue", "set_tiles_dem",
+              source->getName(), source->getName(), active);
           if (active) {
-            mGuiManager->getSideBar()->callJavascript(
-                "set_elevation_data_copyright", source->getCopyright());
+            mGuiManager->getGui()->callJavascript(
+                "CosmoScout.lodBody.setElevationDataCopyright", source->getCopyright());
           }
         }
       });
 
-  mGuiManager->getSideBar()->registerCallback<std::string>(
+  mGuiManager->getGui()->registerCallback<std::string>(
       "set_tiles_img", ([this](std::string const& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
@@ -268,7 +270,7 @@ void Plugin::init() {
         }
       }));
 
-  mGuiManager->getSideBar()->registerCallback<std::string>(
+  mGuiManager->getGui()->registerCallback<std::string>(
       "set_tiles_dem", ([this](std::string const& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
@@ -283,13 +285,14 @@ void Plugin::init() {
       mNonAutoLod = mProperties->mLODFactor.get();
     } else {
       mProperties->mLODFactor = mNonAutoLod;
-      mGuiManager->getSideBar()->callJavascript("set_slider_value", "set_terrain_lod", mNonAutoLod);
+      mGuiManager->getGui()->callJavascript(
+          "CosmoScout.setSliderValue", "set_terrain_lod", mNonAutoLod);
     }
   });
 
   mProperties->mLODFactor.onChange().connect([this](float value) {
     if (mProperties->mAutoLOD()) {
-      mGuiManager->getSideBar()->callJavascript("set_slider_value", "set_terrain_lod", value);
+      mGuiManager->getGui()->callJavascript("CosmoScout.setSliderValue", "set_terrain_lod", value);
     }
   });
 
@@ -304,26 +307,26 @@ void Plugin::deInit() {
     mSolarSystem->unregisterBody(body);
   }
 
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_tiles_freeze");
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_tiles_debug");
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_wireframe");
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_heightlines");
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_lat_long_grid");
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_lat_long_grid_labels");
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_color_mixing");
-  mGuiManager->getSideBar()->unregisterCallback("set_terrain_lod");
-  mGuiManager->getSideBar()->unregisterCallback("set_enable_auto_terrain_lod");
-  mGuiManager->getSideBar()->unregisterCallback("set_texture_gamma");
-  mGuiManager->getSideBar()->unregisterCallback("set_height_range");
-  mGuiManager->getSideBar()->unregisterCallback("set_slope_range");
-  mGuiManager->getSideBar()->unregisterCallback("set_surface_coloring_mode_0");
-  mGuiManager->getSideBar()->unregisterCallback("set_surface_coloring_mode_1");
-  mGuiManager->getSideBar()->unregisterCallback("set_surface_coloring_mode_2");
-  mGuiManager->getSideBar()->unregisterCallback("set_terrain_projection_mode_0");
-  mGuiManager->getSideBar()->unregisterCallback("set_terrain_projection_mode_1");
-  mGuiManager->getSideBar()->unregisterCallback("set_terrain_projection_mode_2");
-  mGuiManager->getSideBar()->unregisterCallback("set_tiles_img");
-  mGuiManager->getSideBar()->unregisterCallback("set_tiles_dem");
+  mGuiManager->getGui()->unregisterCallback("set_enable_tiles_freeze");
+  mGuiManager->getGui()->unregisterCallback("set_enable_tiles_debug");
+  mGuiManager->getGui()->unregisterCallback("set_enable_wireframe");
+  mGuiManager->getGui()->unregisterCallback("set_enable_heightlines");
+  mGuiManager->getGui()->unregisterCallback("set_enable_lat_long_grid");
+  mGuiManager->getGui()->unregisterCallback("set_enable_lat_long_grid_labels");
+  mGuiManager->getGui()->unregisterCallback("set_enable_color_mixing");
+  mGuiManager->getGui()->unregisterCallback("set_terrain_lod");
+  mGuiManager->getGui()->unregisterCallback("set_enable_auto_terrain_lod");
+  mGuiManager->getGui()->unregisterCallback("set_texture_gamma");
+  mGuiManager->getGui()->unregisterCallback("set_height_range");
+  mGuiManager->getGui()->unregisterCallback("set_slope_range");
+  mGuiManager->getGui()->unregisterCallback("set_surface_coloring_mode_0");
+  mGuiManager->getGui()->unregisterCallback("set_surface_coloring_mode_1");
+  mGuiManager->getGui()->unregisterCallback("set_surface_coloring_mode_2");
+  mGuiManager->getGui()->unregisterCallback("set_terrain_projection_mode_0");
+  mGuiManager->getGui()->unregisterCallback("set_terrain_projection_mode_1");
+  mGuiManager->getGui()->unregisterCallback("set_terrain_projection_mode_2");
+  mGuiManager->getGui()->unregisterCallback("set_tiles_img");
+  mGuiManager->getGui()->unregisterCallback("set_tiles_dem");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
