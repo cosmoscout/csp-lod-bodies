@@ -89,6 +89,8 @@ class Plugin : public cs::core::PluginBase {
   std::vector<std::shared_ptr<LodBody>> mLodBodies;
   std::shared_ptr<Properties>           mProperties;
   float                                 mNonAutoLod;
+
+  int mActiveBodyConnection = -1;
 };
 
 } // namespace csp::lodbodies

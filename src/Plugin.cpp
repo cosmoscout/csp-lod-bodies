@@ -227,7 +227,7 @@ void Plugin::init() {
     mLodBodies.push_back(body);
   }
 
-  mSolarSystem->pActiveBody.onChange().connect(
+  mActiveBodyConnection = mSolarSystem->pActiveBody.onChange().connect(
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
         auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
@@ -295,8 +295,6 @@ void Plugin::init() {
       mGuiManager->getGui()->callJavascript("CosmoScout.setSliderValue", "set_terrain_lod", value);
     }
   });
-
-  mSolarSystem->pActiveBody = mLodBodies[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,6 +304,8 @@ void Plugin::deInit() {
     mInputManager->unregisterSelectable(body);
     mSolarSystem->unregisterBody(body);
   }
+
+  mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
 
   mGuiManager->getGui()->unregisterCallback("set_enable_tiles_freeze");
   mGuiManager->getGui()->unregisterCallback("set_enable_tiles_debug");
