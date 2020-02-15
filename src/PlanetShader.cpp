@@ -39,6 +39,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
     std::shared_ptr<cs::core::GuiManager> const&                            pGuiManager)
     : csp::lodbodies::TerrainShader()
     , mGraphicsEngine(graphicsEngine)
+    , mGuiManager(pGuiManager)
     , mProperties(pProperties)
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
   // clang-format off
@@ -84,15 +85,15 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
       }
 
       mColorMaps.insert(std::make_pair(name, cs::graphics::ColorMap(file)));
-      pGuiManager->getSideBar()->callJavascript(
-          "add_dropdown_value", "set_colormap", name, name, first);
+      pGuiManager->getGui()->callJavascript(
+          "CosmoScout.addDropdownValue", "set_colormap", name, name, first);
       if (first) {
         first                         = false;
         mProperties->mTerrainColorMap = name;
       }
     }
 
-    pGuiManager->getSideBar()->registerCallback<std::string>("set_colormap",
+    pGuiManager->getGui()->registerCallback<std::string>("set_colormap",
         ([this](std::string const& name) { mProperties->mTerrainColorMap = name; }));
   }
 }
@@ -105,6 +106,8 @@ PlanetShader::~PlanetShader() {
   mGraphicsEngine->pEnableShadowsDebug.onChange().disconnect(mEnableShadowsDebugConnection);
   mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
   mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
+
+  mGuiManager->getGui()->unregisterCallback("set_colormap");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
