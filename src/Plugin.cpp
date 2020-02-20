@@ -13,6 +13,7 @@
 #include "../../../src/cs-core/InputManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-utils/convert.hpp"
+#include "../../../src/cs-utils/logger.hpp"
 
 #include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
 #include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
@@ -84,12 +85,16 @@ void from_json(const nlohmann::json& j, Plugin::Settings& o) {
 
 Plugin::Plugin()
     : mProperties(std::make_shared<Properties>()) {
+
+  // Create default logger for this plugin.
+  spdlog::set_default_logger(cs::utils::logger::createLogger("csp-lod-bodies"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::init() {
-  std::cout << "Loading: CosmoScout VR Plugin Lod-Bodies" << std::endl;
+
+  spdlog::info("Loading plugin...");
 
   mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
 
@@ -295,11 +300,15 @@ void Plugin::init() {
       mGuiManager->getGui()->callJavascript("CosmoScout.setSliderValue", "set_terrain_lod", value);
     }
   });
+
+  spdlog::info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
+  spdlog::info("Unloading plugin...");
+
   for (auto const& body : mLodBodies) {
     mInputManager->unregisterSelectable(body);
     mSolarSystem->unregisterBody(body);
@@ -327,6 +336,8 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("set_terrain_projection_mode_2");
   mGuiManager->getGui()->unregisterCallback("set_tiles_img");
   mGuiManager->getGui()->unregisterCallback("set_tiles_dem");
+
+  spdlog::info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
