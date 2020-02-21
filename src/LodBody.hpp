@@ -81,12 +81,13 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   std::shared_ptr<const cs::scene::CelestialObject> mSun;
   std::shared_ptr<cs::core::GuiManager>             mGuiManager;
 
+  std::vector<std::shared_ptr<TileSource>> mDEMtileSources;
+  std::vector<std::shared_ptr<TileSource>> mIMGtileSources;
+
   VistaPlanet  mPlanet;
   PlanetShader mShader;
   glm::dvec3   mRadii;
-
-  std::vector<std::shared_ptr<TileSource>> mDEMtileSources;
-  std::vector<std::shared_ptr<TileSource>> mIMGtileSources;
+  int          mHeightScaleConnection = -1;
 };
 
 } // namespace csp::lodbodies

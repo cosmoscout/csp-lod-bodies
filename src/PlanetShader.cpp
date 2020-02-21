@@ -39,6 +39,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
     std::shared_ptr<cs::core::GuiManager> const&                            pGuiManager)
     : csp::lodbodies::TerrainShader()
     , mGraphicsEngine(graphicsEngine)
+    , mGuiManager(pGuiManager)
     , mProperties(pProperties)
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
   // clang-format off
@@ -53,15 +54,15 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
         [this](Plugin::Properties::ColorMappingType) { mShaderDirty = true; });
     mProperties->mTerrainProjectionType.onChange().connect(
         [this](Plugin::Properties::TerrainProjectionType) { mShaderDirty = true; });
-    mGraphicsEngine->pEnableLighting.onChange().connect(
+    mEnableLightingConnection = mGraphicsEngine->pEnableLighting.onChange().connect(
         [this](bool) { mShaderDirty = true; });
-    mGraphicsEngine->pEnableShadowsDebug.onChange().connect(
+    mEnableShadowsDebugConnection = mGraphicsEngine->pEnableShadowsDebug.onChange().connect(
         [this](bool) { mShaderDirty = true; });
-    mGraphicsEngine->pEnableShadows.onChange().connect(
+    mEnableShadowsConnection = mGraphicsEngine->pEnableShadows.onChange().connect(
         [this](bool) { mShaderDirty = true; });
-    mGraphicsEngine->pEnableHDR.onChange().connect(
+    mEnableHDRConnection = mGraphicsEngine->pEnableHDR.onChange().connect(
         [this](bool) { mShaderDirty = true; });
-    mGraphicsEngine->pLightingQuality.onChange().connect(
+    mLightingQualityConnection = mGraphicsEngine->pLightingQuality.onChange().connect(
         [this](int) { mShaderDirty = true; });
     mProperties->mEnableTilesDebug.onChange().connect(
         [this](bool) { mShaderDirty = true; });
@@ -86,15 +87,15 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
       }
 
       mColorMaps.insert(std::make_pair(name, cs::graphics::ColorMap(file)));
-      pGuiManager->getSideBar()->callJavascript(
-          "add_dropdown_value", "set_colormap", name, name, first);
+      pGuiManager->getGui()->callJavascript(
+          "CosmoScout.addDropdownValue", "set_colormap", name, name, first);
       if (first) {
         first                         = false;
         mProperties->mTerrainColorMap = name;
       }
     }
 
-    pGuiManager->getSideBar()->registerCallback<std::string>("set_colormap",
+    pGuiManager->getGui()->registerCallback<std::string>("set_colormap",
         ([this](std::string const& name) { mProperties->mTerrainColorMap = name; }));
   }
 }
@@ -103,6 +104,13 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
 
 PlanetShader::~PlanetShader() {
   delete mFontTexture;
+  mGraphicsEngine->pEnableLighting.onChange().disconnect(mEnableLightingConnection);
+  mGraphicsEngine->pEnableShadowsDebug.onChange().disconnect(mEnableShadowsDebugConnection);
+  mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
+  mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
+  mGraphicsEngine->pEnableHDR.onChange().disconnect(mEnableHDRConnection);
+
+  mGuiManager->getGui()->unregisterCallback("set_colormap");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -59,8 +59,8 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     for (auto const& s : mDEMtileSources) {
       if (s->getName() == val) {
         mPlanet.setDEMSource(s.get());
-        mGuiManager->getSideBar()->callJavascript(
-            "set_elevation_data_copyright", s->getCopyright());
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.lodBody.setElevationDataCopyright", s->getCopyright());
         break;
       }
     }
@@ -70,14 +70,15 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     if (val == "None") {
       mShader.pEnableTexture = false;
       mPlanet.setIMGSource(nullptr);
-      mGuiManager->getSideBar()->callJavascript("set_map_data_copyright", "");
+      mGuiManager->getGui()->callJavascript("CosmoScout.lodBody.setMapDataCopyright", "");
     } else {
       for (auto const& s : mIMGtileSources) {
         if (s->getName() == val) {
           mShader.pEnableTexture = true;
           mShader.pTextureIsRGB  = (s->getDataType() == TileDataType::eU8Vec3);
           mPlanet.setIMGSource(s.get());
-          mGuiManager->getSideBar()->callJavascript("set_map_data_copyright", s->getCopyright());
+          mGuiManager->getGui()->callJavascript(
+              "CosmoScout.lodBody.setMapDataCopyright", s->getCopyright());
           break;
         }
       }
@@ -85,7 +86,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
   });
 
   // scene-wide settings -----------------------------------------------------
-  mGraphicsEngine->pHeightScale.onChange().connect(
+  mHeightScaleConnection = mGraphicsEngine->pHeightScale.onChange().connect(
       [this](float val) { mPlanet.setHeightScale(val); });
 
   mProperties->mLODFactor.onChange().connect([this](float val) { mPlanet.setLODFactor(val); });
@@ -106,6 +107,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
 
 LodBody::~LodBody() {
   mGraphicsEngine->unregisterCaster(&mPlanet);
+  mGraphicsEngine->pHeightScale.onChange().disconnect(mHeightScaleConnection);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

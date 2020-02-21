@@ -18,6 +18,7 @@
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
 #include <fstream>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -47,7 +48,7 @@ bool loadImpl(
   try {
     cacheFile = source->loadData(level, x, y);
   } catch (std::exception const& e) {
-    std::cerr << "Tile loading failed: " << e.what() << std::endl;
+    spdlog::error("Tile loading failed: {}", e.what());
     return false;
   }
 
@@ -55,7 +56,7 @@ bool loadImpl(
     TIFFSetWarningHandler(nullptr);
     auto data = TIFFOpen(cacheFile.c_str(), "r");
     if (!data) {
-      std::cout << "Failed to load " << cacheFile << std::endl;
+      spdlog::error("Tile loading failed: Cannot open '{}' with libtiff!", cacheFile);
       return false;
     }
 
@@ -86,7 +87,7 @@ bool loadImpl(
     auto data = reinterpret_cast<T*>(stbi_load(cacheFile.c_str(), &width, &height, &bpp, channels));
 
     if (!data) {
-      std::cout << "Failed to load " << cacheFile << std::endl;
+      spdlog::error("Tile loading failed: Cannot open '{}' with stbi!", cacheFile);
       return false;
     }
 
@@ -318,7 +319,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
         cs::utils::filesystem::createDirectoryRecursively(
             cacheDirPath, boost::filesystem::perms::all_all);
       } catch (std::exception& e) {
-        std::cerr << "Failed to create cache directory: " << e.what() << std::endl;
+        spdlog::error("Failed to create cache directory: {}", e.what());
       }
     }
   }
@@ -329,7 +330,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
     out.open(cacheFile.str(), std::ofstream::out | std::ofstream::binary);
 
     if (!out) {
-      std::cerr << "Failed to open " << cacheFile.str() << " for writing!" << std::endl;
+      spdlog::error("Failed to download tile data: Cannot open '{}' for writing!", cacheFile.str());
     }
 
     curlpp::Easy request;
