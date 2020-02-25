@@ -104,8 +104,8 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
   mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/csp-lod-bodies.js");
 
-  mGuiManager->getGui()->registerCallback<bool>("setEnableTilesFreeze",
-      ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
+  mGuiManager->getGui()->registerCallback<bool>(
+      "setEnableTilesFreeze", ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
 
   mGuiManager->getGui()->registerCallback<bool>(
       "setEnableTilesDebug", ([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
@@ -113,8 +113,8 @@ void Plugin::init() {
   mGuiManager->getGui()->registerCallback<bool>(
       "setEnableWireframe", ([this](bool enable) { mProperties->mEnableWireframe = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("setEnableHeightlines",
-      ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
+  mGuiManager->getGui()->registerCallback<bool>(
+      "setEnableHeightlines", ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
   mGuiManager->getGui()->registerCallback<bool>("setEnableLatLongGrid", ([this](bool enable) {
     mProperties->mEnableLatLongGrid       = enable;
@@ -124,8 +124,8 @@ void Plugin::init() {
   mGuiManager->getGui()->registerCallback<bool>("setEnableLatLongGridLabels",
       ([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("setEnableColorMixing",
-      ([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
+  mGuiManager->getGui()->registerCallback<bool>(
+      "setEnableColorMixing", ([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
 
   mGuiManager->getGui()->registerCallback<double>("setTerrainLod", ([this](double value) {
     if (!mProperties->mAutoLOD.get()) {
