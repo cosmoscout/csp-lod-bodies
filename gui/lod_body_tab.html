@@ -4,13 +4,13 @@
 
 <div class="row">
     <div class="col-5">
-        <label for="set_tiles_img">Image Channel</label>
+        <label for="setTilesImg">Image Channel</label>
     </div>
     <div class="col-1">
         <i class="material-icons" id="img-data-copyright">info</i>
     </div>
     <div class="col-6">
-        <select id="set_tiles_img" class="simple-value-dropdown">
+        <select id="setTilesImg" class="simple-value-dropdown">
             <!-- Filled by JavaScript Function called from DataBase Manager -->
             <option value="-1">None</option>
         </select>
@@ -19,13 +19,13 @@
 
 <div class="row">
     <div class="col-5">
-        <label for="set_tiles_dem">Elevation Channel</label>
+        <label for="setTilesDem">Elevation Channel</label>
     </div>
     <div class="col-1">
         <i class="material-icons" id="dem-data-copyright">info</i>
     </div>
     <div class="col-6">
-        <select id="set_tiles_dem" class="simple-value-dropdown">
+        <select id="setTilesDem" class="simple-value-dropdown">
             <!-- Filled by JavaScript Function called from DataBase Manager -->
         </select>
     </div>
@@ -38,10 +38,10 @@
 
 <div class="row">
     <div class="col-6">
-        <label for="set_colormap">Colormap</label>
+        <label for="setColormap">Colormap</label>
     </div>
     <div class="col-6">
-        <select id="set_colormap" class="simple-value-dropdown">
+        <select id="setColormap" class="simple-value-dropdown">
             <!-- Filled by JavaScript Function -->
         </select>
     </div>
@@ -50,13 +50,13 @@
 <div class="row">
     <div class="col-6">
         <label class="radiolabel">
-            <input name="surface_coloring" type="radio" id="set_surface_coloring_mode_0" checked />
+            <input name="surface_coloring" type="radio" id="setSurfaceColoringMode0" checked />
             <span>Off</span>
         </label>
     </div>
     <div class="col-6">
         <label class="checklabel">
-            <input type="checkbox" id="set_enable_color_mixing" checked />
+            <input type="checkbox" id="setEnableColorMixing" checked />
             <i class="material-icons"></i>
             <span>Mix with IMG</span>
         </label>
@@ -66,24 +66,24 @@
 <div class="row">
     <div class="col-6">
         <label class="radiolabel">
-            <input name="surface_coloring" type="radio" id="set_surface_coloring_mode_1" />
+            <input name="surface_coloring" type="radio" id="setSurfaceColoringMode1" />
             <span>Map on Height [km]</span>
         </label>
     </div>
     <div class="col-6">
-        <div id="set_height_range"></div>
+        <div id="setHeightRange"></div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-6">
         <label class="radiolabel">
-            <input name="surface_coloring" type="radio" id="set_surface_coloring_mode_2" />
+            <input name="surface_coloring" type="radio" id="setSurfaceColoringMode2" />
             <span>Map on Slope [°]</span>
         </label>
     </div>
     <div class="col-6">
-        <div id="set_slope_range"></div>
+        <div id="setSlopeRange"></div>
     </div>
 </div>
 
@@ -94,14 +94,14 @@
 <div class="row">
     <div class="col-6">
         <label class="checklabel">
-            <input type="checkbox" id="set_enable_lat_long_grid" />
+            <input type="checkbox" id="setEnableLatLongGrid" />
             <i class="material-icons"></i>
             <span>Coordinates</span>
         </label>
     </div>
     <div class="col-6">
         <label class="checklabel">
-            <input type="checkbox" id="set_enable_heightlines" />
+            <input type="checkbox" id="setEnableHeightlines" />
             <i class="material-icons"></i>
             <span>Contourlines</span>
         </label>
@@ -113,7 +113,7 @@
         Texture Gamma
     </div>
     <div class="col-6">
-        <div id="set_texture_gamma">
+        <div id="setTextureGamma">
         </div>
     </div>
 </div>
@@ -122,7 +122,7 @@
         Height Exaggeration
     </div>
     <div class="col-6">
-        <div id="set_terrain_height">
+        <div id="setTerrainHeight">
         </div>
     </div>
 </div>

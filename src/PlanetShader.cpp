@@ -86,14 +86,14 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
 
       mColorMaps.insert(std::make_pair(name, cs::graphics::ColorMap(file)));
       pGuiManager->getGui()->callJavascript(
-          "CosmoScout.gui.addDropdownValue", "set_colormap", name, name, first);
+          "CosmoScout.gui.addDropdownValue", "setColormap", name, name, first);
       if (first) {
         first                         = false;
         mProperties->mTerrainColorMap = name;
       }
     }
 
-    pGuiManager->getGui()->registerCallback<std::string>("set_colormap",
+    pGuiManager->getGui()->registerCallback<std::string>("setColormap",
         ([this](std::string const& name) { mProperties->mTerrainColorMap = name; }));
   }
 }
@@ -107,7 +107,7 @@ PlanetShader::~PlanetShader() {
   mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
   mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
 
-  mGuiManager->getGui()->unregisterCallback("set_colormap");
+  mGuiManager->getGui()->unregisterCallback("setColormap");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

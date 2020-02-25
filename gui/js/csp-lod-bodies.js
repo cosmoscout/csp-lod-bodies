@@ -13,19 +13,19 @@ class LODBodyApi extends IApi {
    * @inheritDoc
    */
   init() {
-    CosmoScout.gui.initSlider('set_terrain_height', 1.0, 20.0, 0.1, [1]);
-    CosmoScout.gui.initSlider('set_height_range', -12.0, 21.0, 0.1, [-8, 12]);
-    CosmoScout.gui.initSlider('set_slope_range', 0.0, 90.0, 1.0, [0, 45]);
-    CosmoScout.gui.initSlider('set_terrain_lod', 10.0, 50.0, 0.1, [15]);
-    CosmoScout.gui.initSlider('set_texture_gamma', 0.1, 3.0, 0.01, [1.0]);
+    CosmoScout.gui.initSlider('setTerrainHeight', 1.0, 20.0, 0.1, [1]);
+    CosmoScout.gui.initSlider('setHeightRange', -12.0, 21.0, 0.1, [-8, 12]);
+    CosmoScout.gui.initSlider('setSlopeRange', 0.0, 90.0, 1.0, [0, 45]);
+    CosmoScout.gui.initSlider('setTerrainLod', 10.0, 50.0, 0.1, [15]);
+    CosmoScout.gui.initSlider('setTextureGamma', 0.1, 3.0, 0.01, [1.0]);
 
-    const terrainLod = document.getElementById('set_terrain_lod');
+    const terrainLod = document.getElementById('setTerrainLod');
 
     if (terrainLod === null) {
       return;
     }
 
-    document.getElementById('set_enable_auto_terrain_lod').addEventListener('change', (event) => {
+    document.getElementById('setEnableAutoTerrainLod').addEventListener('change', (event) => {
       if (event.target.checked) {
         terrainLod.classList.add('unresponsive');
       } else {
