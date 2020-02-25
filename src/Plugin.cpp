@@ -104,43 +104,44 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
   mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/csp-lod-bodies.js");
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableTilesFreeze", ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
+  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableTilesFreeze",
+      ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
+
+  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableTilesDebug",
+      ([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
+
+  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableWireframe",
+      ([this](bool enable) { mProperties->mEnableWireframe = enable; }));
+
+  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableHeightlines",
+      ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
   mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableTilesDebug", ([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
+      "lodBodies.setEnableLatLongGrid", ([this](bool enable) {
+        mProperties->mEnableLatLongGrid       = enable;
+        mProperties->mEnableLatLongGridLabels = enable;
+      }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableWireframe", ([this](bool enable) { mProperties->mEnableWireframe = enable; }));
-
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableHeightlines", ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
-
-  mGuiManager->getGui()->registerCallback<bool>("setEnableLatLongGrid", ([this](bool enable) {
-    mProperties->mEnableLatLongGrid       = enable;
-    mProperties->mEnableLatLongGridLabels = enable;
-  }));
-
-  mGuiManager->getGui()->registerCallback<bool>("setEnableLatLongGridLabels",
+  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableLatLongGridLabels",
       ([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableColorMixing", ([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
+  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableColorMixing",
+      ([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
 
-  mGuiManager->getGui()->registerCallback<double>("setTerrainLod", ([this](double value) {
+  mGuiManager->getGui()->registerCallback<double>("lodBodies.setTerrainLod", ([this](double value) {
     if (!mProperties->mAutoLOD.get()) {
       mProperties->mLODFactor = value;
     }
   }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableAutoTerrainLod", ([this](bool enable) { mProperties->mAutoLOD = enable; }));
+  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableAutoTerrainLod",
+      ([this](bool enable) { mProperties->mAutoLOD = enable; }));
 
   mGuiManager->getGui()->registerCallback<double>(
-      "setTextureGamma", ([this](double value) { mProperties->mTextureGamma = value; }));
+      "lodBodies.setTextureGamma", ([this](double value) { mProperties->mTextureGamma = value; }));
 
   mGuiManager->getGui()->registerCallback<double, double>(
-      "setHeightRange", ([this](double val, double handle) {
+      "lodBodies.setHeightRange", ([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mHeightMin = val * 1000;
         else
@@ -148,31 +149,31 @@ void Plugin::init() {
       }));
 
   mGuiManager->getGui()->registerCallback<double, double>(
-      "setSlopeRange", ([this](double val, double handle) {
+      "lodBodies.setSlopeRange", ([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mSlopeMin = cs::utils::convert::toRadians(val);
         else
           mProperties->mSlopeMax = cs::utils::convert::toRadians(val);
       }));
 
-  mGuiManager->getGui()->registerCallback("setSurfaceColoringMode0",
+  mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
       ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eNone; }));
 
-  mGuiManager->getGui()->registerCallback("setSurfaceColoringMode1",
+  mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
       ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eHeight; }));
 
-  mGuiManager->getGui()->registerCallback("setSurfaceColoringMode2",
+  mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
       ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eSlope; }));
 
-  mGuiManager->getGui()->registerCallback("setTerrainProjectionMode0", ([this]() {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0", ([this]() {
     mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
   }));
 
-  mGuiManager->getGui()->registerCallback("setTerrainProjectionMode1", ([this]() {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1", ([this]() {
     mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
   }));
 
-  mGuiManager->getGui()->registerCallback("setTerrainProjectionMode2", ([this]() {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2", ([this]() {
     mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
   }));
 
@@ -268,7 +269,7 @@ void Plugin::init() {
       });
 
   mGuiManager->getGui()->registerCallback<std::string>(
-      "setTilesImg", ([this](std::string const& name) {
+      "lodBodies.setTilesImg", ([this](std::string const& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceIMG = name;
@@ -276,7 +277,7 @@ void Plugin::init() {
       }));
 
   mGuiManager->getGui()->registerCallback<std::string>(
-      "setTilesDem", ([this](std::string const& name) {
+      "lodBodies.setTilesDem", ([this](std::string const& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceDEM = name;
@@ -317,26 +318,26 @@ void Plugin::deInit() {
 
   mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
 
-  mGuiManager->getGui()->unregisterCallback("setEnableTilesFreeze");
-  mGuiManager->getGui()->unregisterCallback("setEnableTilesDebug");
-  mGuiManager->getGui()->unregisterCallback("setEnableWireframe");
-  mGuiManager->getGui()->unregisterCallback("setEnableHeightlines");
-  mGuiManager->getGui()->unregisterCallback("setEnableLatLongGrid");
-  mGuiManager->getGui()->unregisterCallback("setEnableLatLongGridLabels");
-  mGuiManager->getGui()->unregisterCallback("setEnableColorMixing");
-  mGuiManager->getGui()->unregisterCallback("setTerrainLod");
-  mGuiManager->getGui()->unregisterCallback("setEnableAutoTerrainLod");
-  mGuiManager->getGui()->unregisterCallback("setTextureGamma");
-  mGuiManager->getGui()->unregisterCallback("setHeightRange");
-  mGuiManager->getGui()->unregisterCallback("setSlopeRange");
-  mGuiManager->getGui()->unregisterCallback("setSurfaceColoringMode0");
-  mGuiManager->getGui()->unregisterCallback("setSurfaceColoringMode1");
-  mGuiManager->getGui()->unregisterCallback("setSurfaceColoringMode2");
-  mGuiManager->getGui()->unregisterCallback("setTerrainProjectionMode0");
-  mGuiManager->getGui()->unregisterCallback("setTerrainProjectionMode1");
-  mGuiManager->getGui()->unregisterCallback("setTerrainProjectionMode2");
-  mGuiManager->getGui()->unregisterCallback("setTilesImg");
-  mGuiManager->getGui()->unregisterCallback("setTilesDem");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesFreeze");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesDebug");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableWireframe");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableHeightlines");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableLatLongGrid");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableLatLongGridLabels");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableColorMixing");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainLod");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableAutoTerrainLod");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTextureGamma");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setHeightRange");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSlopeRange");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSurfaceColoringMode0");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSurfaceColoringMode1");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSurfaceColoringMode2");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainProjectionMode0");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainProjectionMode1");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainProjectionMode2");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesImg");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesDem");
 
   spdlog::info("Unloading done.");
 }

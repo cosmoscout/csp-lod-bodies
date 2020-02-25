@@ -93,8 +93,8 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
       }
     }
 
-    pGuiManager->getGui()->registerCallback<std::string>(
-        "setColormap", ([this](std::string const& name) { mProperties->mTerrainColorMap = name; }));
+    pGuiManager->getGui()->registerCallback<std::string>("lodBodies.setColormap",
+        ([this](std::string const& name) { mProperties->mTerrainColorMap = name; }));
   }
 }
 
@@ -107,7 +107,7 @@ PlanetShader::~PlanetShader() {
   mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
   mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
 
-  mGuiManager->getGui()->unregisterCallback("setColormap");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setColormap");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
