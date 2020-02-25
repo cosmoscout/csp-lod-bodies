@@ -13,11 +13,11 @@ class LODBodyApi extends IApi {
    * @inheritDoc
    */
   init() {
-    CosmoScout.initSlider('set_terrain_height', 1.0, 20.0, 0.1, [1]);
-    CosmoScout.initSlider('set_height_range', -12.0, 21.0, 0.1, [-8, 12]);
-    CosmoScout.initSlider('set_slope_range', 0.0, 90.0, 1.0, [0, 45]);
-    CosmoScout.initSlider('set_terrain_lod', 10.0, 50.0, 0.1, [15]);
-    CosmoScout.initSlider('set_texture_gamma', 0.1, 3.0, 0.01, [1.0]);
+    CosmoScout.gui.initSlider('set_terrain_height', 1.0, 20.0, 0.1, [1]);
+    CosmoScout.gui.initSlider('set_height_range', -12.0, 21.0, 0.1, [-8, 12]);
+    CosmoScout.gui.initSlider('set_slope_range', 0.0, 90.0, 1.0, [0, 45]);
+    CosmoScout.gui.initSlider('set_terrain_lod', 10.0, 50.0, 0.1, [15]);
+    CosmoScout.gui.initSlider('set_texture_gamma', 0.1, 3.0, 0.01, [1.0]);
 
     const terrainLod = document.getElementById('set_terrain_lod');
 
