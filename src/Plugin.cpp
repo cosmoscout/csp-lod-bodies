@@ -244,26 +244,26 @@ void Plugin::init() {
           return;
         }
 
-        mGuiManager->getGui()->callJavascript("CosmoScout.gui.clearDropdown", "setTilesImg");
-        mGuiManager->getGui()->callJavascript("CosmoScout.gui.clearDropdown", "setTilesDem");
+        mGuiManager->getGui()->callJavascript("CosmoScout.gui.clearDropdown", "lodBodies.setTilesImg");
+        mGuiManager->getGui()->callJavascript("CosmoScout.gui.clearDropdown", "lodBodies.setTilesDem");
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.gui.addDropdownValue", "setTilesImg", "None", "None", "false");
+            "CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg", "None", "None", "false");
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue", "setTilesImg",
+          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg",
               source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBody.setMapDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
           }
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue", "setTilesDem",
+          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue", "lodBodies.setTilesDem",
               source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBody.setElevationDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
           }
         }
       });
@@ -292,14 +292,14 @@ void Plugin::init() {
     } else {
       mProperties->mLODFactor = mNonAutoLod;
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.gui.setSliderValue", "setTerrainLod", mNonAutoLod);
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", mNonAutoLod);
     }
   });
 
   mProperties->mLODFactor.onChange().connect([this](float value) {
     if (mProperties->mAutoLOD()) {
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.gui.setSliderValue", "setTerrainLod", value);
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", value);
     }
   });
 
