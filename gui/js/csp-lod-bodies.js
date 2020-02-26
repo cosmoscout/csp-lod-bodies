@@ -17,15 +17,10 @@ class LODBodiesApi extends IApi {
     CosmoScout.gui.initSlider('lodBodies.setSlopeRange', 0.0, 90.0, 1.0, [0, 45]);
     CosmoScout.gui.initSlider('lodBodies.setTerrainLod', 10.0, 50.0, 0.1, [15]);
     CosmoScout.gui.initSlider('lodBodies.setTextureGamma', 0.1, 3.0, 0.01, [1.0]);
-    CosmoScout.gui.initSlider('setTerrainHeight', 1.0, 20.0, 0.1, [1]);
+    CosmoScout.gui.initSlider('graphics.setTerrainHeight', 1.0, 20.0, 0.1, [1]);
 
-    const terrainLod = document.getElementById('lodBodies.setTerrainLod');
-
-    if (terrainLod === null) {
-      return;
-    }
-
-    document.getElementById('lodBodies.setEnableAutoTerrainLod').addEventListener('change', (event) => {
+    const terrainLod = document.querySelector('[data-callback="lodBodies.setTerrainLod"]');
+    document.querySelector('[data-callback="lodBodies.setEnableAutoTerrainLod"]').addEventListener('change', (event) => {
       if (event.target.checked) {
         terrainLod.classList.add('unresponsive');
       } else {
