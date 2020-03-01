@@ -244,14 +244,16 @@ void Plugin::init() {
           return;
         }
 
-        mGuiManager->getGui()->callJavascript("CosmoScout.gui.clearDropdown", "lodBodies.setTilesImg");
-        mGuiManager->getGui()->callJavascript("CosmoScout.gui.clearDropdown", "lodBodies.setTilesDem");
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.gui.clearDropdown", "lodBodies.setTilesImg");
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.gui.clearDropdown", "lodBodies.setTilesDem");
         mGuiManager->getGui()->callJavascript(
             "CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg", "None", "None", "false");
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg",
-              source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
+              "lodBodies.setTilesImg", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
                 "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
@@ -259,8 +261,8 @@ void Plugin::init() {
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue", "lodBodies.setTilesDem",
-              source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
+              "lodBodies.setTilesDem", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
                 "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
