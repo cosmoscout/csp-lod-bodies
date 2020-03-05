@@ -104,52 +104,53 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
   mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/csp-lod-bodies.js");
 
-  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableTilesFreeze",
-      ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesFreeze",
+      std::function([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableTilesDebug",
-      ([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesDebug",
+      std::function([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableWireframe",
-      ([this](bool enable) { mProperties->mEnableWireframe = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableWireframe",
+      std::function([this](bool enable) { mProperties->mEnableWireframe = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableHeightlines",
-      ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableHeightlines",
+      std::function([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "lodBodies.setEnableLatLongGrid", ([this](bool enable) {
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setEnableLatLongGrid", std::function([this](bool enable) {
         mProperties->mEnableLatLongGrid       = enable;
         mProperties->mEnableLatLongGridLabels = enable;
       }));
 
-  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableLatLongGridLabels",
-      ([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGridLabels",
+      std::function([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableColorMixing",
-      ([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableColorMixing",
+      std::function([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
 
-  mGuiManager->getGui()->registerCallback<double>("lodBodies.setTerrainLod", ([this](double value) {
-    if (!mProperties->mAutoLOD.get()) {
-      mProperties->mLODFactor = value;
-    }
-  }));
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setTerrainLod", std::function([this](double value) {
+        if (!mProperties->mAutoLOD.get()) {
+          mProperties->mLODFactor = value;
+        }
+      }));
 
-  mGuiManager->getGui()->registerCallback<bool>("lodBodies.setEnableAutoTerrainLod",
-      ([this](bool enable) { mProperties->mAutoLOD = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableAutoTerrainLod",
+      std::function([this](bool enable) { mProperties->mAutoLOD = enable; }));
 
-  mGuiManager->getGui()->registerCallback<double>(
-      "lodBodies.setTextureGamma", ([this](double value) { mProperties->mTextureGamma = value; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setTextureGamma",
+      std::function([this](double value) { mProperties->mTextureGamma = value; }));
 
-  mGuiManager->getGui()->registerCallback<double, double>(
-      "lodBodies.setHeightRange", ([this](double val, double handle) {
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setHeightRange", std::function([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mHeightMin = val * 1000;
         else
           mProperties->mHeightMax = val * 1000;
       }));
 
-  mGuiManager->getGui()->registerCallback<double, double>(
-      "lodBodies.setSlopeRange", ([this](double val, double handle) {
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setSlopeRange", std::function([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mSlopeMin = cs::utils::convert::toRadians(val);
         else
@@ -157,25 +158,31 @@ void Plugin::init() {
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
-      ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eNone; }));
+      std::function(
+          [this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eNone; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
-      ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eHeight; }));
+      std::function(
+          [this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eHeight; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
-      ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eSlope; }));
+      std::function(
+          [this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eSlope; }));
 
-  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0", ([this]() {
-    mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
-  }));
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setTerrainProjectionMode0", std::function([this]() {
+        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
+      }));
 
-  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1", ([this]() {
-    mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
-  }));
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setTerrainProjectionMode1", std::function([this]() {
+        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
+      }));
 
-  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2", ([this]() {
-    mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
-  }));
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setTerrainProjectionMode2", std::function([this]() {
+        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
+      }));
 
   mGLResources = std::make_shared<csp::lodbodies::GLResources>(mPluginSettings.mMaxGPUTilesDEM,
       mPluginSettings.mMaxGPUTilesGray, mPluginSettings.mMaxGPUTilesColor);
@@ -270,16 +277,16 @@ void Plugin::init() {
         }
       });
 
-  mGuiManager->getGui()->registerCallback<std::string>(
-      "lodBodies.setTilesImg", ([this](std::string const& name) {
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setTilesImg", std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceIMG = name;
         }
       }));
 
-  mGuiManager->getGui()->registerCallback<std::string>(
-      "lodBodies.setTilesDem", ([this](std::string const& name) {
+  mGuiManager->getGui()->registerCallback(
+      "lodBodies.setTilesDem", std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceDEM = name;

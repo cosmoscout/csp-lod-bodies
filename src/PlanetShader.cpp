@@ -93,8 +93,8 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
       }
     }
 
-    pGuiManager->getGui()->registerCallback<std::string>("lodBodies.setColormap",
-        ([this](std::string const& name) { mProperties->mTerrainColorMap = name; }));
+    pGuiManager->getGui()->registerCallback("lodBodies.setColormap",
+        std::function([this](std::string&& name) { mProperties->mTerrainColorMap = name; }));
   }
 }
 
