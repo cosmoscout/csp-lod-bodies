@@ -118,7 +118,7 @@ void Plugin::init() {
       std::function([this](bool enable) { mProperties->mEnableWireframe = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableHeightlines",
-      "Enables or disables rendering of iso-altidtude lines.",
+      "Enables or disables rendering of iso-altitude lines.",
       std::function([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGrid",
@@ -129,7 +129,7 @@ void Plugin::init() {
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGridLabels",
-      "If the latitude-longitude-grid is enabled, this function can be used to enables or disables "
+      "If the latitude-longitude-grid is enabled, this function can be used to enable or disable "
       "rendering of grid labels.",
       std::function([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
 
@@ -177,36 +177,36 @@ void Plugin::init() {
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
-      "Call this to deselect any surface coloring.", std::function([this]() {
+      "Call this to deselect any surface coloring.", std::function([this] {
         mProperties->mColorMappingType = Properties::ColorMappingType::eNone;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
-      "Call this to enable height based surface coloring.", std::function([this]() {
+      "Call this to enable height based surface coloring.", std::function([this] {
         mProperties->mColorMappingType = Properties::ColorMappingType::eHeight;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
-      "Call this to enable slope based surface coloring.", std::function([this]() {
+      "Call this to enable slope based surface coloring.", std::function([this] {
         mProperties->mColorMappingType = Properties::ColorMappingType::eSlope;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0",
       "Call this to use a GPU-based HEALPix projection for the planet's surface.",
-      std::function([this]() {
+      std::function([this] {
         mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1",
       "Call this to use a CPU-based HEALPix projection and a linear interpolation on the GPU-side "
       "for the planet's surface.",
-      std::function([this]() {
+      std::function([this] {
         mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2",
       "Call this to choose a projection for the planet's surface based on the observer's distance.",
-      std::function([this]() {
+      std::function([this] {
         mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
       }));
 
