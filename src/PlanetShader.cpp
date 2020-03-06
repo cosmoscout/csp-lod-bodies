@@ -94,6 +94,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
     }
 
     pGuiManager->getGui()->registerCallback("lodBodies.setColormap",
+        "Make the planet shader use the colormap with the given name.",
         std::function([this](std::string&& name) { mProperties->mTerrainColorMap = name; }));
   }
 }

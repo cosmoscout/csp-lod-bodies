@@ -105,52 +105,71 @@ void Plugin::init() {
   mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/csp-lod-bodies.js");
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesFreeze",
+      "If set to true, the level of detail and the frustum culling of the planet's tiles will not "
+      "be updated anymore.",
       std::function([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesDebug",
+      "Enables or disables coloring of the planet's tiles.",
       std::function([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableWireframe",
+      "Enables or disables wireframe rendering of the planet.",
       std::function([this](bool enable) { mProperties->mEnableWireframe = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableHeightlines",
+      "Enables or disables rendering of iso-altidtude lines.",
       std::function([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setEnableLatLongGrid", std::function([this](bool enable) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGrid",
+      "Enables or disables rendering of a latidude-longitude-grid.",
+      std::function([this](bool enable) {
         mProperties->mEnableLatLongGrid       = enable;
         mProperties->mEnableLatLongGridLabels = enable;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGridLabels",
+      "If the latitude-longitude-grid is enabled, this function can be used to enables or disables "
+      "rendering of grid labels.",
       std::function([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableColorMixing",
+      "When enabled, the values of the colormap will be multiplied with the image channel.",
       std::function([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setTerrainLod", std::function([this](double value) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainLod",
+      "Specifies the amount of detail of the planet's surface. Should be in the range 1-100.",
+      std::function([this](double value) {
         if (!mProperties->mAutoLOD.get()) {
           mProperties->mLODFactor = value;
         }
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableAutoTerrainLod",
+      "If set to true, the level-of-detail will be chosen automatically based on the current "
+      "rendering performance.",
       std::function([this](bool enable) { mProperties->mAutoLOD = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTextureGamma",
+      "A multiplier for the brightness of the image channel.",
       std::function([this](double value) { mProperties->mTextureGamma = value; }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setHeightRange", std::function([this](double val, double handle) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setHeightRange",
+      "Sets one end of the height range for the color mapping. The first parameter is the actual "
+      "value, the second specifies which end to set: Zero for the lower end; One for the upper "
+      "end.",
+      std::function([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mHeightMin = val * 1000;
         else
           mProperties->mHeightMax = val * 1000;
       }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setSlopeRange", std::function([this](double val, double handle) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setSlopeRange",
+      "Sets one end of the slope range for the color mapping. The first parameter is the actual "
+      "value, the second specifies which end to set: Zero for the lower end; One for the upper "
+      "end.",
+      std::function([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mSlopeMin = cs::utils::convert::toRadians(val);
         else
@@ -158,29 +177,36 @@ void Plugin::init() {
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
-      std::function(
-          [this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eNone; }));
+      "Call this to deselect any surface coloring.", std::function([this]() {
+        mProperties->mColorMappingType = Properties::ColorMappingType::eNone;
+      }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
-      std::function(
-          [this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eHeight; }));
+      "Call this to enable height based surface coloring.", std::function([this]() {
+        mProperties->mColorMappingType = Properties::ColorMappingType::eHeight;
+      }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
-      std::function(
-          [this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eSlope; }));
+      "Call this to enable slope based surface coloring.", std::function([this]() {
+        mProperties->mColorMappingType = Properties::ColorMappingType::eSlope;
+      }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setTerrainProjectionMode0", std::function([this]() {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0",
+      "Call this to use a GPU-based HEALPix projection for the planet's surface.",
+      std::function([this]() {
         mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
       }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setTerrainProjectionMode1", std::function([this]() {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1",
+      "Call this to use a CPU-based HEALPix projection and a linear interpolation on the GPU-side "
+      "for the planet's surface.",
+      std::function([this]() {
         mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
       }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setTerrainProjectionMode2", std::function([this]() {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2",
+      "Call this to choose a projection for the planet's surface based on the observer's distance.",
+      std::function([this]() {
         mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
       }));
 
@@ -277,16 +303,18 @@ void Plugin::init() {
         }
       });
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setTilesImg", std::function([this](std::string&& name) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
+      "Set the current planet's image channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceIMG = name;
         }
       }));
 
-  mGuiManager->getGui()->registerCallback(
-      "lodBodies.setTilesDem", std::function([this](std::string&& name) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesDem",
+      "Set the current planet's elevation channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceDEM = name;
