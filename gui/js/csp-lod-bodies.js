@@ -20,13 +20,14 @@ class LODBodiesApi extends IApi {
     CosmoScout.gui.initSlider('graphics.setTerrainHeight', 1.0, 20.0, 0.1, [1]);
 
     const terrainLod = document.querySelector('[data-callback="lodBodies.setTerrainLod"]');
-    document.querySelector('[data-callback="lodBodies.setEnableAutoTerrainLod"]').addEventListener('change', (event) => {
-      if (event.target.checked) {
-        terrainLod.classList.add('unresponsive');
-      } else {
-        terrainLod.classList.remove('unresponsive');
-      }
-    });
+    document.querySelector('[data-callback="lodBodies.setEnableAutoTerrainLod"]')
+        .addEventListener('change', (event) => {
+          if (event.target.checked) {
+            terrainLod.classList.add('unresponsive');
+          } else {
+            terrainLod.classList.remove('unresponsive');
+          }
+        });
   }
 
   /**
@@ -37,7 +38,7 @@ class LODBodiesApi extends IApi {
    */
   // eslint-disable-next-line class-methods-use-this
   setElevationDataCopyright(copyright) {
-    $('#lodbodies-img-data-copyright').tooltip({ title: `© ${copyright}`, placement: 'top' });
+    $('#lodbodies-img-data-copyright').tooltip({title: `© ${copyright}`, placement: 'top'});
   }
 
   /**
@@ -48,7 +49,7 @@ class LODBodiesApi extends IApi {
    */
   // eslint-disable-next-line class-methods-use-this
   setMapDataCopyright(copyright) {
-    $('#lodbodies-dem-data-copyright').tooltip({ title: `© ${copyright}`, placement: 'bottom' });
+    $('#lodbodies-dem-data-copyright').tooltip({title: `© ${copyright}`, placement: 'bottom'});
   }
 }
 
