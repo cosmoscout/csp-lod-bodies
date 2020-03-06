@@ -104,77 +104,111 @@ void Plugin::init() {
       "Body Settings", "landscape", "../share/resources/gui/lod_body_settings.html");
   mGuiManager->addScriptToGuiFromJS("../share/resources/gui/js/csp-lod-bodies.js");
 
-  mGuiManager->getGui()->registerCallback<bool>("set_enable_tiles_freeze",
-      ([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesFreeze",
+      "If set to true, the level of detail and the frustum culling of the planet's tiles will not "
+      "be updated anymore.",
+      std::function([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "set_enable_tiles_debug", ([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesDebug",
+      "Enables or disables coloring of the planet's tiles.",
+      std::function([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "set_enable_wireframe", ([this](bool enable) { mProperties->mEnableWireframe = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableWireframe",
+      "Enables or disables wireframe rendering of the planet.",
+      std::function([this](bool enable) { mProperties->mEnableWireframe = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("set_enable_heightlines",
-      ([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableHeightlines",
+      "Enables or disables rendering of iso-altitude lines.",
+      std::function([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("set_enable_lat_long_grid", ([this](bool enable) {
-    mProperties->mEnableLatLongGrid       = enable;
-    mProperties->mEnableLatLongGridLabels = enable;
-  }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGrid",
+      "Enables or disables rendering of a latidude-longitude-grid.",
+      std::function([this](bool enable) {
+        mProperties->mEnableLatLongGrid       = enable;
+        mProperties->mEnableLatLongGridLabels = enable;
+      }));
 
-  mGuiManager->getGui()->registerCallback<bool>("set_enable_lat_long_grid_labels",
-      ([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGridLabels",
+      "If the latitude-longitude-grid is enabled, this function can be used to enable or disable "
+      "rendering of grid labels.",
+      std::function([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("set_enable_color_mixing",
-      ([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableColorMixing",
+      "When enabled, the values of the colormap will be multiplied with the image channel.",
+      std::function([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
 
-  mGuiManager->getGui()->registerCallback<double>("set_terrain_lod", ([this](double value) {
-    if (!mProperties->mAutoLOD.get()) {
-      mProperties->mLODFactor = value;
-    }
-  }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainLod",
+      "Specifies the amount of detail of the planet's surface. Should be in the range 1-100.",
+      std::function([this](double value) {
+        if (!mProperties->mAutoLOD.get()) {
+          mProperties->mLODFactor = value;
+        }
+      }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "set_enable_auto_terrain_lod", ([this](bool enable) { mProperties->mAutoLOD = enable; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setEnableAutoTerrainLod",
+      "If set to true, the level-of-detail will be chosen automatically based on the current "
+      "rendering performance.",
+      std::function([this](bool enable) { mProperties->mAutoLOD = enable; }));
 
-  mGuiManager->getGui()->registerCallback<double>(
-      "set_texture_gamma", ([this](double value) { mProperties->mTextureGamma = value; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setTextureGamma",
+      "A multiplier for the brightness of the image channel.",
+      std::function([this](double value) { mProperties->mTextureGamma = value; }));
 
-  mGuiManager->getGui()->registerCallback<double, double>(
-      "set_height_range", ([this](double val, double handle) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setHeightRange",
+      "Sets one end of the height range for the color mapping. The first parameter is the actual "
+      "value, the second specifies which end to set: Zero for the lower end; One for the upper "
+      "end.",
+      std::function([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mHeightMin = val * 1000;
         else
           mProperties->mHeightMax = val * 1000;
       }));
 
-  mGuiManager->getGui()->registerCallback<double, double>(
-      "set_slope_range", ([this](double val, double handle) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setSlopeRange",
+      "Sets one end of the slope range for the color mapping. The first parameter is the actual "
+      "value, the second specifies which end to set: Zero for the lower end; One for the upper "
+      "end.",
+      std::function([this](double val, double handle) {
         if (handle == 0.0)
           mProperties->mSlopeMin = cs::utils::convert::toRadians(val);
         else
           mProperties->mSlopeMax = cs::utils::convert::toRadians(val);
       }));
 
-  mGuiManager->getGui()->registerCallback("set_surface_coloring_mode_0",
-      ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eNone; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
+      "Call this to deselect any surface coloring.", std::function([this] {
+        mProperties->mColorMappingType = Properties::ColorMappingType::eNone;
+      }));
 
-  mGuiManager->getGui()->registerCallback("set_surface_coloring_mode_1",
-      ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eHeight; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
+      "Call this to enable height based surface coloring.", std::function([this] {
+        mProperties->mColorMappingType = Properties::ColorMappingType::eHeight;
+      }));
 
-  mGuiManager->getGui()->registerCallback("set_surface_coloring_mode_2",
-      ([this]() { mProperties->mColorMappingType = Properties::ColorMappingType::eSlope; }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
+      "Call this to enable slope based surface coloring.", std::function([this] {
+        mProperties->mColorMappingType = Properties::ColorMappingType::eSlope;
+      }));
 
-  mGuiManager->getGui()->registerCallback("set_terrain_projection_mode_0", ([this]() {
-    mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
-  }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0",
+      "Call this to use a GPU-based HEALPix projection for the planet's surface.",
+      std::function([this] {
+        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
+      }));
 
-  mGuiManager->getGui()->registerCallback("set_terrain_projection_mode_1", ([this]() {
-    mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
-  }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1",
+      "Call this to use a CPU-based HEALPix projection and a linear interpolation on the GPU-side "
+      "for the planet's surface.",
+      std::function([this] {
+        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
+      }));
 
-  mGuiManager->getGui()->registerCallback("set_terrain_projection_mode_2", ([this]() {
-    mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
-  }));
+  mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2",
+      "Call this to choose a projection for the planet's surface based on the observer's distance.",
+      std::function([this] {
+        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
+      }));
 
   mGLResources = std::make_shared<csp::lodbodies::GLResources>(mPluginSettings.mMaxGPUTilesDEM,
       mPluginSettings.mMaxGPUTilesGray, mPluginSettings.mMaxGPUTilesColor);
@@ -243,40 +277,44 @@ void Plugin::init() {
           return;
         }
 
-        mGuiManager->getGui()->callJavascript("CosmoScout.clearDropdown", "set_tiles_img");
-        mGuiManager->getGui()->callJavascript("CosmoScout.clearDropdown", "set_tiles_dem");
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.addDropdownValue", "set_tiles_img", "None", "None", "false");
+            "CosmoScout.gui.clearDropdown", "lodBodies.setTilesImg");
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.gui.clearDropdown", "lodBodies.setTilesDem");
+        mGuiManager->getGui()->callJavascript(
+            "CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg", "None", "None", "false");
         for (auto const& source : lodBody->getIMGtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue", "set_tiles_img",
-              source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
+              "lodBodies.setTilesImg", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBody.setMapDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
           }
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
           bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
-          mGuiManager->getGui()->callJavascript("CosmoScout.addDropdownValue", "set_tiles_dem",
-              source->getName(), source->getName(), active);
+          mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
+              "lodBodies.setTilesDem", source->getName(), source->getName(), active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBody.setElevationDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
           }
         }
       });
 
-  mGuiManager->getGui()->registerCallback<std::string>(
-      "set_tiles_img", ([this](std::string const& name) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
+      "Set the current planet's image channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceIMG = name;
         }
       }));
 
-  mGuiManager->getGui()->registerCallback<std::string>(
-      "set_tiles_dem", ([this](std::string const& name) {
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesDem",
+      "Set the current planet's elevation channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceDEM = name;
@@ -291,13 +329,14 @@ void Plugin::init() {
     } else {
       mProperties->mLODFactor = mNonAutoLod;
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.setSliderValue", "set_terrain_lod", mNonAutoLod);
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", mNonAutoLod);
     }
   });
 
   mProperties->mLODFactor.onChange().connect([this](float value) {
     if (mProperties->mAutoLOD()) {
-      mGuiManager->getGui()->callJavascript("CosmoScout.setSliderValue", "set_terrain_lod", value);
+      mGuiManager->getGui()->callJavascript(
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", value);
     }
   });
 
@@ -316,26 +355,26 @@ void Plugin::deInit() {
 
   mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
 
-  mGuiManager->getGui()->unregisterCallback("set_enable_tiles_freeze");
-  mGuiManager->getGui()->unregisterCallback("set_enable_tiles_debug");
-  mGuiManager->getGui()->unregisterCallback("set_enable_wireframe");
-  mGuiManager->getGui()->unregisterCallback("set_enable_heightlines");
-  mGuiManager->getGui()->unregisterCallback("set_enable_lat_long_grid");
-  mGuiManager->getGui()->unregisterCallback("set_enable_lat_long_grid_labels");
-  mGuiManager->getGui()->unregisterCallback("set_enable_color_mixing");
-  mGuiManager->getGui()->unregisterCallback("set_terrain_lod");
-  mGuiManager->getGui()->unregisterCallback("set_enable_auto_terrain_lod");
-  mGuiManager->getGui()->unregisterCallback("set_texture_gamma");
-  mGuiManager->getGui()->unregisterCallback("set_height_range");
-  mGuiManager->getGui()->unregisterCallback("set_slope_range");
-  mGuiManager->getGui()->unregisterCallback("set_surface_coloring_mode_0");
-  mGuiManager->getGui()->unregisterCallback("set_surface_coloring_mode_1");
-  mGuiManager->getGui()->unregisterCallback("set_surface_coloring_mode_2");
-  mGuiManager->getGui()->unregisterCallback("set_terrain_projection_mode_0");
-  mGuiManager->getGui()->unregisterCallback("set_terrain_projection_mode_1");
-  mGuiManager->getGui()->unregisterCallback("set_terrain_projection_mode_2");
-  mGuiManager->getGui()->unregisterCallback("set_tiles_img");
-  mGuiManager->getGui()->unregisterCallback("set_tiles_dem");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesFreeze");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesDebug");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableWireframe");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableHeightlines");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableLatLongGrid");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableLatLongGridLabels");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableColorMixing");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainLod");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableAutoTerrainLod");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTextureGamma");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setHeightRange");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSlopeRange");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSurfaceColoringMode0");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSurfaceColoringMode1");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setSurfaceColoringMode2");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainProjectionMode0");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainProjectionMode1");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTerrainProjectionMode2");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesImg");
+  mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesDem");
 
   spdlog::info("Unloading done.");
 }
