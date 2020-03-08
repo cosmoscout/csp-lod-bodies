@@ -1,128 +1,131 @@
 <div class="strike">
-    <span>Dataset Selection</span>
+  <span>Dataset Selection</span>
 </div>
 
 <div class="row">
-    <div class="col-5">
-        <label for="set_tiles_img">Image Channel</label>
-    </div>
-    <div class="col-1">
-        <i class="material-icons" id="img-data-copyright">info</i>
-    </div>
-    <div class="col-6">
-        <select id="set_tiles_img" class="simple-value-dropdown">
-            <!-- Filled by JavaScript Function called from DataBase Manager -->
-            <option value="-1">None</option>
-        </select>
-    </div>
+  <div class="col-5">
+    <label>Image Channel</label>
+  </div>
+  <div class="col-1">
+    <i class="material-icons" id="lodbodies-img-data-copyright">info</i>
+  </div>
+  <div class="col-6">
+    <select data-callback="lodBodies.setTilesImg" class="simple-value-dropdown">
+      <!-- Filled by JavaScript Function called from DataBase Manager -->
+      <option value="-1">None</option>
+    </select>
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-5">
-        <label for="set_tiles_dem">Elevation Channel</label>
-    </div>
-    <div class="col-1">
-        <i class="material-icons" id="dem-data-copyright">info</i>
-    </div>
-    <div class="col-6">
-        <select id="set_tiles_dem" class="simple-value-dropdown">
-            <!-- Filled by JavaScript Function called from DataBase Manager -->
-        </select>
-    </div>
+  <div class="col-5">
+    <label>Elevation Channel</label>
+  </div>
+  <div class="col-1">
+    <i class="material-icons" id="lodbodies-dem-data-copyright">info</i>
+  </div>
+  <div class="col-6">
+    <select data-callback="lodBodies.setTilesDem" class="simple-value-dropdown">
+      <!-- Filled by JavaScript Function called from DataBase Manager -->
+    </select>
+  </div>
 </div>
 
 
 <div class="strike">
-    <span>Color Mapping</span>
+  <span>Color Mapping</span>
 </div>
 
 <div class="row">
-    <div class="col-6">
-        <label for="set_colormap">Colormap</label>
-    </div>
-    <div class="col-6">
-        <select id="set_colormap" class="simple-value-dropdown">
-            <!-- Filled by JavaScript Function -->
-        </select>
-    </div>
+  <div class="col-6">
+    <span>Colormap</span>
+  </div>
+  <div class="col-6">
+    <select data-callback="lodBodies.setColormap" class="simple-value-dropdown">
+      <!-- Filled by JavaScript Function -->
+    </select>
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-6">
-        <label class="radiolabel">
-            <input name="surface_coloring" type="radio" id="set_surface_coloring_mode_0" checked />
-            <span>Off</span>
-        </label>
-    </div>
-    <div class="col-6">
-        <label class="checklabel">
-            <input type="checkbox" id="set_enable_color_mixing" checked />
-            <i class="material-icons"></i>
-            <span>Mix with IMG</span>
-        </label>
-    </div>
+  <div class="col-6">
+    <label class="radiolabel">
+      <input name="surface_coloring" type="radio" data-callback="lodBodies.setSurfaceColoringMode0"
+        checked />
+      <span>Off</span>
+    </label>
+  </div>
+  <div class="col-6">
+    <label class="checklabel">
+      <input type="checkbox" data-callback="lodBodies.setEnableColorMixing" checked />
+      <i class="material-icons"></i>
+      <span>Mix with IMG</span>
+    </label>
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-6">
-        <label class="radiolabel">
-            <input name="surface_coloring" type="radio" id="set_surface_coloring_mode_1" />
-            <span>Map on Height [km]</span>
-        </label>
-    </div>
-    <div class="col-6">
-        <div id="set_height_range"></div>
-    </div>
+  <div class="col-6">
+    <label class="radiolabel">
+      <input name="surface_coloring" type="radio"
+        data-callback="lodBodies.setSurfaceColoringMode1" />
+      <span>Map on Height [km]</span>
+    </label>
+  </div>
+  <div class="col-6">
+    <div data-callback="lodBodies.setHeightRange"></div>
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-6">
-        <label class="radiolabel">
-            <input name="surface_coloring" type="radio" id="set_surface_coloring_mode_2" />
-            <span>Map on Slope [°]</span>
-        </label>
-    </div>
-    <div class="col-6">
-        <div id="set_slope_range"></div>
-    </div>
+  <div class="col-6">
+    <label class="radiolabel">
+      <input name="surface_coloring" type="radio"
+        data-callback="lodBodies.setSurfaceColoringMode2" />
+      <span>Map on Slope [°]</span>
+    </label>
+  </div>
+  <div class="col-6">
+    <div data-callback="lodBodies.setSlopeRange"></div>
+  </div>
 </div>
 
 <div class="strike">
-    <span>Terrain Visualization</span>
+  <span>Terrain Visualization</span>
 </div>
 
 <div class="row">
-    <div class="col-6">
-        <label class="checklabel">
-            <input type="checkbox" id="set_enable_lat_long_grid" />
-            <i class="material-icons"></i>
-            <span>Coordinates</span>
-        </label>
-    </div>
-    <div class="col-6">
-        <label class="checklabel">
-            <input type="checkbox" id="set_enable_heightlines" />
-            <i class="material-icons"></i>
-            <span>Contourlines</span>
-        </label>
-    </div>
+  <div class="col-6">
+    <label class="checklabel">
+      <input type="checkbox" data-callback="lodBodies.setEnableLatLongGrid" />
+      <i class="material-icons"></i>
+      <span>Coordinates</span>
+    </label>
+  </div>
+  <div class="col-6">
+    <label class="checklabel">
+      <input type="checkbox" data-callback="lodBodies.setEnableHeightlines" />
+      <i class="material-icons"></i>
+      <span>Contourlines</span>
+    </label>
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-6">
-        Texture Gamma
+  <div class="col-6">
+    Texture Gamma
+  </div>
+  <div class="col-6">
+    <div data-callback="lodBodies.setTextureGamma">
     </div>
-    <div class="col-6">
-        <div id="set_texture_gamma">
-        </div>
-    </div>
+  </div>
 </div>
 <div class="row">
-    <div class="col-6">
-        Height Exaggeration
+  <div class="col-6">
+    Height Exaggeration
+  </div>
+  <div class="col-6">
+    <div data-callback="graphics.setTerrainHeight">
     </div>
-    <div class="col-6">
-        <div id="set_terrain_height">
-        </div>
-    </div>
+  </div>
 </div>
