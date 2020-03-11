@@ -193,7 +193,7 @@ void PlanetShader::bind() {
   loc = mShader->GetUniformLocation("texGamma");
   mShader->SetUniform(loc, mProperties->mTextureGamma.get());
 
-  loc = mShader->GetUniformLocation("uSun");
+  loc = mShader->GetUniformLocation("uSunDirIlluminance");
   mShader->SetUniform(loc, mSunDirection.x, mSunDirection.y, mSunDirection.z, mSunIlluminance);
 
   loc = mShader->GetUniformLocation("farClip");

@@ -9,7 +9,7 @@ uniform float slopeMax;
 uniform float ambientBrightness;
 uniform float texGamma;
 uniform float farClip;
-uniform vec4 uSun;
+uniform vec4 uSunDirIlluminance;
 
 uniform sampler1D heightTex;
 uniform sampler2D fontTex;
@@ -31,6 +31,7 @@ in VS_OUT
     vec2  lngLat;
     float height;
     vec2  vertexPosition;
+    vec3  sunDir;
 } fsIn;
 
 vec3 heat(float v) {
@@ -109,7 +110,7 @@ void main()
     }
   #endif
 
-  fragColor = fragColor * uSun.w;
+  fragColor = fragColor * uSunDirIlluminance.w;
 
   float directLight = 1.0;
   float ambientLight = ambientBrightness;
@@ -123,7 +124,7 @@ void main()
     const float hillShadingIntensity = 0.5;
     ambientLight *= mix(1.0, max(0, dot(idealNormal, surfaceNormal)), hillShadingIntensity);
     
-    vec3 sunDir = normalize(uSun.xyz);
+    vec3 sunDir = normalize(fsIn.sunDir);
     directLight *= max(dot(surfaceNormal, sunDir), 0.0);
   #endif
 

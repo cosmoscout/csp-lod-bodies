@@ -162,7 +162,9 @@ void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
         sunIlluminance = mSolarSystem->getSunIlluminance(getWorldTransform()[3]);
       }
 
-      auto sunDirection = mSolarSystem->getSunDirection(getWorldTransform()[3]);
+      auto sunDirection =
+          glm::normalize(glm::inverse(getWorldTransform()) *
+                         glm::dvec4(mSolarSystem->getSunDirection(getWorldTransform()[3]), 0.0));
 
       mShader.setSun(sunDirection, sunIlluminance);
     }
