@@ -9,6 +9,7 @@ uniform float slopeMax;
 uniform float ambientBrightness;
 uniform float texGamma;
 uniform float farClip;
+uniform vec4 uSunDirIlluminance;
 
 uniform sampler1D heightTex;
 uniform sampler2D fontTex;
@@ -50,6 +51,12 @@ vec3 heat(float v) {
 
 layout(location = 0) out vec3 fragColor;
 
+vec3 SRGBtoLINEAR(vec3 srgbIn)
+{
+  vec3 bLess = step(vec3(0.04045),srgbIn);
+  return mix( srgbIn/vec3(12.92), pow((srgbIn+vec3(0.055))/vec3(1.055),vec3(2.4)), bLess );
+}
+
 void main()
 {
   if (VP_shadowMapMode)
@@ -78,10 +85,12 @@ void main()
     #else
       fragColor = texture(VP_texIMG, vec3(fsIn.texcoords, VP_layerIMG)).rrr;
     #endif
+    
+    #if $ENABLE_HDR
+      fragColor = SRGBtoLINEAR(fragColor);
+    #endif
 
     fragColor = pow(fragColor, vec3(1.0 / texGamma));
-
-    // fragColor = (fragColor == vec3(0)) ? vec3(1) : fragColor;
   #endif
 
   #if $COLOR_MAPPING_TYPE==1
@@ -101,27 +110,25 @@ void main()
     }
   #endif
 
-  vec3 sunDir = normalize(fsIn.sunDir);
-  float fLightIntensity = 1.0;
+  fragColor = fragColor * uSunDirIlluminance.w;
 
-  // make ambient lighting influence more intense on day side
-  float daySide = (dot(idealNormal, sunDir)+1.0)*0.5;
-  float ambientLight = daySide * ambientBrightness;
-
-  // hill shading / pseudo ambient occlusion
-  const float hillShadingIntensity = 0.5;
-  ambientLight *= mix(1.0, max(0, dot(idealNormal, surfaceNormal)), hillShadingIntensity);
+  float directLight = 1.0;
+  float ambientLight = ambientBrightness;
 
   #if $ENABLE_SHADOWS
-    fLightIntensity *= VP_getShadow(fsIn.position);
+    directLight *= VP_getShadow(fsIn.position);
   #endif
 
   #if $ENABLE_LIGHTING
-    // make normal phong a bit brighter
-    fLightIntensity *= pow(max(dot(surfaceNormal, sunDir), 0.0), 0.5);
+    // hill shading / pseudo ambient occlusion
+    const float hillShadingIntensity = 0.5;
+    ambientLight *= mix(1.0, max(0, dot(idealNormal, surfaceNormal)), hillShadingIntensity);
+    
+    vec3 sunDir = normalize(fsIn.sunDir);
+    directLight *= max(dot(surfaceNormal, sunDir), 0.0);
   #endif
 
-  fragColor *= fLightIntensity * (1.0 - ambientLight) + ambientLight;
+  fragColor = mix(fragColor*ambientLight, fragColor, directLight);
 
   #if $SHOW_TILE_BORDER
     // color area by level

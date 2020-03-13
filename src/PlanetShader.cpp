@@ -60,6 +60,8 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
         [this](bool) { mShaderDirty = true; });
     mEnableShadowsConnection = mGraphicsEngine->pEnableShadows.onChange().connect(
         [this](bool) { mShaderDirty = true; });
+    mEnableHDRConnection = mGraphicsEngine->pEnableHDR.onChange().connect(
+        [this](bool) { mShaderDirty = true; });
     mLightingQualityConnection = mGraphicsEngine->pLightingQuality.onChange().connect(
         [this](int) { mShaderDirty = true; });
     mProperties->mEnableTilesDebug.onChange().connect(
@@ -107,14 +109,16 @@ PlanetShader::~PlanetShader() {
   mGraphicsEngine->pEnableShadowsDebug.onChange().disconnect(mEnableShadowsDebugConnection);
   mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
   mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
+  mGraphicsEngine->pEnableHDR.onChange().disconnect(mEnableHDRConnection);
 
   mGuiManager->getGui()->unregisterCallback("lodBodies.setColormap");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PlanetShader::setSunDirection(VistaVector3D const& sunDirection) {
-  mSunDirection = sunDirection;
+void PlanetShader::setSun(glm::vec3 const& direction, float illuminance) {
+  mSunDirection   = direction;
+  mSunIlluminance = illuminance;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +138,8 @@ void PlanetShader::compile() {
       cs::utils::toString(static_cast<int>(mProperties->mColorMappingType.get())));
   cs::utils::replaceString(mFragmentSource, "$ENABLE_LIGHTING",
       cs::utils::toString(mGraphicsEngine->pEnableLighting.get()));
+  cs::utils::replaceString(
+      mFragmentSource, "$ENABLE_HDR", cs::utils::toString(mGraphicsEngine->pEnableHDR.get()));
   cs::utils::replaceString(mFragmentSource, "$ENABLE_SHADOWS_DEBUG",
       cs::utils::toString(mGraphicsEngine->pEnableShadowsDebug.get()));
   cs::utils::replaceString(mFragmentSource, "$ENABLE_SHADOWS",
@@ -187,8 +193,8 @@ void PlanetShader::bind() {
   loc = mShader->GetUniformLocation("texGamma");
   mShader->SetUniform(loc, mProperties->mTextureGamma.get());
 
-  loc = mShader->GetUniformLocation("uSunDir");
-  mShader->SetUniform(loc, mSunDirection[0], mSunDirection[1], mSunDirection[2]);
+  loc = mShader->GetUniformLocation("uSunDirIlluminance");
+  mShader->SetUniform(loc, mSunDirection.x, mSunDirection.y, mSunDirection.z, mSunIlluminance);
 
   loc = mShader->GetUniformLocation("farClip");
   mShader->SetUniform(loc, cs::utils::getCurrentFarClipDistance());

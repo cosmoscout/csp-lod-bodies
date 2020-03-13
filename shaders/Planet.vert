@@ -6,7 +6,7 @@ $VP_TERRAIN_SHADER_UNIFORMS
 $VP_TERRAIN_SHADER_FUNCTIONS
 
 // uniforms
-uniform vec3 uSunDir;
+uniform vec4 uSunDirIlluminance;
 
 // outputs
 // ==========================================================================
@@ -39,7 +39,7 @@ void main(void)
         #elif $LIGHTING_QUALITY > 1
             vsOut.normal         = VP_getVertexNormalLow(vsOut.position, VP_iPosition, $TERRAIN_PROJECTION_TYPE);
         #endif
-        vsOut.sunDir         = (VP_matModelView * vec4(uSunDir, 0)).xyz;
+        vsOut.sunDir         = (VP_matModelView * vec4(uSunDirIlluminance.xyz, 0)).xyz;
         vsOut.planetCenter   = (VP_matModelView * vec4(0,0,0,1)).xyz;
         vsOut.texcoords      = VP_getTexCoordIMG(VP_iPosition);
         vsOut.height         = VP_getVertexHeight(VP_iPosition);

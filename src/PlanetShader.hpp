@@ -13,7 +13,7 @@
 #include "Plugin.hpp"
 #include "TerrainShader.hpp"
 
-#include <VistaBase/VistaVector3D.h>
+#include <glm/glm.hpp>
 #include <vector>
 
 class VistaTexture;
@@ -39,7 +39,7 @@ class PlanetShader : public TerrainShader {
       std::shared_ptr<cs::core::GuiManager> const&              pGuiManager);
   virtual ~PlanetShader();
 
-  void setSunDirection(VistaVector3D const& sunDirection);
+  void setSun(glm::vec3 const& direction, float illuminance);
 
   virtual void bind() override;
   virtual void release() override;
@@ -51,13 +51,15 @@ class PlanetShader : public TerrainShader {
   std::shared_ptr<cs::core::GuiManager>     mGuiManager;
   std::shared_ptr<Plugin::Properties>       mProperties;
   bool                                      mColorscaleTextureDirty       = true;
-  VistaVector3D                             mSunDirection                 = VistaVector3D(0, 1, 0);
+  glm::vec3                                 mSunDirection                 = glm::vec3(0, 1, 0);
+  float                                     mSunIlluminance               = 1.f;
   VistaTexture*                             mFontTexture                  = nullptr;
   unsigned                                  mLutTexID                     = 0;
   int                                       mEnableLightingConnection     = -1;
   int                                       mEnableShadowsDebugConnection = -1;
   int                                       mEnableShadowsConnection      = -1;
   int                                       mLightingQualityConnection    = -1;
+  int                                       mEnableHDRConnection          = -1;
 
   static std::map<std::string, cs::graphics::ColorMap> mColorMaps;
 };
