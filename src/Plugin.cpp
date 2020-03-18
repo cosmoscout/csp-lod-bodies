@@ -302,6 +302,7 @@ void Plugin::init() {
           }
         }
       });
+  mSolarSystem->pActiveBody.touchFor(mActiveBodyConnection);
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
       "Set the current planet's image channel to the TileSource with the given name.",
@@ -354,6 +355,9 @@ void Plugin::deInit() {
   }
 
   mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
+
+  mGuiManager->removePluginTab("Body Settings");
+  mGuiManager->removeSettingsSection("Body Settings");
 
   mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesFreeze");
   mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesDebug");
