@@ -271,7 +271,7 @@ void Plugin::init() {
         auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.sidebar.setTabEnabled", "collapse-Body-Settings", lodBody != nullptr);
+            "CosmoScout.sidebar.setTabEnabled", "Body Settings", lodBody != nullptr);
 
         if (!lodBody) {
           return;
