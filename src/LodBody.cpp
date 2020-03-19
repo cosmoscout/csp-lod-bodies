@@ -83,6 +83,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
   // scene-wide settings -----------------------------------------------------
   mHeightScaleConnection = mGraphicsEngine->pHeightScale.onChange().connect(
       [this](float val) { mPlanet.setHeightScale(val); });
+  mGraphicsEngine->pHeightScale.touchFor(mHeightScaleConnection);
 
   mProperties->mLODFactor.onChange().connect([this](float val) { mPlanet.setLODFactor(val); });
 

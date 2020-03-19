@@ -15,6 +15,7 @@
 #include "../../../src/cs-utils/convert.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 
+#include <VistaKernel/GraphicsManager/VistaGroupNode.h>
 #include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
 #include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
 #include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
@@ -262,6 +263,8 @@ void Plugin::init() {
     VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
         parent, static_cast<int>(cs::utils::DrawOrder::ePlanets));
 
+    mOpenGLNodes.emplace_back(parent);
+
     mInputManager->registerSelectable(body);
     mLodBodies.push_back(body);
   }
@@ -352,6 +355,10 @@ void Plugin::deInit() {
   for (auto const& body : mLodBodies) {
     mInputManager->unregisterSelectable(body);
     mSolarSystem->unregisterBody(body);
+  }
+
+  for (auto const& node : mOpenGLNodes) {
+    mSceneGraph->GetRoot()->DisconnectChild(node.get());
   }
 
   mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
