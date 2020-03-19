@@ -269,7 +269,7 @@ void Plugin::init() {
     mLodBodies.push_back(body);
   }
 
-  mActiveBodyConnection = mSolarSystem->pActiveBody.onChange().connect(
+  mActiveBodyConnection = mSolarSystem->pActiveBody.connectAndTouch(
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
         auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
@@ -305,7 +305,6 @@ void Plugin::init() {
           }
         }
       });
-  mSolarSystem->pActiveBody.touchFor(mActiveBodyConnection);
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
       "Set the current planet's image channel to the TileSource with the given name.",
@@ -327,7 +326,7 @@ void Plugin::init() {
 
   mNonAutoLod = mProperties->mLODFactor.get();
 
-  mProperties->mAutoLOD.onChange().connect([this](bool enabled) {
+  mProperties->mAutoLOD.connect([this](bool enabled) {
     if (enabled) {
       mNonAutoLod = mProperties->mLODFactor.get();
     } else {
@@ -337,7 +336,7 @@ void Plugin::init() {
     }
   });
 
-  mProperties->mLODFactor.onChange().connect([this](float value) {
+  mProperties->mLODFactor.connect([this](float value) {
     if (mProperties->mAutoLOD()) {
       mGuiManager->getGui()->callJavascript(
           "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", value);
@@ -361,7 +360,7 @@ void Plugin::deInit() {
     mSceneGraph->GetRoot()->DisconnectChild(node.get());
   }
 
-  mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
+  mSolarSystem->pActiveBody.disconnect(mActiveBodyConnection);
 
   mGuiManager->removePluginTab("Body Settings");
   mGuiManager->removeSettingsSection("Body Settings");
