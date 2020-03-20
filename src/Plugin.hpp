@@ -15,6 +15,8 @@
 #include <glm/gtc/constants.hpp>
 #include <vector>
 
+class VistaOpenGLNode;
+
 namespace csp::lodbodies {
 
 class GLResources;
@@ -84,11 +86,12 @@ class Plugin : public cs::core::PluginBase {
   void update() override;
 
  private:
-  Settings                              mPluginSettings;
-  std::shared_ptr<GLResources>          mGLResources;
-  std::vector<std::shared_ptr<LodBody>> mLodBodies;
-  std::shared_ptr<Properties>           mProperties;
-  float                                 mNonAutoLod;
+  Settings                                      mPluginSettings;
+  std::shared_ptr<GLResources>                  mGLResources;
+  std::vector<std::unique_ptr<VistaOpenGLNode>> mOpenGLNodes;
+  std::vector<std::shared_ptr<LodBody>>         mLodBodies;
+  std::shared_ptr<Properties>                   mProperties;
+  float                                         mNonAutoLod;
 
   int mActiveBodyConnection = -1;
 };

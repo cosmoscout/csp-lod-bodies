@@ -43,34 +43,34 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
     , mProperties(pProperties)
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
   // clang-format off
-    pTextureIsRGB.onChange().connect(
+    pTextureIsRGB.connect(
         [this](bool) { mShaderDirty = true; });
-    pEnableTexture.onChange().connect(
+    pEnableTexture.connect(
         [this](bool) { mShaderDirty = true; });
 
-    mProperties->mEnableHeightlines.onChange().connect(
+    mProperties->mEnableHeightlines.connect(
         [this](bool) { mShaderDirty = true; });
-    mProperties->mColorMappingType.onChange().connect(
+    mProperties->mColorMappingType.connect(
         [this](Plugin::Properties::ColorMappingType) { mShaderDirty = true; });
-    mProperties->mTerrainProjectionType.onChange().connect(
+    mProperties->mTerrainProjectionType.connect(
         [this](Plugin::Properties::TerrainProjectionType) { mShaderDirty = true; });
-    mEnableLightingConnection = mGraphicsEngine->pEnableLighting.onChange().connect(
+    mEnableLightingConnection = mGraphicsEngine->pEnableLighting.connect(
         [this](bool) { mShaderDirty = true; });
-    mEnableShadowsDebugConnection = mGraphicsEngine->pEnableShadowsDebug.onChange().connect(
+    mEnableShadowsDebugConnection = mGraphicsEngine->pEnableShadowsDebug.connect(
         [this](bool) { mShaderDirty = true; });
-    mEnableShadowsConnection = mGraphicsEngine->pEnableShadows.onChange().connect(
+    mEnableShadowsConnection = mGraphicsEngine->pEnableShadows.connect(
         [this](bool) { mShaderDirty = true; });
-    mEnableHDRConnection = mGraphicsEngine->pEnableHDR.onChange().connect(
+    mEnableHDRConnection = mGraphicsEngine->pEnableHDR.connect(
         [this](bool) { mShaderDirty = true; });
-    mLightingQualityConnection = mGraphicsEngine->pLightingQuality.onChange().connect(
+    mLightingQualityConnection = mGraphicsEngine->pLightingQuality.connect(
         [this](int) { mShaderDirty = true; });
-    mProperties->mEnableTilesDebug.onChange().connect(
+    mProperties->mEnableTilesDebug.connect(
         [this](bool) { mShaderDirty = true; });
-    mProperties->mEnableLatLongGridLabels.onChange().connect(
+    mProperties->mEnableLatLongGridLabels.connect(
         [this](bool) { mShaderDirty = true; });
-    mProperties->mEnableLatLongGrid.onChange().connect(
+    mProperties->mEnableLatLongGrid.connect(
         [this](bool) { mShaderDirty = true; });
-    mProperties->mEnableColorMixing.onChange().connect(
+    mProperties->mEnableColorMixing.connect(
         [this](bool) { mShaderDirty = true; });
   // clang-format on
 
@@ -105,11 +105,11 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
 
 PlanetShader::~PlanetShader() {
   delete mFontTexture;
-  mGraphicsEngine->pEnableLighting.onChange().disconnect(mEnableLightingConnection);
-  mGraphicsEngine->pEnableShadowsDebug.onChange().disconnect(mEnableShadowsDebugConnection);
-  mGraphicsEngine->pEnableShadows.onChange().disconnect(mEnableShadowsConnection);
-  mGraphicsEngine->pLightingQuality.onChange().disconnect(mLightingQualityConnection);
-  mGraphicsEngine->pEnableHDR.onChange().disconnect(mEnableHDRConnection);
+  mGraphicsEngine->pEnableLighting.disconnect(mEnableLightingConnection);
+  mGraphicsEngine->pEnableShadowsDebug.disconnect(mEnableShadowsDebugConnection);
+  mGraphicsEngine->pEnableShadows.disconnect(mEnableShadowsConnection);
+  mGraphicsEngine->pLightingQuality.disconnect(mLightingQualityConnection);
+  mGraphicsEngine->pEnableHDR.disconnect(mEnableHDRConnection);
 
   mGuiManager->getGui()->unregisterCallback("lodBodies.setColormap");
 }

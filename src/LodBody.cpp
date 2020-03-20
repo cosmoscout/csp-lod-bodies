@@ -37,7 +37,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     , mDEMtileSources(dems)
     , mIMGtileSources(imgs) {
 
-  pVisible.onChange().connect([this](bool val) {
+  pVisible.connect([this](bool val) {
     if (val)
       mGraphicsEngine->registerCaster(&mPlanet);
     else
@@ -55,7 +55,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
   mPlanet.setPolarRadius(mRadii[0]);
   pVisibleRadius = mRadii[0];
 
-  pActiveTileSourceDEM.onChange().connect([this](std::string const& val) {
+  pActiveTileSourceDEM.connect([this](std::string const& val) {
     for (auto const& s : mDEMtileSources) {
       if (s->getName() == val) {
         mPlanet.setDEMSource(s.get());
@@ -64,7 +64,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     }
   });
 
-  pActiveTileSourceIMG.onChange().connect([this](std::string const& val) {
+  pActiveTileSourceIMG.connect([this](std::string const& val) {
     if (val == "None") {
       mShader.pEnableTexture = false;
       mPlanet.setIMGSource(nullptr);
@@ -81,15 +81,15 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
   });
 
   // scene-wide settings -----------------------------------------------------
-  mHeightScaleConnection = mGraphicsEngine->pHeightScale.onChange().connect(
+  mHeightScaleConnection = mGraphicsEngine->pHeightScale.connectAndTouch(
       [this](float val) { mPlanet.setHeightScale(val); });
 
-  mProperties->mLODFactor.onChange().connect([this](float val) { mPlanet.setLODFactor(val); });
+  mProperties->mLODFactor.connect([this](float val) { mPlanet.setLODFactor(val); });
 
-  mProperties->mEnableWireframe.onChange().connect(
+  mProperties->mEnableWireframe.connect(
       [this](bool val) { mPlanet.getTileRenderer().setWireframe(val); });
 
-  mProperties->mEnableTilesFreeze.onChange().connect([this](bool val) {
+  mProperties->mEnableTilesFreeze.connect([this](bool val) {
     mPlanet.getLODVisitor().setUpdateLOD(!val);
     mPlanet.getLODVisitor().setUpdateCulling(!val);
   });
@@ -102,7 +102,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
 
 LodBody::~LodBody() {
   mGraphicsEngine->unregisterCaster(&mPlanet);
-  mGraphicsEngine->pHeightScale.onChange().disconnect(mHeightScaleConnection);
+  mGraphicsEngine->pHeightScale.disconnect(mHeightScaleConnection);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

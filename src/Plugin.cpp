@@ -15,6 +15,7 @@
 #include "../../../src/cs-utils/convert.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 
+#include <VistaKernel/GraphicsManager/VistaGroupNode.h>
 #include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
 #include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
 #include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
@@ -262,16 +263,18 @@ void Plugin::init() {
     VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
         parent, static_cast<int>(cs::utils::DrawOrder::ePlanets));
 
+    mOpenGLNodes.emplace_back(parent);
+
     mInputManager->registerSelectable(body);
     mLodBodies.push_back(body);
   }
 
-  mActiveBodyConnection = mSolarSystem->pActiveBody.onChange().connect(
+  mActiveBodyConnection = mSolarSystem->pActiveBody.connectAndTouch(
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
         auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.sidebar.setTabEnabled", "collapse-Body-Settings", lodBody != nullptr);
+            "CosmoScout.sidebar.setTabEnabled", "Body Settings", lodBody != nullptr);
 
         if (!lodBody) {
           return;
@@ -323,7 +326,7 @@ void Plugin::init() {
 
   mNonAutoLod = mProperties->mLODFactor.get();
 
-  mProperties->mAutoLOD.onChange().connect([this](bool enabled) {
+  mProperties->mAutoLOD.connect([this](bool enabled) {
     if (enabled) {
       mNonAutoLod = mProperties->mLODFactor.get();
     } else {
@@ -333,7 +336,7 @@ void Plugin::init() {
     }
   });
 
-  mProperties->mLODFactor.onChange().connect([this](float value) {
+  mProperties->mLODFactor.connect([this](float value) {
     if (mProperties->mAutoLOD()) {
       mGuiManager->getGui()->callJavascript(
           "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", value);
@@ -353,7 +356,14 @@ void Plugin::deInit() {
     mSolarSystem->unregisterBody(body);
   }
 
-  mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
+  for (auto const& node : mOpenGLNodes) {
+    mSceneGraph->GetRoot()->DisconnectChild(node.get());
+  }
+
+  mSolarSystem->pActiveBody.disconnect(mActiveBodyConnection);
+
+  mGuiManager->removePluginTab("Body Settings");
+  mGuiManager->removeSettingsSection("Body Settings");
 
   mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesFreeze");
   mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesDebug");
