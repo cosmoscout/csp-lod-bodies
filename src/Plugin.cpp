@@ -256,9 +256,7 @@ void Plugin::init() {
           "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
     }
 
-    auto   existence       = cs::core::getExistenceFromSettings(*anchor);
-    double tStartExistence = existence.first;
-    double tEndExistence   = existence.second;
+    auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
 
     std::vector<std::shared_ptr<TileSource>> DEMs;
     std::vector<std::shared_ptr<TileSource>> IMGs;
