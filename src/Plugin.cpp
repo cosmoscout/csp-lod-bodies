@@ -37,48 +37,82 @@ namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void from_json(const nlohmann::json& j, TileDataType& o) {
-  if (j.get<std::string>() == "Float32") {
+void from_json(nlohmann::json const& j, TileDataType& o) {
+  auto s = j.get<std::string>();
+  if (s == "Float32") {
     o = TileDataType::eFloat32;
-    return;
-  }
-
-  if (j.get<std::string>() == "UInt8") {
+  } else if (s == "UInt8") {
     o = TileDataType::eUInt8;
-    return;
-  }
-
-  if (j.get<std::string>() == "U8Vec3") {
+  } else if (s == "U8Vec3") {
     o = TileDataType::eU8Vec3;
-    return;
+  } else {
+    throw std::runtime_error(
+        "Failed to parse TileDataType! Only 'Float32', 'UInt8' or 'U8Vec3' are allowed.");
   }
-
-  throw std::runtime_error("Invalid data set format \"" + j.get<std::string>() + "\" in config!");
 }
 
-void from_json(const nlohmann::json& j, Plugin::Settings::Dataset& o) {
-  o.mFormat    = cs::core::parseProperty<TileDataType>("format", j);
-  o.mName      = cs::core::parseProperty<std::string>("name", j);
-  o.mCopyright = cs::core::parseProperty<std::string>("copyright", j);
-  o.mLayers    = cs::core::parseProperty<std::string>("layers", j);
-  o.mMaxLevel  = cs::core::parseProperty<uint32_t>("maxLevel", j);
-  o.mURL       = cs::core::parseProperty<std::string>("url", j);
+void to_json(nlohmann::json& j, TileDataType o) {
+  switch (o) {
+  case TileDataType::eFloat32:
+    j = "Float32";
+    break;
+  case TileDataType::eUInt8:
+    j = "UInt8";
+    break;
+  case TileDataType::eU8Vec3:
+    j = "U8Vec3";
+    break;
+  }
 }
 
-void from_json(const nlohmann::json& j, Plugin::Settings::Body& o) {
-  o.mDemDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("demDatasets", j);
-  o.mImgDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("imgDatasets", j);
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void from_json(nlohmann::json const& j, Plugin::Settings::Dataset& o) {
+  cs::core::Settings::deserialize(j, "format", o.mFormat);
+  cs::core::Settings::deserialize(j, "name", o.mName);
+  cs::core::Settings::deserialize(j, "copyright", o.mCopyright);
+  cs::core::Settings::deserialize(j, "layers", o.mLayers);
+  cs::core::Settings::deserialize(j, "maxLevel", o.mMaxLevel);
+  cs::core::Settings::deserialize(j, "url", o.mURL);
 }
 
-void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  cs::core::parseSection("csp-lod-bodies", [&] {
-    o.mMaxGPUTilesColor = cs::core::parseProperty<uint32_t>("maxGPUTilesColor", j);
-    o.mMaxGPUTilesGray  = cs::core::parseProperty<uint32_t>("maxGPUTilesGray", j);
-    o.mMaxGPUTilesDEM   = cs::core::parseProperty<uint32_t>("maxGPUTilesDEM", j);
-    o.mMapCache         = cs::core::parseProperty<std::string>("mapCache", j);
+void to_json(nlohmann::json& j, Plugin::Settings::Dataset const& o) {
+  cs::core::Settings::serialize(j, "format", o.mFormat);
+  cs::core::Settings::serialize(j, "name", o.mName);
+  cs::core::Settings::serialize(j, "copyright", o.mCopyright);
+  cs::core::Settings::serialize(j, "layers", o.mLayers);
+  cs::core::Settings::serialize(j, "maxLevel", o.mMaxLevel);
+  cs::core::Settings::serialize(j, "url", o.mURL);
+}
 
-    o.mBodies = cs::core::parseMap<std::string, Plugin::Settings::Body>("bodies", j);
-  });
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void from_json(nlohmann::json const& j, Plugin::Settings::Body& o) {
+  cs::core::Settings::deserialize(j, "demDatasets", o.mDemDatasets);
+  cs::core::Settings::deserialize(j, "imgDatasets", o.mImgDatasets);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings::Body const& o) {
+  cs::core::Settings::serialize(j, "demDatasets", o.mDemDatasets);
+  cs::core::Settings::serialize(j, "imgDatasets", o.mImgDatasets);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void from_json(nlohmann::json const& j, Plugin::Settings& o) {
+  cs::core::Settings::deserialize(j, "maxGPUTilesColor", o.mMaxGPUTilesColor);
+  cs::core::Settings::deserialize(j, "maxGPUTilesGray", o.mMaxGPUTilesGray);
+  cs::core::Settings::deserialize(j, "maxGPUTilesDEM", o.mMaxGPUTilesDEM);
+  cs::core::Settings::deserialize(j, "mapCache", o.mMapCache);
+  cs::core::Settings::deserialize(j, "bodies", o.mBodies);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings const& o) {
+  cs::core::Settings::serialize(j, "maxGPUTilesColor", o.mMaxGPUTilesColor);
+  cs::core::Settings::serialize(j, "maxGPUTilesGray", o.mMaxGPUTilesGray);
+  cs::core::Settings::serialize(j, "maxGPUTilesDEM", o.mMaxGPUTilesDEM);
+  cs::core::Settings::serialize(j, "mapCache", o.mMapCache);
+  cs::core::Settings::serialize(j, "bodies", o.mBodies);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
