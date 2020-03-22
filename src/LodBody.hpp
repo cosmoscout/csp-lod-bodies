@@ -44,9 +44,10 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   /// The currently selected data source for image data.
   cs::utils::Property<std::string> pActiveTileSourceIMG;
 
-  LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<cs::core::SolarSystem> const&        solarSystem,
-      std::shared_ptr<Plugin::Properties> const&           pProperties,
+  LodBody(std::shared_ptr<cs::core::Settings> const&   settings,
+      std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+      std::shared_ptr<cs::core::SolarSystem> const&    solarSystem,
+      std::shared_ptr<Plugin::Properties> const&       pProperties,
       std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
       std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
       std::vector<std::shared_ptr<TileSource>> const& dems,
@@ -75,6 +76,7 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   virtual bool GetBoundingBox(VistaBoundingBox& bb) override;
 
  private:
+  std::shared_ptr<cs::core::Settings>               mSettings;
   std::shared_ptr<cs::core::GraphicsEngine>         mGraphicsEngine;
   std::shared_ptr<cs::core::SolarSystem>            mSolarSystem;
   std::shared_ptr<Plugin::Properties>               mProperties;

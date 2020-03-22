@@ -6,8 +6,8 @@
 
 #include "PlanetShader.hpp"
 
-#include "../../../src/cs-core/GraphicsEngine.hpp"
 #include "../../../src/cs-core/GuiManager.hpp"
+#include "../../../src/cs-core/Settings.hpp"
 #include "../../../src/cs-gui/GuiItem.hpp"
 #include "../../../src/cs-utils/convert.hpp"
 #include "../../../src/cs-utils/filesystem.hpp"
@@ -34,11 +34,11 @@ std::map<std::string, cs::graphics::ColorMap> PlanetShader::mColorMaps;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-    std::shared_ptr<Plugin::Properties> const&                              pProperties,
-    std::shared_ptr<cs::core::GuiManager> const&                            pGuiManager)
+PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> const& settings,
+    std::shared_ptr<Plugin::Properties> const&                        pProperties,
+    std::shared_ptr<cs::core::GuiManager> const&                      pGuiManager)
     : csp::lodbodies::TerrainShader()
-    , mGraphicsEngine(graphicsEngine)
+    , mSettings(settings)
     , mGuiManager(pGuiManager)
     , mProperties(pProperties)
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
@@ -54,15 +54,15 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
         [this](Plugin::Properties::ColorMappingType) { mShaderDirty = true; });
     mProperties->mTerrainProjectionType.connect(
         [this](Plugin::Properties::TerrainProjectionType) { mShaderDirty = true; });
-    mEnableLightingConnection = mGraphicsEngine->pEnableLighting.connect(
+    mEnableLightingConnection = mSettings->mGraphics.pEnableLighting.connect(
         [this](bool) { mShaderDirty = true; });
-    mEnableShadowsDebugConnection = mGraphicsEngine->pEnableShadowsDebug.connect(
+    mEnableShadowsDebugConnection = mSettings->mGraphics.pEnableShadowsDebug.connect(
         [this](bool) { mShaderDirty = true; });
-    mEnableShadowsConnection = mGraphicsEngine->pEnableShadows.connect(
+    mEnableShadowsConnection = mSettings->mGraphics.pEnableShadows.connect(
         [this](bool) { mShaderDirty = true; });
-    mEnableHDRConnection = mGraphicsEngine->pEnableHDR.connect(
+    mEnableHDRConnection = mSettings->mGraphics.pEnableHDR.connect(
         [this](bool) { mShaderDirty = true; });
-    mLightingQualityConnection = mGraphicsEngine->pLightingQuality.connect(
+    mLightingQualityConnection = mSettings->mGraphics.pLightingQuality.connect(
         [this](int) { mShaderDirty = true; });
     mProperties->mEnableTilesDebug.connect(
         [this](bool) { mShaderDirty = true; });
@@ -105,11 +105,11 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
 
 PlanetShader::~PlanetShader() {
   delete mFontTexture;
-  mGraphicsEngine->pEnableLighting.disconnect(mEnableLightingConnection);
-  mGraphicsEngine->pEnableShadowsDebug.disconnect(mEnableShadowsDebugConnection);
-  mGraphicsEngine->pEnableShadows.disconnect(mEnableShadowsConnection);
-  mGraphicsEngine->pLightingQuality.disconnect(mLightingQualityConnection);
-  mGraphicsEngine->pEnableHDR.disconnect(mEnableHDRConnection);
+  mSettings->mGraphics.pEnableLighting.disconnect(mEnableLightingConnection);
+  mSettings->mGraphics.pEnableShadowsDebug.disconnect(mEnableShadowsDebugConnection);
+  mSettings->mGraphics.pEnableShadows.disconnect(mEnableShadowsConnection);
+  mSettings->mGraphics.pLightingQuality.disconnect(mLightingQualityConnection);
+  mSettings->mGraphics.pEnableHDR.disconnect(mEnableHDRConnection);
 
   mGuiManager->getGui()->unregisterCallback("lodBodies.setColormap");
 }
@@ -137,15 +137,15 @@ void PlanetShader::compile() {
   cs::utils::replaceString(mFragmentSource, "$COLOR_MAPPING_TYPE",
       cs::utils::toString(static_cast<int>(mProperties->mColorMappingType.get())));
   cs::utils::replaceString(mFragmentSource, "$ENABLE_LIGHTING",
-      cs::utils::toString(mGraphicsEngine->pEnableLighting.get()));
+      cs::utils::toString(mSettings->mGraphics.pEnableLighting.get()));
   cs::utils::replaceString(
-      mFragmentSource, "$ENABLE_HDR", cs::utils::toString(mGraphicsEngine->pEnableHDR.get()));
+      mFragmentSource, "$ENABLE_HDR", cs::utils::toString(mSettings->mGraphics.pEnableHDR.get()));
   cs::utils::replaceString(mFragmentSource, "$ENABLE_SHADOWS_DEBUG",
-      cs::utils::toString(mGraphicsEngine->pEnableShadowsDebug.get()));
+      cs::utils::toString(mSettings->mGraphics.pEnableShadowsDebug.get()));
   cs::utils::replaceString(mFragmentSource, "$ENABLE_SHADOWS",
-      cs::utils::toString(mGraphicsEngine->pEnableShadows.get()));
+      cs::utils::toString(mSettings->mGraphics.pEnableShadows.get()));
   cs::utils::replaceString(mFragmentSource, "$LIGHTING_QUALITY",
-      cs::utils::toString(mGraphicsEngine->pLightingQuality.get()));
+      cs::utils::toString(mSettings->mGraphics.pLightingQuality.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_TILE_BORDER",
       cs::utils::toString(mProperties->mEnableTilesDebug.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_LAT_LONG_LABELS",
@@ -156,7 +156,7 @@ void PlanetShader::compile() {
       mFragmentSource, "$MIX_COLORS", cs::utils::toString(mProperties->mEnableColorMixing.get()));
 
   cs::utils::replaceString(mVertexSource, "$LIGHTING_QUALITY",
-      cs::utils::toString(mGraphicsEngine->pLightingQuality.get()));
+      cs::utils::toString(mSettings->mGraphics.pLightingQuality.get()));
   cs::utils::replaceString(mVertexSource, "$TERRAIN_PROJECTION_TYPE",
       cs::utils::toString(static_cast<int>(mProperties->mTerrainProjectionType.get())));
 
@@ -188,7 +188,7 @@ void PlanetShader::bind() {
   mShader->SetUniform(loc, mProperties->mSlopeMax.get());
 
   loc = mShader->GetUniformLocation("ambientBrightness");
-  mShader->SetUniform(loc, mGraphicsEngine->pAmbientBrightness.get());
+  mShader->SetUniform(loc, mSettings->mGraphics.pAmbientBrightness.get());
 
   loc = mShader->GetUniformLocation("texGamma");
   mShader->SetUniform(loc, mProperties->mTextureGamma.get());

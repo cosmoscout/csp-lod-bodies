@@ -284,9 +284,9 @@ void Plugin::init() {
       IMGs.push_back(img);
     }
 
-    auto body = std::make_shared<LodBody>(mGraphicsEngine, mSolarSystem, mProperties, mGuiManager,
-        anchor->second.mCenter, anchor->second.mFrame, mGLResources, DEMs, IMGs, tStartExistence,
-        tEndExistence);
+    auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem, mProperties,
+        mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources, DEMs, IMGs,
+        tStartExistence, tEndExistence);
 
     mSolarSystem->registerBody(body);
 

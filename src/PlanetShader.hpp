@@ -23,7 +23,7 @@ class GuiManager;
 } // namespace cs::core
 
 namespace cs::graphics {
-class GraphicsEngine;
+class Settings;
 } // namespace cs::graphics
 
 namespace csp::lodbodies {
@@ -34,9 +34,9 @@ class PlanetShader : public TerrainShader {
   cs::utils::Property<bool> pTextureIsRGB  = true;
   cs::utils::Property<bool> pEnableTexture = true; ///< If false the image data will not be drawn.
 
-  PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<Plugin::Properties> const&                pProperties,
-      std::shared_ptr<cs::core::GuiManager> const&              pGuiManager);
+  PlanetShader(std::shared_ptr<cs::core::Settings> const& settings,
+      std::shared_ptr<Plugin::Properties> const&          pProperties,
+      std::shared_ptr<cs::core::GuiManager> const&        pGuiManager);
   virtual ~PlanetShader();
 
   void setSun(glm::vec3 const& direction, float illuminance);
@@ -47,19 +47,19 @@ class PlanetShader : public TerrainShader {
  private:
   void compile() override;
 
-  std::shared_ptr<cs::core::GraphicsEngine> mGraphicsEngine;
-  std::shared_ptr<cs::core::GuiManager>     mGuiManager;
-  std::shared_ptr<Plugin::Properties>       mProperties;
-  bool                                      mColorscaleTextureDirty       = true;
-  glm::vec3                                 mSunDirection                 = glm::vec3(0, 1, 0);
-  float                                     mSunIlluminance               = 1.f;
-  VistaTexture*                             mFontTexture                  = nullptr;
-  unsigned                                  mLutTexID                     = 0;
-  int                                       mEnableLightingConnection     = -1;
-  int                                       mEnableShadowsDebugConnection = -1;
-  int                                       mEnableShadowsConnection      = -1;
-  int                                       mLightingQualityConnection    = -1;
-  int                                       mEnableHDRConnection          = -1;
+  std::shared_ptr<cs::core::Settings>   mSettings;
+  std::shared_ptr<cs::core::GuiManager> mGuiManager;
+  std::shared_ptr<Plugin::Properties>   mProperties;
+  bool                                  mColorscaleTextureDirty       = true;
+  glm::vec3                             mSunDirection                 = glm::vec3(0, 1, 0);
+  float                                 mSunIlluminance               = 1.f;
+  VistaTexture*                         mFontTexture                  = nullptr;
+  unsigned                              mLutTexID                     = 0;
+  int                                   mEnableLightingConnection     = -1;
+  int                                   mEnableShadowsDebugConnection = -1;
+  int                                   mEnableShadowsConnection      = -1;
+  int                                   mLightingQualityConnection    = -1;
+  int                                   mEnableHDRConnection          = -1;
 
   static std::map<std::string, cs::graphics::ColorMap> mColorMaps;
 };

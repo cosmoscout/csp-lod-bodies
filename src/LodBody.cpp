@@ -18,21 +18,23 @@ namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-    std::shared_ptr<cs::core::SolarSystem> const&                 solarSystem,
-    std::shared_ptr<Plugin::Properties> const&                    pProperties,
+LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
+    std::shared_ptr<cs::core::GraphicsEngine> const&        graphicsEngine,
+    std::shared_ptr<cs::core::SolarSystem> const&           solarSystem,
+    std::shared_ptr<Plugin::Properties> const&              pProperties,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
     std::vector<std::shared_ptr<TileSource>> const& dems,
     std::vector<std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
     double tEndExistence)
     : cs::scene::CelestialBody(sCenterName, sFrameName, tStartExistence, tEndExistence)
+    , mSettings(settings)
     , mGraphicsEngine(graphicsEngine)
     , mSolarSystem(solarSystem)
     , mProperties(pProperties)
     , mGuiManager(pGuiManager)
     , mPlanet(glResources)
-    , mShader(graphicsEngine, pProperties, pGuiManager)
+    , mShader(settings, pProperties, pGuiManager)
     , mRadii(cs::core::SolarSystem::getRadii(sCenterName))
     , mDEMtileSources(dems)
     , mIMGtileSources(imgs) {
@@ -81,7 +83,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
   });
 
   // scene-wide settings -----------------------------------------------------
-  mHeightScaleConnection = mGraphicsEngine->pHeightScale.connectAndTouch(
+  mHeightScaleConnection = mSettings->mGraphics.pHeightScale.connectAndTouch(
       [this](float val) { mPlanet.setHeightScale(val); });
 
   mProperties->mLODFactor.connect([this](float val) { mPlanet.setLODFactor(val); });
@@ -102,7 +104,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
 
 LodBody::~LodBody() {
   mGraphicsEngine->unregisterCaster(&mPlanet);
-  mGraphicsEngine->pHeightScale.disconnect(mHeightScaleConnection);
+  mSettings->mGraphics.pHeightScale.disconnect(mHeightScaleConnection);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +160,7 @@ void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
 
     if (mSun) {
       double sunIlluminance = 1.0;
-      if (mGraphicsEngine->pEnableHDR.get()) {
+      if (mSettings->mGraphics.pEnableHDR.get()) {
         sunIlluminance = mSolarSystem->getSunIlluminance(getWorldTransform()[3]);
       }
 
