@@ -245,7 +245,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
 
     if (bxyN[1] < 0) {
       // crossed to SW neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][i];
+      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
 
       if (bxy[0] >= 8) {
         bxyN[1] = bxyN[2];
@@ -255,7 +255,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
       }
     } else if (bxyN[1] >= mNSide) {
       // crosed to NE neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][i];
+      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
 
       if (bxy[0] < 4) {
         bxyN[1] = bxyN[2];
@@ -265,7 +265,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
       }
     } else if (bxyN[2] < 0) {
       // crossed to SE neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][i];
+      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
 
       if (bxy[0] >= 8) {
         bxyN[2] = bxyN[1];
@@ -275,7 +275,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
       }
     } else if (bxyN[2] >= mNSide) {
       // crossed to NW neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][i];
+      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
 
       if (bxy[0] < 4) {
         bxyN[2] = bxyN[1];
@@ -327,7 +327,7 @@ glm::dvec3 HEALPixLevel::getPatchOffsetScale(glm::int64 patchIdx) const {
 /* explicit */
 HEALPixLevel::HEALPixLevel(int level)
     : mLevel(level)
-    , mNSide(1 << level) {
+    , mNSide(int64_t(1) << int64_t(level)) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -651,7 +651,7 @@ int HEALPix::convertLngLat2Base(glm::dvec2 const& lngLat) {
   if (octant % 2 == 0) {
     if (y > ySep - x * slope) //!< north patch
     {
-      return octant * 0.5;
+      return octant / 2;
     }
     if (y < -ySep + x * slope) //!< south patch
     {
@@ -660,16 +660,16 @@ int HEALPix::convertLngLat2Base(glm::dvec2 const& lngLat) {
   } else {
     if (y > x * slope) //!< north patch
     {
-      return octant * 0.5;
+      return static_cast<int32_t>(octant * 0.5);
     }
     if (y < -x * slope) //!< south patch
     {
-      return 8 + octant * 0.5;
+      return static_cast<int32_t>(8 + octant * 0.5);
     }
   }
 
   // diamond at equator
-  return 4 + (octant % 7 + 1) * 0.5;
+  return static_cast<int32_t>(4 + (octant % 7 + 1) * 0.5);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

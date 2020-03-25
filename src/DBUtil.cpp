@@ -96,7 +96,7 @@ bool readTileHeader(FILE* file, glm::int64 sizeTile, TileId const& tileId,
   std::fread(childIndices.data(), sizeof(glm::uint64), childIndices.size(), file);
 
   for (std::size_t i = 0; i < childIndices.size(); ++i) {
-    TileId childId = HEALPix::getChildTileId(mappedTileId, i);
+    TileId childId = HEALPix::getChildTileId(mappedTileId, static_cast<int>(i));
 
     if (childIndices[i] != InvalidIndex) {
       indexMap.insert(std::unordered_map<TileId, glm::int64>::value_type(childId, childIndices[i]));

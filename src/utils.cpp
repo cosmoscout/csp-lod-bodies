@@ -256,8 +256,10 @@ bool intersectPlanet(
       glm::dvec4 entry     = origin + direction * min_dist;
       glm::dvec4 exit      = origin + direction * max_dist;
       auto       sampleDir = (exit - entry).xyz();
-      glm::dvec3 sampleCartesian, lastSampleCartesian;
-      glm::dvec3 sampleLngLatHeight, lastSampleLngLatHeight;
+      glm::dvec3 lastSampleCartesian{};
+      glm::dvec3 sampleCartesian{};
+      glm::dvec3 lastSampleLngLatHeight{};
+      glm::dvec3 sampleLngLatHeight{};
       double     height(0.0), lastHeight(0.0);
       bool       first_sample(true);
 

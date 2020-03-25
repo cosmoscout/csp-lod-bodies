@@ -386,7 +386,7 @@ void VistaPlanet::setEquatorialRadius(float radius) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float VistaPlanet::getEquatorialRadius() const {
+double VistaPlanet::getEquatorialRadius() const {
   return mParams.mEquatorialRadius;
 }
 
@@ -400,7 +400,7 @@ void VistaPlanet::setPolarRadius(float radius) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float VistaPlanet::getPolarRadius() const {
+double VistaPlanet::getPolarRadius() const {
   return mParams.mPolarRadius;
 }
 
@@ -414,7 +414,7 @@ void VistaPlanet::setHeightScale(float scale) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float VistaPlanet::getHeightScale() const {
+double VistaPlanet::getHeightScale() const {
   return mParams.mHeightScale;
 }
 
@@ -426,7 +426,7 @@ void VistaPlanet::setLODFactor(float lodFactor) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float VistaPlanet::getLODFactor() const {
+double VistaPlanet::getLODFactor() const {
   return mParams.mLodFactor;
 }
 
