@@ -235,6 +235,8 @@ TileSourceWebMapService::TileSourceWebMapService()
     return loadImpl<glm::uint8>(this, level, patchIdx);
   if (mFormat == TileDataType::eU8Vec3)
     return loadImpl<glm::u8vec3>(this, level, patchIdx);
+
+  throw std::domain_error(fmt::format("Unsupported format: {}!", mFormat));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,8 +248,8 @@ bool TileSourceWebMapService::getXY(int level, glm::int64 patchIdx, int& x, int&
 
   glm::i64vec3 baseXY = HEALPix::getBaseXY(TileId(level, patchIdx));
 
-  x = basePatchExtends[baseXY[0]][0] * (1 << level) + baseXY[1];
-  y = basePatchExtends[baseXY[0]][1] * (1 << level) + baseXY[2];
+  x = static_cast<int32_t>(basePatchExtends[baseXY[0]][0] * (1 << level) + baseXY[1]);
+  y = static_cast<int32_t>(basePatchExtends[baseXY[0]][1] * (1 << level) + baseXY[2]);
 
   if (basePatchExtends[baseXY[0]][0] == 0 && basePatchExtends[baseXY[0]][1] == 4) {
     // check if tile is located above the diagonal

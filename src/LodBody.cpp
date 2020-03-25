@@ -51,8 +51,8 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
   mPlanet.setLODFactor(mProperties->mLODFactor.get());
 
   // per-planet settings -----------------------------------------------------
-  mPlanet.setEquatorialRadius(mRadii[0]);
-  mPlanet.setPolarRadius(mRadii[0]);
+  mPlanet.setEquatorialRadius(static_cast<float>(mRadii[0]));
+  mPlanet.setPolarRadius(static_cast<float>(mRadii[0]));
   pVisibleRadius = mRadii[0];
 
   pActiveTileSourceDEM.connect([this](std::string const& val) {
@@ -166,7 +166,7 @@ void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
           glm::normalize(glm::inverse(getWorldTransform()) *
                          glm::dvec4(mSolarSystem->getSunDirection(getWorldTransform()[3]), 0.0));
 
-      mShader.setSun(sunDirection, sunIlluminance);
+      mShader.setSun(sunDirection, static_cast<float>(sunIlluminance));
     }
   }
 }

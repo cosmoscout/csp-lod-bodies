@@ -81,20 +81,20 @@ class VistaPlanet : public IVistaOpenGLDraw, public cs::graphics::ShadowCaster {
   /// Set planet equatorial radius. This is a potentially expensive operation since it invalidates
   /// the cached bounding volume for all tiles and requires recalculating them.
   void  setEquatorialRadius(float radius);
-  float getEquatorialRadius() const;
+  double getEquatorialRadius() const;
 
   /// Set planet polar radius. This is a potentially expensive operation since it invalidates
   /// the cached bounding volume for all tiles and requires recalculating them.
   void  setPolarRadius(float radius);
-  float getPolarRadius() const;
+  double getPolarRadius() const;
 
   /// Set factor by which to scale height data. This is a potentially expensive operation since it
   /// invalidates the cached bounding volume for all tiles and requires recalculating them.
   void  setHeightScale(float scale);
-  float getHeightScale() const;
+  double getHeightScale() const;
 
   void  setLODFactor(float lodFactor);
-  float getLODFactor() const;
+  double getLODFactor() const;
 
   void setMinLevel(int minLevel);
   int  getMinLevel() const;
