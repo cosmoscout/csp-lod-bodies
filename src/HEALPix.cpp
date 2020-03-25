@@ -327,7 +327,7 @@ glm::dvec3 HEALPixLevel::getPatchOffsetScale(glm::int64 patchIdx) const {
 /* explicit */
 HEALPixLevel::HEALPixLevel(int level)
     : mLevel(level)
-    , mNSide(int64_t(1) << int64_t(level)) {
+    , mNSide(int64_t(1) << level) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
