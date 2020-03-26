@@ -397,7 +397,7 @@ void TileRenderer::preRenderTiles(cs::graphics::ShadowMap* shadowMap) {
     shader->SetUniform(shader->GetUniformLocation("VP_shadowBias"), shadowMap->getBias());
     shader->SetUniform(
         shader->GetUniformLocation("VP_shadowCascades"), (int)shadowMap->getMaps().size());
-    for (int i = 0; i < shadowMap->getMaps().size(); ++i) {
+    for (size_t i = 0; i < shadowMap->getMaps().size(); ++i) {
       GLint locSamplers = glGetUniformLocation(
           shader->GetProgram(), ("VP_shadowMaps[" + std::to_string(i) + "]").c_str());
       GLint locMatrices = glGetUniformLocation(shader->GetProgram(),
@@ -435,7 +435,7 @@ void TileRenderer::renderTiles(
   int missingIMG = 0;
 
   // iterate over both std::vector<RenderData*>s together
-  for (int i(0); i < renderDEM.size(); ++i) {
+  for (size_t i(0); i < renderDEM.size(); ++i) {
     // get data associated with nodes
     RenderDataDEM* rdDEM = dynamic_cast<RenderDataDEM*>(renderDEM[i]);
     RenderDataImg* rdIMG =

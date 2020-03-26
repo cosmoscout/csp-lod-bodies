@@ -151,7 +151,7 @@ float MinMaxPyramid::getData(
   // pyramid layer address of searched value
   int x(0);
   int y(0);
-  for (int i(0); i < qSize; ++i) {
+  for (size_t i(0); i < qSize; ++i) {
     int step = int(std::pow(2, qSize - (i + 1)));
     switch (quadrants[i]) {
     case 1:

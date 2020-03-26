@@ -31,11 +31,11 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     , mSolarSystem(solarSystem)
     , mProperties(pProperties)
     , mGuiManager(pGuiManager)
+    , mDEMtileSources(dems)
+    , mIMGtileSources(imgs)
     , mPlanet(glResources)
     , mShader(graphicsEngine, pProperties, pGuiManager)
-    , mRadii(cs::core::SolarSystem::getRadii(sCenterName))
-    , mDEMtileSources(dems)
-    , mIMGtileSources(imgs) {
+    , mRadii(cs::core::SolarSystem::getRadii(sCenterName)) {
 
   pVisible.connect([this](bool val) {
     if (val)
