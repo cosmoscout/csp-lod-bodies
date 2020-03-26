@@ -49,10 +49,10 @@ class VistaPlanet : public IVistaOpenGLDraw, public cs::graphics::ShadowCaster {
   virtual ~VistaPlanet();
 
   virtual void doShadows() override;
-  virtual bool getWorldTransform(VistaTransformMatrix& matTransform) const;
+  virtual bool getWorldTransform(VistaTransformMatrix& matTransform) const override;
 
-  virtual bool Do();
-  virtual bool GetBoundingBox(VistaBoundingBox& bb);
+  virtual bool Do() override;
+  virtual bool GetBoundingBox(VistaBoundingBox& bb) override;
 
   void       setWorldTransform(glm::dmat4 const& mat);
   glm::dmat4 getWorldTransform() const;
