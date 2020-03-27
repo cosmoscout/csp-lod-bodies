@@ -403,8 +403,8 @@ void TileRenderer::preRenderTiles(cs::graphics::ShadowMap* shadowMap) {
       GLint locMatrices = glGetUniformLocation(shader->GetProgram(),
           ("VP_shadowProjectionViewMatrices[" + std::to_string(i) + "]").c_str());
 
-      shadowMap->getMaps()[i]->Bind(GL_TEXTURE0 + texUnitShadow + i);
-      glUniform1i(locSamplers, texUnitShadow + i);
+      shadowMap->getMaps()[i]->Bind(GL_TEXTURE0 + texUnitShadow + static_cast<int>(i));
+      glUniform1i(locSamplers, texUnitShadow + static_cast<int>(i));
 
       auto mat = shadowMap->getShadowMatrices()[i];
       glUniformMatrix4fv(locMatrices, 1, GL_FALSE, mat.GetData());
