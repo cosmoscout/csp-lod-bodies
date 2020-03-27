@@ -146,9 +146,7 @@ double getHeight(
     hP1              = ptr[vB + sizeY * (uB + 1)];
     hP2              = ptr[vB + 1 + sizeY * uB];
     hPP              = ptr[vB + 1 + sizeY * (uB + 1)];
-  }
-
-  if (child->getTileDataType() == TileDataType::eUInt8) {
+  } else {
     const unsigned char* ptr = child->getTile()->getTypedPtr<unsigned char>();
     h                        = ptr[vB + sizeY * uB];
     hP1                      = ptr[vB + sizeY * (uB + 1)];
@@ -337,8 +335,7 @@ bool intersectPlanet(
           hP1              = ptr[vB + sizeY * (uB + 1)];
           hP2              = ptr[vB + 1 + sizeY * uB];
           hPP              = ptr[vB + 1 + sizeY * (uB + 1)];
-        }
-        if (parent->getTileDataType() == TileDataType::eUInt8) {
+        } else {
           const unsigned char* ptr = parent->getTile()->getTypedPtr<unsigned char>();
           height                   = ptr[vB + sizeY * uB];
           hP1                      = ptr[vB + sizeY * (uB + 1)];
