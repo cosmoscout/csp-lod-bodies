@@ -136,7 +136,7 @@ void TileTextureArray::releaseGPU(RenderData* rdata) {
     // avoid erasing an element in the middle of std::vector,
     // just invalidate the pointer and skip NULL entries when uploading
     if (rIt != mUploadQueue.end())
-      *rIt = NULL;
+      *rIt = nullptr;
   }
 }
 
@@ -162,7 +162,7 @@ void TileTextureArray::processQueue(int maxItems) {
   int count = 0;
 
   while (!mUploadQueue.empty() && count < maxItems) {
-    if (mFreeLayers.size() == 0) {
+    if (mFreeLayers.empty()) {
       break;
     }
 
@@ -170,7 +170,7 @@ void TileTextureArray::processQueue(int maxItems) {
 
     // rdata could be NULL if a tile is removed before it is ever
     // uploaded to the GPU, c.f. releaseGPU
-    if (rdata != NULL) {
+    if (rdata != nullptr) {
       allocateLayer(rdata);
       ++count;
     }
@@ -230,7 +230,7 @@ void TileTextureArray::allocateTexture(TileDataType dataType) {
 
   glBindTexture(GL_TEXTURE_2D_ARRAY, mTexId);
   glTexImage3D(
-      GL_TEXTURE_2D_ARRAY, level, mIformat, width, height, depth, border, mFormat, mType, NULL);
+      GL_TEXTURE_2D_ARRAY, level, mIformat, width, height, depth, border, mFormat, mType, nullptr);
 
   // set filter and wrapping parameters
   glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -12,7 +12,7 @@ namespace csp::lodbodies {
 
 TileNode::TileNode()
     : mTile()
-    , mParent(NULL)
+    , mParent(nullptr)
     , mChildren()
     , mChildMaxLevel(0) {
 }
@@ -21,7 +21,7 @@ TileNode::TileNode()
 
 TileNode::TileNode(TileBase* tile, int childMaxLevel)
     : mTile(tile)
-    , mParent(NULL)
+    , mParent(nullptr)
     , mChildren()
     , mChildMaxLevel(childMaxLevel) {
   if (mChildMaxLevel < 0 && mTile)
@@ -32,7 +32,7 @@ TileNode::TileNode(TileBase* tile, int childMaxLevel)
 
 TileNode::TileNode(std::unique_ptr<TileBase>&& tile, int childMaxLevel)
     : mTile(std::move(tile))
-    , mParent(NULL)
+    , mParent(nullptr)
     , mChildren()
     , mChildMaxLevel(childMaxLevel) {
   if (mChildMaxLevel < 0 && mTile)
@@ -97,7 +97,7 @@ TileNode* TileNode::getChild(int childIdx) const {
 
 TileNode* TileNode::releaseChild(int childIdx) {
   if (mChildren[childIdx])
-    mChildren[childIdx]->setParent(NULL);
+    mChildren[childIdx]->setParent(nullptr);
 
   return mChildren[childIdx].release();
 }
@@ -107,7 +107,7 @@ TileNode* TileNode::releaseChild(int childIdx) {
 void TileNode::setChild(int childIdx, TileNode* child) {
   // unset OLD parent
   if (mChildren[childIdx])
-    mChildren[childIdx]->setParent(NULL);
+    mChildren[childIdx]->setParent(nullptr);
 
   mChildren[childIdx].reset(child);
 

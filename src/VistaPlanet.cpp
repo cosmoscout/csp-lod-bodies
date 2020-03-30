@@ -31,9 +31,9 @@ VistaPlanet::VistaPlanet(std::shared_ptr<GLResources> const& glResources)
     , mParams()
     , mLodVisitor(mParams)
     , mRenderer(mParams)
-    , mSrcDEM(NULL)
+    , mSrcDEM(nullptr)
     , mTreeMgrDEM(mParams, glResources)
-    , mSrcIMG(NULL)
+    , mSrcIMG(nullptr)
     , mTreeMgrIMG(mParams, glResources)
     , mLastFrameClock(GetVistaSystem()->GetFrameClock())
     , mSumFrameClock(0.0)
@@ -139,9 +139,9 @@ void VistaPlanet::setDEMSource(TileSource* srcDEM) {
   if (mSrcDEM) {
     mSrcDEM->fini();
 
-    mLodVisitor.setTreeManagerDEM(NULL);
-    mRenderer.setTreeManagerDEM(NULL);
-    mTreeMgrDEM.setSource(NULL);
+    mLodVisitor.setTreeManagerDEM(nullptr);
+    mRenderer.setTreeManagerDEM(nullptr);
+    mTreeMgrDEM.setSource(nullptr);
   }
 
   mSrcDEM = srcDEM;
@@ -169,9 +169,9 @@ void VistaPlanet::setIMGSource(TileSource* srcIMG) {
   if (mSrcIMG) {
     mSrcIMG->fini();
 
-    mLodVisitor.setTreeManagerIMG(NULL);
-    mRenderer.setTreeManagerIMG(NULL);
-    mTreeMgrIMG.setSource(NULL);
+    mLodVisitor.setTreeManagerIMG(nullptr);
+    mRenderer.setTreeManagerIMG(nullptr);
+    mTreeMgrIMG.setSource(nullptr);
   }
 
   mSrcIMG = srcIMG;
@@ -360,7 +360,7 @@ glm::dmat4 VistaPlanet::getModelviewMatrix() const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::dmat4 VistaPlanet::getProjectionMatrix() const {
+glm::dmat4 VistaPlanet::getProjectionMatrix() {
   GLfloat glMat[16];
   glGetFloatv(GL_PROJECTION_MATRIX, &glMat[0]);
 
@@ -369,7 +369,7 @@ glm::dmat4 VistaPlanet::getProjectionMatrix() const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::ivec4 VistaPlanet::getViewport() const {
+glm::ivec4 VistaPlanet::getViewport() {
   GLint glVP[4];
   glGetIntegerv(GL_VIEWPORT, &glVP[0]);
 

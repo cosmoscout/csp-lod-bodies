@@ -27,6 +27,10 @@
 
 #include <tiffio.h>
 
+#if defined(_WIN32) && defined(min)
+#undef min
+#endif
+
 namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,13 +70,13 @@ bool loadImpl(
       if (which == CopyPixels::eAll) {
         TIFFReadScanline(data, &tile->data()[257 * y], y);
       } else if (which == CopyPixels::eAboveDiagonal) {
-        std::array<float, 257> tmp;
+        std::array<float, 257> tmp{};
         TIFFReadScanline(data, tmp.data(), y);
         int offset = 257 * y;
         int count  = 257 - y - 1;
         std::memcpy(tile->data().data() + offset, tmp.data(), count * sizeof(float));
       } else if (which == CopyPixels::eBelowDiagonal) {
-        std::array<float, 257> tmp;
+        std::array<float, 257> tmp{};
         TIFFReadScanline(data, tmp.data(), y);
         int offset = 257 * y + (257 - y);
         int count  = y;
@@ -128,7 +132,7 @@ void fillDiagonal(TileNode* node) {
 
 template <typename T>
 TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 patchIdx) {
-  TileNode* node = new TileNode();
+  auto* node = new TileNode();
 
   node->setTile(new Tile<T>(level, patchIdx));
   node->setChildMaxLevel(std::min(level + 1, source->getMaxLevel()));

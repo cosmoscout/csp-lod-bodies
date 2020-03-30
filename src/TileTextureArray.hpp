@@ -60,8 +60,8 @@ class TileTextureArray : private boost::noncopyable {
   void allocateLayer(RenderData* rdata);
   void releaseLayer(RenderData* rdata);
 
-  void preUpload();
-  void postUpload();
+  void        preUpload();
+  static void postUpload();
 
   GLuint       mTexId;
   GLenum       mIformat;

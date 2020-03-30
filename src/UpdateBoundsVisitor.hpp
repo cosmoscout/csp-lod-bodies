@@ -20,9 +20,9 @@ class UpdateBoundsVisitor : public TileVisitor<UpdateBoundsVisitor> {
   explicit UpdateBoundsVisitor(TreeManagerBase* treeMgrDEM, PlanetParameters const& params);
 
  protected:
-  bool preTraverse();
-  bool preVisitRoot(TileId const& tileId);
-  bool preVisit(TileId const& tileId);
+  static bool preTraverse();
+  bool        preVisitRoot(TileId const& tileId);
+  bool        preVisit(TileId const& tileId);
 
   friend class TileVisitor<UpdateBoundsVisitor>;
 

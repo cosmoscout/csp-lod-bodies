@@ -19,7 +19,7 @@ class TerrainShader {
  public:
   TerrainShader() {
   }
-  TerrainShader(std::string const& vertexSource, std::string const& fragmentSource);
+  TerrainShader(std::string vertexSource, std::string fragmentSource);
   virtual ~TerrainShader();
 
   virtual void bind();

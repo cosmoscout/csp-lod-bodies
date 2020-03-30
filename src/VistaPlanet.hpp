@@ -118,9 +118,9 @@ class VistaPlanet : public IVistaOpenGLDraw, public cs::graphics::ShadowCaster {
   void renderTiles(int frameCount, glm::dmat4 const& matVM, glm::fmat4x4 const& matP,
       cs::graphics::ShadowMap* shadowMap);
 
-  glm::dmat4 getModelviewMatrix() const;
-  glm::dmat4 getProjectionMatrix() const;
-  glm::ivec4 getViewport() const;
+  glm::dmat4        getModelviewMatrix() const;
+  static glm::dmat4 getProjectionMatrix();
+  static glm::ivec4 getViewport();
 
   static glm::uint8 const sFlagTileBoundsInvalid = 0x01;
   static bool             sGlewInitialized;

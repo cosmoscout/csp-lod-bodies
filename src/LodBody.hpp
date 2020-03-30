@@ -45,7 +45,7 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   cs::utils::Property<std::string> pActiveTileSourceIMG;
 
   LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<cs::core::SolarSystem> const&        solarSystem,
+      std::shared_ptr<cs::core::SolarSystem>               solarSystem,
       std::shared_ptr<Plugin::Properties> const&           pProperties,
       std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
       std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,

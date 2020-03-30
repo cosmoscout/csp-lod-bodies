@@ -63,8 +63,8 @@ bool testInFrustum(Frustum const& frustum, BoundingBox<double> const& tb) {
 
     // test if any BB corner is inside the halfspace defined
     // by the current plane
-    for (std::size_t j = 0; j < tbPnts.size(); ++j) {
-      if (glm::dot(normal, tbPnts[j]) >= d) {
+    for (auto& tbPnt : tbPnts) {
+      if (glm::dot(normal, tbPnt) >= d) {
         // corner j is inside - stop testing
         outside = false;
         break;
@@ -93,7 +93,7 @@ bool testFrontFacing(glm::dvec3 const& camPos, PlanetParameters const* params,
   auto minHeight(std::numeric_limits<float>::max());
   for (int i(0); i < treeMgrDEM->getTree()->sNumRoots; ++i) {
     auto  tile       = treeMgrDEM->getTree()->getRoot(i)->getTile();
-    auto& castedTile = static_cast<Tile<float> const&>(*tile);
+    auto& castedTile = dynamic_cast<Tile<float> const&>(*tile);
     minHeight        = std::min(minHeight, castedTile.getMinMaxPyramid()->getMin());
   }
 
@@ -113,9 +113,9 @@ bool testFrontFacing(glm::dvec3 const& camPos, PlanetParameters const* params,
           glm::dvec3(tbMax[0], tbMax[1], tbMax[2]), glm::dvec3(tbMin[0], tbMax[1], tbMax[2])}};
 
   // Simple ray-sphere intersection test for every corner point
-  for (std::size_t j = 0; j < tbPnts.size(); ++j) {
-    double     dRayLength = glm::length(tbPnts[j] - camPos);
-    glm::dvec3 vRayDir    = (tbPnts[j] - camPos) / dRayLength;
+  for (auto& tbPnt : tbPnts) {
+    double     dRayLength = glm::length(tbPnt - camPos);
+    glm::dvec3 vRayDir    = (tbPnt - camPos) / dRayLength;
     double     b          = glm::dot(camPos, vRayDir);
     double     c          = glm::dot(camPos, camPos) - dProxyRadius * dProxyRadius;
     double     fDet       = b * b - c;
@@ -145,7 +145,7 @@ bool childrenAvailable(TileNode* node, TreeManagerBase* treeMgr) {
     TileNode* child = node->getChild(i);
 
     // child is not loaded -> can not refine
-    if (child == NULL) {
+    if (child == nullptr) {
       return false;
     }
 
@@ -168,7 +168,7 @@ bool childrenAvailable(TileNode* node, TreeManagerBase* treeMgr) {
 // is found but there is renderdata for the tile @a tileId, this will be
 // returned.
 RenderDataDEM* findParentRData(TreeManagerBase* treeMgr, TileId tileId) {
-  RenderDataDEM* rdata     = treeMgr->find<RenderDataDEM>(tileId);
+  auto*          rdata     = treeMgr->find<RenderDataDEM>(tileId);
   RenderDataDEM* origRdata = rdata;
 
   while (!rdata || !rdata->testFlag(RenderDataDEM::Flags::eRender)) {
@@ -196,11 +196,11 @@ RenderDataDEM* findParentRData(TreeManagerBase* treeMgr, TileId tileId) {
 /* explicit */
 LODVisitor::LODVisitor(
     PlanetParameters const& params, TreeManagerBase* treeMgrDEM, TreeManagerBase* treeMgrIMG)
-    : TileVisitor<LODVisitor>(
-          treeMgrDEM ? treeMgrDEM->getTree() : NULL, treeMgrIMG ? treeMgrIMG->getTree() : NULL)
+    : TileVisitor<LODVisitor>(treeMgrDEM ? treeMgrDEM->getTree() : nullptr,
+          treeMgrIMG ? treeMgrIMG->getTree() : nullptr)
     , mParams(&params)
-    , mTreeMgrDEM(NULL)
-    , mTreeMgrIMG(NULL)
+    , mTreeMgrDEM(nullptr)
+    , mTreeMgrIMG(nullptr)
     , mViewport()
     , mMatVM()
     , mMatP()
@@ -226,7 +226,7 @@ LODVisitor::LODVisitor(
 void LODVisitor::setTreeManagerDEM(TreeManagerBase* treeMgr) {
   // unset tree from OLD tree manager
   if (mTreeMgrDEM) {
-    setTreeDEM(NULL);
+    setTreeDEM(nullptr);
   }
 
   mStack.clear();
@@ -247,7 +247,7 @@ void LODVisitor::setTreeManagerDEM(TreeManagerBase* treeMgr) {
 void LODVisitor::setTreeManagerIMG(TreeManagerBase* treeMgr) {
   // unset tree from OLD tree manager
   if (mTreeMgrIMG) {
-    setTreeIMG(NULL);
+    setTreeIMG(nullptr);
   }
 
   mTreeMgrIMG = treeMgr;
@@ -291,14 +291,14 @@ bool LODVisitor::preTraverse() {
   for (int i = 0; i < TileQuadTree::sNumRoots; ++i) {
     if (mTreeDEM) {
       if (!mTreeDEM->getRoot(i)) {
-        mLoadDEM.push_back(TileId(0, i));
+        mLoadDEM.emplace_back(0, i);
         result = false;
       }
     }
 
     if (mTreeIMG) {
       if (!mTreeIMG->getRoot(i)) {
-        mLoadIMG.push_back(TileId(0, i));
+        mLoadIMG.emplace_back(0, i);
         result = false;
       }
     }
@@ -316,8 +316,8 @@ void LODVisitor::postTraverse() {
   // the RenderDataDEM of the parent (or the parent's parent or ...) will
   // be stored.
   for (auto rd : mRenderDEM) {
-    RenderDataDEM* rdDEM  = dynamic_cast<RenderDataDEM*>(rd);
-    TileId const&  tileId = rd->getNode()->getTileId();
+    auto*         rdDEM  = dynamic_cast<RenderDataDEM*>(rd);
+    TileId const& tileId = rd->getNode()->getTileId();
 
     auto nIds = HEALPix::getNeighbourIds(tileId);
 
@@ -369,26 +369,26 @@ bool LODVisitor::preVisitRoot(TileId const& tileId) {
 
   // track highest resolution nodes in this sub tree (in case there is
   // higher resolution image data than DEM data).
-  state.mLastDEM  = NULL;
-  state.mLastIMG  = NULL;
+  state.mLastDEM  = nullptr;
+  state.mLastIMG  = nullptr;
   state.mMaxLevel = 0;
 
   // fetch RenderDataDEM for visited node and mark as used in this frame
   if (mTreeMgrDEM && state.mNodeDEM) {
-    RenderDataDEM* rd = mTreeMgrDEM->find<RenderDataDEM>(state.mNodeDEM);
-    state.mRdDEM      = rd;
+    auto* rd     = mTreeMgrDEM->find<RenderDataDEM>(state.mNodeDEM);
+    state.mRdDEM = rd;
     state.mRdDEM->setLastFrame(mFrameCount);
   } else {
-    state.mRdDEM = NULL;
+    state.mRdDEM = nullptr;
   }
 
   // fetch RenderDataImg for visited node and mark as used in this frame
   if (mTreeMgrIMG && state.mNodeIMG) {
-    RenderDataImg* rd = mTreeMgrIMG->find<RenderDataImg>(state.mNodeIMG);
-    state.mRdIMG      = rd;
+    auto* rd     = mTreeMgrIMG->find<RenderDataImg>(state.mNodeIMG);
+    state.mRdIMG = rd;
     state.mRdIMG->setLastFrame(mFrameCount);
   } else {
-    state.mRdIMG = NULL;
+    state.mRdIMG = nullptr;
   }
 
   return visitNode(tileId);
@@ -416,8 +416,8 @@ bool LODVisitor::preVisit(TileId const& tileId) {
 
   // fetch RenderDataDEM for visited node and mark as used in this frame
   if (mTreeMgrDEM && !state.mLastDEM && state.mNodeDEM) {
-    RenderDataDEM* rd = mTreeMgrDEM->find<RenderDataDEM>(state.mNodeDEM);
-    state.mRdDEM      = rd;
+    auto* rd     = mTreeMgrDEM->find<RenderDataDEM>(state.mNodeDEM);
+    state.mRdDEM = rd;
     state.mRdDEM->setLastFrame(mFrameCount);
   } else {
     // copy value from parent state to ensure this matches state.mLastDEM
@@ -426,8 +426,8 @@ bool LODVisitor::preVisit(TileId const& tileId) {
 
   // fetch RenderDataImg for visited node and mark as used in this frame
   if (mTreeMgrIMG && !state.mLastIMG && state.mNodeIMG) {
-    RenderDataImg* rd = mTreeMgrIMG->find<RenderDataImg>(state.mNodeIMG);
-    state.mRdIMG      = rd;
+    auto* rd     = mTreeMgrIMG->find<RenderDataImg>(state.mNodeIMG);
+    state.mRdIMG = rd;
     state.mRdIMG->setLastFrame(mFrameCount);
   } else {
     // copy value from parent state to ensure this matches state.mLastIMG
@@ -483,14 +483,14 @@ bool LODVisitor::visitNode(TileId const& tileId) {
 bool LODVisitor::handleRefine(TileId const& tileId) {
   bool      result  = false;
   LODState& state   = getLODState();
-  TileNode* nodeDEM = !state.mLastDEM ? state.mNodeDEM : NULL;
-  TileNode* nodeIMG = !state.mLastIMG ? state.mNodeIMG : NULL;
+  TileNode* nodeDEM = !state.mLastDEM ? state.mNodeDEM : nullptr;
+  TileNode* nodeIMG = !state.mLastIMG ? state.mNodeIMG : nullptr;
 
   // test if nodes can be refined
   bool childrenDemAvailable = nodeDEM ? childrenAvailable(nodeDEM, mTreeMgrDEM) : false;
   bool childrenImgAvailable = nodeIMG ? childrenAvailable(nodeIMG, mTreeMgrIMG) : false;
 
-  if (mTreeMgrDEM != NULL && mTreeMgrIMG != NULL) {
+  if (mTreeMgrDEM != nullptr && mTreeMgrIMG != nullptr) {
     // DEM and IMG data
 
     // request to load missing children
@@ -511,7 +511,7 @@ bool LODVisitor::handleRefine(TileId const& tileId) {
       // can not refine, draw this level
       drawLevel();
     }
-  } else if (mTreeMgrDEM != NULL && mTreeMgrIMG == NULL) {
+  } else if (mTreeMgrDEM != nullptr && mTreeMgrIMG == nullptr) {
     // DEM data only
 
     if (childrenDemAvailable) {
@@ -594,7 +594,7 @@ bool LODVisitor::testVisible(TileId const& tileId, TreeManagerBase* treeMgrDEM) 
     // Get MinMaxPyramid of last known DEM tile
     auto tileBaseDEM = state.mLastDEM->getTile();
     if (tileBaseDEM->getDataType() == TileDataType::eFloat32) {
-      auto tileDEM = static_cast<Tile<float>*>(tileBaseDEM);
+      auto tileDEM = dynamic_cast<Tile<float>*>(tileBaseDEM);
       if (auto pyr = tileDEM->getMinMaxPyramid()) {
 
         auto  lvl = tileId.level();
@@ -683,8 +683,8 @@ bool LODVisitor::testNeedRefine(TileId const& tileId) {
 
     double maxAngle(0.0f);
 
-    for (std::size_t i = 0; i < tbDirs.size(); ++i) {
-      maxAngle = std::max(std::acos(std::min(1.0, glm::dot(tbDirs[i], centerDir))), maxAngle);
+    for (auto& tbDir : tbDirs) {
+      maxAngle = std::max(std::acos(std::min(1.0, glm::dot(tbDir, centerDir))), maxAngle);
     }
 
     // calculate field of view

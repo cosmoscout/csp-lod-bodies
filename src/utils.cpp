@@ -44,7 +44,7 @@ double getHeight(
   TileNode* parent = planet->getTileRenderer().getTreeManagerDEM()->getTree()->getRoot(rootIndex);
 
   // Check if parent is valid
-  if (parent == NULL)
+  if (parent == nullptr)
     return 0.0f;
 
   // Start with the Root
@@ -84,7 +84,7 @@ double getHeight(
     child = parent->getChild(childIndex);
 
     // Child is unavailable and precision is "HeightSamplePrecision::eActual"
-    if (child == NULL && precision == HeightSamplePrecision::eActual) {
+    if (child == nullptr && precision == HeightSamplePrecision::eActual) {
       child = parent;
 
       // Reset coordinates
@@ -93,7 +93,7 @@ double getHeight(
     }
 
     // Child is unavailable and precision is "Fine"
-    if (child == NULL && precision == HeightSamplePrecision::eFine) {
+    if (child == nullptr && precision == HeightSamplePrecision::eFine) {
       std::vector<TileId> requested;
 
       requested.push_back(HEALPix::getChildTileId(parent->getTileId(), childIndex));
@@ -108,7 +108,7 @@ double getHeight(
   }
 
   // Check if Child Exists
-  if (child == NULL)
+  if (child == nullptr)
     return 0.0;
 
   int sizeX = TileBase::SizeX;
@@ -141,17 +141,17 @@ double getHeight(
   double h, hP1, hP2, hPP;
 
   if (child->getTileDataType() == TileDataType::eFloat32) {
-    const float* ptr = child->getTile()->getTypedPtr<float>();
-    h                = ptr[vB + sizeY * uB];
-    hP1              = ptr[vB + sizeY * (uB + 1)];
-    hP2              = ptr[vB + 1 + sizeY * uB];
-    hPP              = ptr[vB + 1 + sizeY * (uB + 1)];
+    const auto* ptr = child->getTile()->getTypedPtr<float>();
+    h               = ptr[vB + sizeY * uB];
+    hP1             = ptr[vB + sizeY * (uB + 1)];
+    hP2             = ptr[vB + 1 + sizeY * uB];
+    hPP             = ptr[vB + 1 + sizeY * (uB + 1)];
   } else {
-    const unsigned char* ptr = child->getTile()->getTypedPtr<unsigned char>();
-    h                        = ptr[vB + sizeY * uB];
-    hP1                      = ptr[vB + sizeY * (uB + 1)];
-    hP2                      = ptr[vB + 1 + sizeY * uB];
-    hPP                      = ptr[vB + 1 + sizeY * (uB + 1)];
+    const auto* ptr = child->getTile()->getTypedPtr<unsigned char>();
+    h               = ptr[vB + sizeY * uB];
+    hP1             = ptr[vB + sizeY * (uB + 1)];
+    hP2             = ptr[vB + 1 + sizeY * uB];
+    hPP             = ptr[vB + 1 + sizeY * (uB + 1)];
   }
 
   double interpol1 = (1.0 - uP) * h + uP * hP1;
@@ -165,9 +165,9 @@ double getHeight(
 
 bool intersectTileBounds(TileNode const* tileNode, VistaPlanet const* planet,
     glm::dvec4 const& origin, glm::dvec4 const& direction, double& minDist, double& maxDist) {
-  TileBase*      tile   = tileNode->getTile();
-  auto           tileId = tile->getTileId();
-  RenderDataDEM* rdDEM = planet->getTileRenderer().getTreeManagerDEM()->find<RenderDataDEM>(tileId);
+  TileBase* tile   = tileNode->getTile();
+  auto      tileId = tile->getTileId();
+  auto*     rdDEM  = planet->getTileRenderer().getTreeManagerDEM()->find<RenderDataDEM>(tileId);
   BoundingBox<double> tile_bounds = rdDEM->getBounds();
   double dMin[3] = {tile_bounds.getMin()[0], tile_bounds.getMin()[1], tile_bounds.getMin()[2]};
   double dMax[3] = {tile_bounds.getMax()[0], tile_bounds.getMax()[1], tile_bounds.getMax()[2]};
@@ -178,7 +178,8 @@ bool intersectTileBounds(TileNode const* tileNode, VistaPlanet const* planet,
   glm::dvec3 o(origin);
   glm::dvec3 d(direction);
 
-  return BoundingBox<double>(aabb_min, aabb_max).GetIntersectionDistance(o, d, 1, minDist, maxDist);
+  return BoundingBox<double>(aabb_min, aabb_max)
+      .GetIntersectionDistance(o, d, true, minDist, maxDist);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +221,7 @@ bool intersectPlanet(
     TileNode* root_node =
         planet->getTileRenderer().getTreeManagerDEM()->getTree()->getRoot(rootIndex);
 
-    if (root_node == NULL) {
+    if (root_node == nullptr) {
       return false;
     }
 
@@ -235,11 +236,11 @@ bool intersectPlanet(
   TileNode* child;
 
   // Process intersected tile patch priority queue:
-  while (intersected_tiles.size() != 0) {
+  while (!intersected_tiles.empty()) {
     parent = intersected_tiles.begin()->second;
     intersected_tiles.erase(intersected_tiles.begin());
 
-    if (parent == NULL) {
+    if (parent == nullptr) {
       return false;
     }
 
@@ -275,11 +276,10 @@ bool intersectPlanet(
       //        |        \   /     |
       //        |         \/       |
       // BboxMin--------------------
-      TileBase*      tile   = parent->getTile();
-      auto           tileId = tile->getTileId();
-      RenderDataDEM* rdDEM =
-          planet->getTileRenderer().getTreeManagerDEM()->find<RenderDataDEM>(tileId);
-      auto tile_bounds = rdDEM->getBounds();
+      TileBase* tile   = parent->getTile();
+      auto      tileId = tile->getTileId();
+      auto*     rdDEM  = planet->getTileRenderer().getTreeManagerDEM()->find<RenderDataDEM>(tileId);
+      auto      tile_bounds = rdDEM->getBounds();
 
       auto max_tile_samplings = sqrt((255.0 * 255.0) + (255.0 * 255.0));
       auto max_bbox_samplings = sqrt(
@@ -330,17 +330,17 @@ bool intersectPlanet(
 
         // Access height data
         if (parent->getTileDataType() == TileDataType::eFloat32) {
-          const float* ptr = parent->getTile()->getTypedPtr<float>();
-          height           = ptr[vB + sizeY * uB];
-          hP1              = ptr[vB + sizeY * (uB + 1)];
-          hP2              = ptr[vB + 1 + sizeY * uB];
-          hPP              = ptr[vB + 1 + sizeY * (uB + 1)];
+          const auto* ptr = parent->getTile()->getTypedPtr<float>();
+          height          = ptr[vB + sizeY * uB];
+          hP1             = ptr[vB + sizeY * (uB + 1)];
+          hP2             = ptr[vB + 1 + sizeY * uB];
+          hPP             = ptr[vB + 1 + sizeY * (uB + 1)];
         } else {
-          const unsigned char* ptr = parent->getTile()->getTypedPtr<unsigned char>();
-          height                   = ptr[vB + sizeY * uB];
-          hP1                      = ptr[vB + sizeY * (uB + 1)];
-          hP2                      = ptr[vB + 1 + sizeY * uB];
-          hPP                      = ptr[vB + 1 + sizeY * (uB + 1)];
+          const auto* ptr = parent->getTile()->getTypedPtr<unsigned char>();
+          height          = ptr[vB + sizeY * uB];
+          hP1             = ptr[vB + sizeY * (uB + 1)];
+          hP2             = ptr[vB + 1 + sizeY * uB];
+          hPP             = ptr[vB + 1 + sizeY * (uB + 1)];
         }
 
         double interpol1 = (1.0 - uP) * height + uP * hP1;
@@ -376,7 +376,7 @@ bool intersectPlanet(
       for (int childIndex = 0; childIndex < 4; ++childIndex) {
         /* Get the new Child */
         child = parent->getChild(childIndex);
-        if (child == NULL)
+        if (child == nullptr)
           continue;
 
         double min_dist, max_dist;

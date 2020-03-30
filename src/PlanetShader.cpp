@@ -17,6 +17,8 @@
 #include <VistaOGLExt/VistaOGLUtils.h>
 #include <VistaOGLExt/VistaShaderRegistry.h>
 
+#include <utility>
+
 namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,13 +36,13 @@ std::map<std::string, cs::graphics::ColorMap> PlanetShader::mColorMaps;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-    std::shared_ptr<Plugin::Properties> const&                              pProperties,
-    std::shared_ptr<cs::core::GuiManager> const&                            pGuiManager)
+PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
+    std::shared_ptr<Plugin::Properties>                              pProperties,
+    std::shared_ptr<cs::core::GuiManager> const&                     pGuiManager)
     : csp::lodbodies::TerrainShader()
-    , mGraphicsEngine(graphicsEngine)
+    , mGraphicsEngine(std::move(graphicsEngine))
     , mGuiManager(pGuiManager)
-    , mProperties(pProperties)
+    , mProperties(std::move(pProperties))
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
   // clang-format off
     pTextureIsRGB.connect(
@@ -79,7 +81,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& grap
     auto files(cs::utils::filesystem::listFiles("../share/resources/colormaps"));
 
     bool first = true;
-    for (auto file : files) {
+    for (const auto& file : files) {
       std::string  name(file);
       const size_t lastSlashIdx = name.find_last_of("\\/");
       if (std::string::npos != lastSlashIdx) {

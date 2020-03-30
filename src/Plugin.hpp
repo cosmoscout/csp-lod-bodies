@@ -91,7 +91,7 @@ class Plugin : public cs::core::PluginBase {
   std::vector<std::unique_ptr<VistaOpenGLNode>> mOpenGLNodes;
   std::vector<std::shared_ptr<LodBody>>         mLodBodies;
   std::shared_ptr<Properties>                   mProperties;
-  float                                         mNonAutoLod;
+  float                                         mNonAutoLod{};
 
   int mActiveBodyConnection = -1;
 };

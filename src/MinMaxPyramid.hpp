@@ -64,7 +64,7 @@ class MinMaxPyramid {
   }
 
  protected:
-  float getData(std::vector<std::vector<float>>& pyramid, std::vector<int> const& quadrants);
+  static float getData(std::vector<std::vector<float>>& pyramid, std::vector<int> const& quadrants);
 
  private:
   std::vector<std::vector<float>> mMinPyramid;

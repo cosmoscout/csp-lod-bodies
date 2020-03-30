@@ -23,6 +23,7 @@
 #include <VistaOGLExt/VistaTexture.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/io.hpp>
+#include <memory>
 
 namespace csp::lodbodies {
 
@@ -419,7 +420,7 @@ void TileRenderer::renderTiles(
   VistaGLSLShader* shader = mProgTerrain->mShader;
 
   // query uniform locations once and store in locs
-  UniformLocs locs;
+  UniformLocs locs{};
   locs.demAverageHeight = shader->GetUniformLocation("VP_demAverageHeight");
   locs.tileOffsetScale  = shader->GetUniformLocation("VP_tileOffsetScale");
   locs.demOffsetScale   = shader->GetUniformLocation("VP_demOffsetScale");
@@ -437,7 +438,7 @@ void TileRenderer::renderTiles(
   // iterate over both std::vector<RenderData*>s together
   for (size_t i(0); i < renderDEM.size(); ++i) {
     // get data associated with nodes
-    RenderDataDEM* rdDEM = dynamic_cast<RenderDataDEM*>(renderDEM[i]);
+    auto*          rdDEM = dynamic_cast<RenderDataDEM*>(renderDEM[i]);
     RenderDataImg* rdIMG =
         i < renderIMG.size() ? dynamic_cast<RenderDataImg*>(renderIMG[i]) : nullptr;
 
@@ -476,7 +477,7 @@ void TileRenderer::renderTiles(
   // Cannot be done during rendering because a TileNode/RenderData may
   // appear multiple times in renderDEM/renderIMG.
   for (auto it : renderDEM) {
-    RenderDataDEM* rdDEM = dynamic_cast<RenderDataDEM*>(it);
+    auto* rdDEM = dynamic_cast<RenderDataDEM*>(it);
     rdDEM->resetEdgeDeltas();
     rdDEM->resetEdgeRData();
     rdDEM->clearFlags();
@@ -490,7 +491,7 @@ void TileRenderer::renderTile(RenderDataDEM* rdDEM, RenderDataImg* rdIMG, Unifor
   TileId const&    idDEM    = rdDEM->getTileId();
   GLuint           idxCount = NumIndices;
 
-  std::array<glm::dvec2, 4> cornersLngLat;
+  std::array<glm::dvec2, 4> cornersLngLat{};
 
   glm::ivec3 demOS(0, 0, 256);
   glm::ivec3 imgOS(0, 0, 256);
@@ -529,7 +530,7 @@ void TileRenderer::renderTile(RenderDataDEM* rdDEM, RenderDataImg* rdIMG, Unifor
   shader->SetUniform(locs.f1f2, 2, 1, glm::value_ptr(patchF1F2));
 
   // order of components: N, W, S, E
-  std::array<glm::dvec3, 4> corners, normals;
+  std::array<glm::dvec3, 4> corners{}, normals{};
   glm::fvec3                cornersViewSpace[4];
   glm::fvec3                normalsViewSpace[4];
 
@@ -551,7 +552,7 @@ void TileRenderer::renderTile(RenderDataDEM* rdDEM, RenderDataImg* rdIMG, Unifor
       glm::value_ptr(normalsViewSpace[0]));
 
   // draw tile
-  glDrawElements(GL_TRIANGLES, idxCount, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, idxCount, GL_UNSIGNED_INT, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -624,7 +625,7 @@ void TileRenderer::renderBounds(
         glUniform3fv(glGetUniformLocation(mProgBounds->GetProgram(), "VP_corners"), 8,
             glm::value_ptr(controlPointsViewSpace[0]));
 
-        glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, nullptr);
       }
     }
   };
@@ -643,7 +644,7 @@ void TileRenderer::postRenderBounds() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TileRenderer::init() {
+void TileRenderer::init() const {
   if (mEnableDrawTiles) {
     if (!mVboTerrain)
       mVboTerrain = makeVBOTerrain();
@@ -677,14 +678,14 @@ void TileRenderer::init() {
 // the corresponding relative position inside the patch - as well as texture
 // coordinates.
 std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOTerrain() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = NumVertices * sizeof(GLushort) * 2;
 
   result->BindAsVertexDataBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  GLuint    idx    = 0;
-  GLushort* buffer = static_cast<GLushort*>(result->MapBuffer(GL_WRITE_ONLY));
+  GLuint idx    = 0;
+  auto*  buffer = static_cast<GLushort*>(result->MapBuffer(GL_WRITE_ONLY));
   for (int y = 0; y < SizeY; ++y) {
     for (int x = 0; x < SizeX; ++x) {
       buffer[idx++] = static_cast<GLushort>(x);
@@ -700,14 +701,14 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOTerrain() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOTerrain() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = NumIndices * sizeof(GLuint);
 
   result->BindAsIndexBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  int     idx    = 0;
-  GLuint* buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
+  int   idx    = 0;
+  auto* buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
 
   // tile
   idx = buildTileIndices(buffer, idx, 0, 0, 0);
@@ -723,7 +724,7 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOTerrain() {
 // Sets up the VertexArrayObject for rendering a Tile
 std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOTerrain(
     VistaBufferObject* vbo, VistaBufferObject* ibo) {
-  auto result = std::unique_ptr<VistaVertexArrayObject>(new VistaVertexArrayObject());
+  auto result = std::make_unique<VistaVertexArrayObject>();
   result->Bind();
   result->EnableAttributeArray(0);
   result->SpecifyAttributeArrayInteger(0, 2, GL_UNSIGNED_SHORT, 0, 0, vbo);
@@ -736,14 +737,14 @@ std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOTerrain(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOBounds() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = 8 * sizeof(GLubyte);
 
   result->BindAsVertexDataBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  GLuint   idx    = 0;
-  GLubyte* buffer = static_cast<GLubyte*>(result->MapBuffer(GL_WRITE_ONLY));
+  GLuint idx    = 0;
+  auto*  buffer = static_cast<GLubyte*>(result->MapBuffer(GL_WRITE_ONLY));
 
   buffer[idx++] = 0;
   buffer[idx++] = 1;
@@ -763,14 +764,14 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOBounds() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOBounds() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = 24 * sizeof(GLuint);
 
   result->BindAsIndexBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  GLuint  idx    = 0;
-  GLuint* buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
+  GLuint idx    = 0;
+  auto*  buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
 
   // bottom "ring"
   buffer[idx++] = 0;
@@ -813,7 +814,7 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOBounds() {
 // Sets up the VertexArrayObject for rendering bounds of a Tile
 std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOBounds(
     VistaBufferObject* vbo, VistaBufferObject* ibo) {
-  auto result = std::unique_ptr<VistaVertexArrayObject>(new VistaVertexArrayObject());
+  auto result = std::make_unique<VistaVertexArrayObject>();
   result->Bind();
   result->EnableAttributeArray(0);
   result->SpecifyAttributeArrayInteger(0, 1, GL_UNSIGNED_BYTE, 0, 0, vbo);
@@ -828,7 +829,7 @@ std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOBounds(
 std::unique_ptr<VistaGLSLShader> TileRenderer::makeProgBounds() {
   VistaShaderRegistry& reg = VistaShaderRegistry::GetInstance();
 
-  auto result = std::unique_ptr<VistaGLSLShader>(new VistaGLSLShader());
+  auto result = std::make_unique<VistaGLSLShader>();
   result->InitVertexShaderFromString(reg.RetrieveShader(BoundsVertexShaderName));
   result->InitFragmentShaderFromString(reg.RetrieveShader(BoundsFragmentShaderName));
 

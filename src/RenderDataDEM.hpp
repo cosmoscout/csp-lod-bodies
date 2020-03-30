@@ -33,7 +33,7 @@ class RenderDataDEM : public RenderData {
 
   void addFlag(Flags flag);
   void subFlag(Flags flag);
-  bool testFlag(Flags flag);
+  bool testFlag(Flags flag) const;
 
   glm::uint8 getFlags() const;
   void       clearFlags();

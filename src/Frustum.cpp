@@ -45,7 +45,7 @@ std::ostream& operator<<(std::ostream& os, FrustumPlaneIdx fpi) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* static */ Frustum Frustum::fromMatrix(glm::dmat4 const& mat) {
-  Frustum result;
+  Frustum result{};
   result.setFromMatrix(mat);
 
   return result;

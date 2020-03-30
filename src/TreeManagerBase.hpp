@@ -46,7 +46,7 @@ class TileTextureArray;
 class TreeManagerBase : private boost::noncopyable {
  public:
   explicit TreeManagerBase(
-      PlanetParameters const& params, std::shared_ptr<GLResources> const& glResources);
+      PlanetParameters const& params, std::shared_ptr<GLResources> glResources);
   virtual ~TreeManagerBase() = 0;
 
   /// Set tile source src to use.

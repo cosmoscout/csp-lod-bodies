@@ -51,7 +51,7 @@ class TileSourceWebMapService : public TileSource {
 
   /// These can be used to pre-populate the local cache, returns true if the tile is on the diagonal
   /// of base patch 4 (the one which is cut in two halves).
-  bool        getXY(int level, glm::int64 patchIdx, int& x, int& y);
+  static bool getXY(int level, glm::int64 patchIdx, int& x, int& y);
   std::string loadData(int level, int x, int y);
 
  private:

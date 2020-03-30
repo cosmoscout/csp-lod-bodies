@@ -11,13 +11,15 @@
 #include <VistaOGLExt/VistaGLSLShader.h>
 #include <VistaOGLExt/VistaShaderRegistry.h>
 
+#include <utility>
+
 namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TerrainShader::TerrainShader(std::string const& vertexSource, std::string const& fragmentSource)
-    : mVertexSource(vertexSource)
-    , mFragmentSource(fragmentSource) {
+TerrainShader::TerrainShader(std::string vertexSource, std::string fragmentSource)
+    : mVertexSource(std::move(vertexSource))
+    , mFragmentSource(std::move(fragmentSource)) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

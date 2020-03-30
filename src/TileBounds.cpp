@@ -49,10 +49,10 @@ BoundingBox<double> calcTileBounds(double tmin, double tmax, int tileLevel, glm:
   // tile corners
   auto corners = hp.getCornersLngLat(patchIdx);
 
-  for (std::size_t i = 0; i < corners.size(); ++i) {
+  for (auto& corner : corners) {
     // lowest/highest point at corner
-    glm::dvec3 pMin(cs::utils::convert::toCartesian(corners[i], radiusE, radiusP, tMin));
-    glm::dvec3 pMax(cs::utils::convert::toCartesian(corners[i], radiusE, radiusP, tMax));
+    glm::dvec3 pMin(cs::utils::convert::toCartesian(corner, radiusE, radiusP, tMin));
+    glm::dvec3 pMax(cs::utils::convert::toCartesian(corner, radiusE, radiusP, tMax));
 
     bbMin = glm::min(bbMin, pMin);
     bbMin = glm::min(bbMin, pMax);
@@ -63,10 +63,10 @@ BoundingBox<double> calcTileBounds(double tmin, double tmax, int tileLevel, glm:
   // tile edge center points
   auto edges = hp.getEdgeCentersLngLat(patchIdx);
 
-  for (std::size_t i = 0; i < edges.size(); ++i) {
+  for (auto& edge : edges) {
     // lowest/highest point at edge center
-    glm::dvec3 pMin(cs::utils::convert::toCartesian(edges[i], radiusE, radiusP, tMin));
-    glm::dvec3 pMax(cs::utils::convert::toCartesian(edges[i], radiusE, radiusP, tMax));
+    glm::dvec3 pMin(cs::utils::convert::toCartesian(edge, radiusE, radiusP, tMin));
+    glm::dvec3 pMax(cs::utils::convert::toCartesian(edge, radiusE, radiusP, tMax));
 
     bbMin = glm::min(bbMin, pMin);
     bbMin = glm::min(bbMin, pMax);
@@ -92,7 +92,7 @@ BoundingBox<double> calcTileBounds(
     TileBase const& tile, double radiusE, double radiusP, double heightScale) {
   switch (tile.getDataType()) {
   case TileDataType::eFloat32: {
-    auto& casted_tile = static_cast<Tile<float> const&>(tile);
+    auto& casted_tile = dynamic_cast<Tile<float> const&>(tile);
     return calcTileBounds(casted_tile.getMinMaxPyramid()->getMin(),
         casted_tile.getMinMaxPyramid()->getMax(), casted_tile.getLevel(), casted_tile.getPatchIdx(),
         radiusE, radiusP, heightScale);

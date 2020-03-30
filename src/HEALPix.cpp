@@ -37,13 +37,13 @@ std::ostream& operator<<(std::ostream& os, EdgeDirection ed) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* static */ std::array<glm::uint16, 256> const HEALPixLevel::sCompressLUT = {{
-#define GEN_LUT_0(v) v, v + 1, 256 + v, 256 + v + 1
+#define GEN_LUT_0(v) v, (v) + 1, 256 + (v), 256 + (v) + 1
 #define GEN_LUT_1(v)                                                                               \
   GEN_LUT_0(v)                                                                                     \
-  , GEN_LUT_0(v + 2), GEN_LUT_0(v + 512), GEN_LUT_0(v + 514)
+  , GEN_LUT_0((v) + 2), GEN_LUT_0((v) + 512), GEN_LUT_0((v) + 514)
 #define GEN_LUT_2(v)                                                                               \
   GEN_LUT_1(v)                                                                                     \
-  , GEN_LUT_1(v + 4), GEN_LUT_1(v + 1024), GEN_LUT_1(v + 1028)
+  , GEN_LUT_1((v) + 4), GEN_LUT_1((v) + 1024), GEN_LUT_1((v) + 1028)
     GEN_LUT_2(0), GEN_LUT_2(8), GEN_LUT_2(2048), GEN_LUT_2(2056)
 #undef GEN_LUT_0
 #undef GEN_LUT_1
@@ -166,7 +166,7 @@ glm::dvec3 HEALPixLevel::getCenterCartesian(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::array<glm::dvec2, 4> HEALPixLevel::getCornersLngLat(glm::int64 patchIdx) const {
-  std::array<glm::dvec2, 4> result;
+  std::array<glm::dvec2, 4> result{};
 
   glm::i64vec3 bxy = getBaseXY(patchIdx);
   double       cx  = (bxy[1] + 0.5) / mNSide;
@@ -185,7 +185,7 @@ std::array<glm::dvec2, 4> HEALPixLevel::getCornersLngLat(glm::int64 patchIdx) co
 
 std::array<glm::dvec3, 4> HEALPixLevel::getCornersCartesian(
     glm::int64 patchIdx, double radiusE, double radiusP) const {
-  std::array<glm::dvec3, 4> result;
+  std::array<glm::dvec3, 4> result{};
   std::array<glm::dvec2, 4> corners = getCornersLngLat(patchIdx);
 
   result[0] = cs::utils::convert::toCartesian(corners[0], radiusE, radiusP);
@@ -199,7 +199,7 @@ std::array<glm::dvec3, 4> HEALPixLevel::getCornersCartesian(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::array<glm::dvec2, 4> HEALPixLevel::getEdgeCentersLngLat(glm::int64 patchIdx) const {
-  std::array<glm::dvec2, 4> result;
+  std::array<glm::dvec2, 4> result{};
 
   glm::i64vec3 bxy = getBaseXY(patchIdx);
   double       cx  = (bxy[1] + 0.5) / mNSide;
@@ -218,7 +218,7 @@ std::array<glm::dvec2, 4> HEALPixLevel::getEdgeCentersLngLat(glm::int64 patchIdx
 
 std::array<glm::dvec3, 4> HEALPixLevel::getEdgeCentersCartesian(
     glm::int64 patchIdx, double radiusE, double radiusP) const {
-  std::array<glm::dvec3, 4> result;
+  std::array<glm::dvec3, 4> result{};
   std::array<glm::dvec2, 4> edges = getEdgeCentersLngLat(patchIdx);
 
   result[0] = cs::utils::convert::toCartesian(edges[0], radiusE, radiusP);
@@ -232,7 +232,7 @@ std::array<glm::dvec3, 4> HEALPixLevel::getEdgeCentersCartesian(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const {
-  std::array<glm::int64, 4> result;
+  std::array<glm::int64, 4> result{};
 
   glm::i64vec3 bxy = getBaseXY(patchIdx);
 
@@ -377,7 +377,7 @@ int HEALPixLevel::getBasePatch(glm::int64 patchIdx) const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::int64 HEALPixLevel::extractEvenBits(glm::int64 value) const {
+glm::int64 HEALPixLevel::extractEvenBits(glm::int64 value) {
   // Value has binary representation: xwvu tsrq ponm lkji hgfe dcba
   // where each letter is a binary digit (i.e. either 0 or 1).
   // We want the even bits:           .... .... .... wusq omki geca
@@ -403,7 +403,7 @@ glm::int64 HEALPixLevel::extractEvenBits(glm::int64 value) const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::int64 HEALPixLevel::extractOddBits(glm::int64 value) const {
+glm::int64 HEALPixLevel::extractOddBits(glm::int64 value) {
   return extractEvenBits(value >> 1);
 }
 
@@ -416,14 +416,14 @@ void HEALPixLevel::extractBits(glm::int64 value, glm::int64& evenBits, glm::int6
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::int64 HEALPixLevel::replaceEvenBits(glm::int64 value) const {
+glm::int64 HEALPixLevel::replaceEvenBits(glm::int64 value) {
   return sExpandLUT[value & 0xFF] | sExpandLUT[(value >> 8) & 0xFF] << 16 |
          sExpandLUT[(value >> 16) & 0xFF] << 32 | sExpandLUT[(value >> 24) & 0xFF] << 48;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::int64 HEALPixLevel::replaceOddBits(glm::int64 value) const {
+glm::int64 HEALPixLevel::replaceOddBits(glm::int64 value) {
   return replaceEvenBits(value) << 1;
 }
 
@@ -536,10 +536,10 @@ glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) co
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* static */ glm::dvec2 HEALPix::convertBaseXY2LngLat(int basePatchIdx, double x, double y) {
-  glm::dvec2   lngLat;
-  double const pi = glm::pi<double>();
-  double       jr = HEALPixLevel::sF1LUT[basePatchIdx] - x - y;
-  double       nr;
+  glm::dvec2 lngLat;
+  auto const pi = glm::pi<double>();
+  double     jr = HEALPixLevel::sF1LUT[basePatchIdx] - x - y;
+  double     nr;
 
   if (jr < 1.0) {
     nr        = jr;
