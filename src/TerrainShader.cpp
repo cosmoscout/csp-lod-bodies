@@ -24,25 +24,19 @@ TerrainShader::TerrainShader(std::string vertexSource, std::string fragmentSourc
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TerrainShader::~TerrainShader() {
-  delete mShader;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void TerrainShader::bind() {
   if (mShaderDirty) {
     compile();
     mShaderDirty = false;
   }
 
-  mShader->Bind();
+  mShader.Bind();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TerrainShader::release() {
-  mShader->Release();
+  mShader.Release();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,11 +54,10 @@ void TerrainShader::compile() {
   cs::utils::replaceString(mFragmentSource, "$VP_TERRAIN_SHADER_UNIFORMS",
       reg.RetrieveShader("VistaPlanetTerrainShaderUniforms.glsl"));
 
-  delete mShader;
-  mShader = new VistaGLSLShader();
-  mShader->InitVertexShaderFromString(mVertexSource);
-  mShader->InitFragmentShaderFromString(mFragmentSource);
-  mShader->Link();
+  mShader = VistaGLSLShader();
+  mShader.InitVertexShaderFromString(mVertexSource);
+  mShader.InitFragmentShaderFromString(mFragmentSource);
+  mShader.Link();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

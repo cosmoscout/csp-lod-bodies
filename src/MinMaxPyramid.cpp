@@ -72,13 +72,15 @@ MinMaxPyramid::MinMaxPyramid(Tile<float>* tile)
       mMaxPyramid[0][y2 * HalfSizeX + x2] = std::max(mMaxPyramid[0][y2 * HalfSizeX + x2], v);
 
       // 256 -> 128
-      if (x % 2 == 1)
+      if (x % 2 == 1) {
         x2 += 1;
+      }
     }
 
     // 256 -> 128
-    if (y % 2 == 1)
+    if (y % 2 == 1) {
       y2 += 1;
+    }
   }
 
   // Build remaining MinMaxPyramid layers 64x62-2x2
@@ -95,11 +97,13 @@ MinMaxPyramid::MinMaxPyramid(Tile<float>* tile)
             mMaxPyramid[i - 1]
                        [static_cast<uint64_t>(y * (TileBase::SizeX - 1) * std::pow(0.5, i) + x)],
             mMaxPyramid[i][static_cast<uint64_t>(y2 * HalfSizeX * std::pow(0.5, i) + x2)]);
-        if (x % 2 == 1)
+        if (x % 2 == 1) {
           x2 += 1;
+        }
       }
-      if (y % 2 == 1)
+      if (y % 2 == 1) {
         y2 += 1;
+      }
     }
   }
 }
@@ -111,6 +115,7 @@ MinMaxPyramid::~MinMaxPyramid() {
     mMinPyramid[layer].clear();
     mMaxPyramid[layer].clear();
   }
+
   mMinPyramid.clear();
   mMaxPyramid.clear();
 }

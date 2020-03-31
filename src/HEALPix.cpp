@@ -240,12 +240,12 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
     // neighbour bxy
     glm::i64vec3 bxyN = bxy;
 
-    bxyN[1] += sNeighbourOffsetLUT[i][0];
-    bxyN[2] += sNeighbourOffsetLUT[i][1];
+    bxyN[1] += sNeighbourOffsetLUT.at(i)[0];
+    bxyN[2] += sNeighbourOffsetLUT.at(i)[1];
 
     if (bxyN[1] < 0) {
       // crossed to SW neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
+      bxyN[0] = sBaseNeighbourLUT.at(bxy[0])[static_cast<int>(i)];
 
       if (bxy[0] >= 8) {
         bxyN[1] = bxyN[2];
@@ -255,7 +255,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
       }
     } else if (bxyN[1] >= mNSide) {
       // crosed to NE neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
+      bxyN[0] = sBaseNeighbourLUT.at(bxy[0])[static_cast<int>(i)];
 
       if (bxy[0] < 4) {
         bxyN[1] = bxyN[2];
@@ -265,7 +265,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
       }
     } else if (bxyN[2] < 0) {
       // crossed to SE neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
+      bxyN[0] = sBaseNeighbourLUT.at(bxy[0])[static_cast<int>(i)];
 
       if (bxy[0] >= 8) {
         bxyN[2] = bxyN[1];
@@ -275,7 +275,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
       }
     } else if (bxyN[2] >= mNSide) {
       // crossed to NW neighbour base patch
-      bxyN[0] = sBaseNeighbourLUT[bxy[0]][static_cast<int>(i)];
+      bxyN[0] = sBaseNeighbourLUT.at(bxy[0])[static_cast<int>(i)];
 
       if (bxy[0] < 4) {
         bxyN[2] = bxyN[1];
@@ -285,7 +285,7 @@ std::array<glm::int64, 4> HEALPixLevel::getNeighbours(glm::int64 patchIdx) const
       }
     }
 
-    result[i] = getPatchIdx(bxyN);
+    result.at(i) = getPatchIdx(bxyN);
   }
 
   return result;
@@ -297,7 +297,7 @@ int HEALPixLevel::getF1(glm::int64 patchIdx) const {
   glm::int64 patchCount = getPatchCount();
   glm::int64 bpatchIdx  = patchIdx / patchCount;
 
-  return sF1LUT[bpatchIdx];
+  return sF1LUT.at(bpatchIdx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,7 +306,7 @@ int HEALPixLevel::getF2(glm::int64 patchIdx) const {
   glm::int64 patchCount = getPatchCount();
   glm::int64 bpatchIdx  = patchIdx / patchCount;
 
-  return sF2LUT[bpatchIdx];
+  return sF2LUT.at(bpatchIdx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,7 +366,8 @@ glm::int64 HEALPixLevel::getPatchCount() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 glm::int64 HEALPixLevel::getTotalPatchCount() const {
-  return 12 * getPatchCount();
+  int64_t const maxPatches = 12;
+  return maxPatches * getPatchCount();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -383,7 +384,8 @@ glm::int64 HEALPixLevel::extractEvenBits(glm::int64 value) {
   // We want the even bits:           .... .... .... wusq omki geca
 
   // 1) Mask all odd bits:            0w0u 0s0q 0o0m 0k0i 0g0e 0c0a
-  glm::int64 tmp = value & 0x5555555555555555ull;
+  uint64_t const oddBitMask = 0x5555555555555555ULL;
+  glm::int64     tmp        = value & oddBitMask;
 
   // 2) Shift high bytes down to replace the zeros.
   //                                  .w.u .s.q .o.m .k.i wgue scqa
@@ -397,8 +399,8 @@ glm::int64 HEALPixLevel::extractEvenBits(glm::int64 value) {
   // the next 8 bit produce output bits 13-16 and 5-8 and so on.
   // Therefore the desired output is found with 4 table lookups and OR'ing
   // the results together.
-  return sCompressLUT[tmp & 0xFF] | (sCompressLUT[(tmp >> 8) & 0xFF] << 4) |
-         (sCompressLUT[(tmp >> 32) & 0xFF] << 16) | (sCompressLUT[(tmp >> 40) & 0xFF] << 20);
+  return sCompressLUT.at(tmp & 0xFF) | (sCompressLUT.at((tmp >> 8) & 0xFF) << 4) |
+         (sCompressLUT.at((tmp >> 32) & 0xFF) << 16) | (sCompressLUT.at((tmp >> 40) & 0xFF) << 20);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +411,7 @@ glm::int64 HEALPixLevel::extractOddBits(glm::int64 value) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void HEALPixLevel::extractBits(glm::int64 value, glm::int64& evenBits, glm::int64& oddBits) const {
+void HEALPixLevel::extractBits(glm::int64 value, glm::int64& evenBits, glm::int64& oddBits) {
   evenBits = extractEvenBits(value);
   oddBits  = extractOddBits(value);
 }
@@ -417,8 +419,8 @@ void HEALPixLevel::extractBits(glm::int64 value, glm::int64& evenBits, glm::int6
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 glm::int64 HEALPixLevel::replaceEvenBits(glm::int64 value) {
-  return sExpandLUT[value & 0xFF] | sExpandLUT[(value >> 8) & 0xFF] << 16 |
-         sExpandLUT[(value >> 16) & 0xFF] << 32 | sExpandLUT[(value >> 24) & 0xFF] << 48;
+  return sExpandLUT.at(value & 0xFF) | sExpandLUT.at((value >> 8) & 0xFF) << 16 |
+         sExpandLUT.at((value >> 16) & 0xFF) << 32 | sExpandLUT.at((value >> 24) & 0xFF) << 48;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -429,14 +431,14 @@ glm::int64 HEALPixLevel::replaceOddBits(glm::int64 value) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) const {
+glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) {
   return replaceEvenBits(evenBits) | replaceOddBits(oddBits);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* static */ HEALPixLevel const& HEALPix::getLevel(int level) {
-  return sLevels[level];
+  return sLevels.at(level);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -509,7 +511,7 @@ glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) co
   std::array<glm::int64, 4> neighbours = getNeighbours(tileId);
 
   for (std::size_t i = 0; i < neighbours.size(); ++i) {
-    result[i] = TileId(tileId.level(), neighbours[i]);
+    result.at(i) = TileId(tileId.level(), neighbours.at(i));
   }
 
   return result;
@@ -538,8 +540,8 @@ glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) co
 /* static */ glm::dvec2 HEALPix::convertBaseXY2LngLat(int basePatchIdx, double x, double y) {
   glm::dvec2 lngLat;
   auto const pi = glm::pi<double>();
-  double     jr = HEALPixLevel::sF1LUT[basePatchIdx] - x - y;
-  double     nr;
+  double     jr = HEALPixLevel::sF1LUT.at(basePatchIdx) - x - y;
+  double     nr{};
 
   if (jr < 1.0) {
     nr        = jr;
@@ -552,7 +554,7 @@ glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) co
     lngLat[1] = (2.0 - jr) * 2.0 / 3.0;
   }
 
-  double tmp = HEALPixLevel::sF2LUT[basePatchIdx] * nr + x - y;
+  double tmp = HEALPixLevel::sF2LUT.at(basePatchIdx) * nr + x - y;
   tmp        = (tmp < 0.0) ? tmp + 8.0 : tmp;
   tmp        = (tmp >= 8.0) ? tmp - 8.0 : tmp;
 
@@ -565,15 +567,16 @@ glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) co
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* static */ glm::dvec2 HEALPix::convertBaseLngLat2XY(int basePatchIdx, glm::dvec2 const& lngLat) {
-  double _f1 = HEALPixLevel::sF1LUT[basePatchIdx];
-  double _f2 = HEALPixLevel::sF2LUT[basePatchIdx];
+  double _f1 = HEALPixLevel::sF1LUT.at(basePatchIdx);
+  double _f2 = HEALPixLevel::sF2LUT.at(basePatchIdx);
 
   double x = std::fmod(lngLat.x / glm::pi<double>() + 1.0, 2.0); //!< Ranges from  0 to 2
   double y = std::sin(lngLat.y);                                 //!< Ranges from -1 to 1
 
   double ySep = 2.0 / 3.0;
 
-  double h, v;
+  double h{};
+  double v{};
 
   // north polar cap (row 0)
   if (y >= ySep) {
@@ -604,8 +607,9 @@ glm::int64 HEALPixLevel::replaceBits(glm::int64 evenBits, glm::int64 oddBits) co
     v = _f1 - i - 1;
 
     // Wrap Arround for Meridian Patch
-    if (basePatchIdx == 4 && x > 0.25)
+    if (basePatchIdx == 4 && x > 0.25) {
       x -= 2.0;
+    }
 
     h = 4 * x - _f2;
   }
@@ -632,8 +636,9 @@ int HEALPix::convertLngLat2Base(glm::dvec2 const& lngLat) {
   // decide which longitude-octant the point is in
   int octant = 0;
 
-  while (x > (octant + 1) * 0.25)
+  while (x > (octant + 1) * 0.25) {
     octant++;
+  }
 
   // north polar cap (row 0)
   if (y >= ySep) {
@@ -686,13 +691,13 @@ int HEALPix::convertLngLat2Base(glm::dvec2 const& lngLat) {
 /* static */ int HEALPix::getChildIdxAtLevel(TileId const& tileId, int level) {
   if (level == 0) {
     return getRootIdx(tileId);
-  } else {
-    int const        lvl = tileId.level();
-    glm::int64 const idx = tileId.patchIdx();
-    assert(level <= lvl); // check that user asked for a parent
-
-    return static_cast<int>((idx >> ((lvl - level) * 2)) & 0x03);
   }
+
+  int const        lvl = tileId.level();
+  glm::int64 const idx = tileId.patchIdx();
+  assert(level <= lvl); // check that user asked for a parent
+
+  return static_cast<int>((idx >> ((lvl - level) * 2)) & 0x03);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

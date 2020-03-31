@@ -13,7 +13,6 @@ namespace csp::lodbodies {
 TileNode::TileNode()
     : mTile()
     , mParent(nullptr)
-    , mChildren()
     , mChildMaxLevel(0) {
 }
 
@@ -22,10 +21,10 @@ TileNode::TileNode()
 TileNode::TileNode(TileBase* tile, int childMaxLevel)
     : mTile(tile)
     , mParent(nullptr)
-    , mChildren()
     , mChildMaxLevel(childMaxLevel) {
-  if (mChildMaxLevel < 0 && mTile)
+  if (mChildMaxLevel < 0 && mTile) {
     mChildMaxLevel = mTile->getLevel();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,10 +32,10 @@ TileNode::TileNode(TileBase* tile, int childMaxLevel)
 TileNode::TileNode(std::unique_ptr<TileBase>&& tile, int childMaxLevel)
     : mTile(std::move(tile))
     , mParent(nullptr)
-    , mChildren()
     , mChildMaxLevel(childMaxLevel) {
-  if (mChildMaxLevel < 0 && mTile)
+  if (mChildMaxLevel < 0 && mTile) {
     mChildMaxLevel = mTile->getLevel();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,30 +89,33 @@ void TileNode::setTile(TileBase* tile) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TileNode* TileNode::getChild(int childIdx) const {
-  return mChildren[childIdx].get();
+  return mChildren.at(childIdx).get();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TileNode* TileNode::releaseChild(int childIdx) {
-  if (mChildren[childIdx])
-    mChildren[childIdx]->setParent(nullptr);
+  if (mChildren.at(childIdx)) {
+    mChildren.at(childIdx)->setParent(nullptr);
+  }
 
-  return mChildren[childIdx].release();
+  return mChildren.at(childIdx).release();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TileNode::setChild(int childIdx, TileNode* child) {
   // unset OLD parent
-  if (mChildren[childIdx])
-    mChildren[childIdx]->setParent(nullptr);
+  if (mChildren.at(childIdx)) {
+    mChildren.at(childIdx)->setParent(nullptr);
+  }
 
-  mChildren[childIdx].reset(child);
+  mChildren.at(childIdx).reset(child);
 
   // set NEW parent
-  if (mChildren[childIdx])
-    mChildren[childIdx]->setParent(this);
+  if (mChildren.at(childIdx)) {
+    mChildren.at(childIdx)->setParent(this);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

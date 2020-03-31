@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-class VistaGLSLShader;
+#include <VistaOGLExt/VistaGLSLShader.h>
 
 namespace csp::lodbodies {
 
@@ -20,7 +20,7 @@ class TerrainShader {
   TerrainShader() {
   }
   TerrainShader(std::string vertexSource, std::string fragmentSource);
-  virtual ~TerrainShader();
+  virtual ~TerrainShader() = default;
 
   virtual void bind();
   virtual void release();
@@ -30,10 +30,10 @@ class TerrainShader {
  protected:
   virtual void compile();
 
-  bool             mShaderDirty = true;
-  std::string      mVertexSource;
-  std::string      mFragmentSource;
-  VistaGLSLShader* mShader = nullptr;
+  bool            mShaderDirty = true;
+  std::string     mVertexSource;
+  std::string     mFragmentSource;
+  VistaGLSLShader mShader;
 };
 
 } // namespace csp::lodbodies

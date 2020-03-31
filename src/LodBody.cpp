@@ -40,10 +40,11 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     , mRadii(cs::core::SolarSystem::getRadii(sCenterName)) {
 
   pVisible.connect([this](bool val) {
-    if (val)
+    if (val) {
       mGraphicsEngine->registerCaster(&mPlanet);
-    else
+    } else {
       mGraphicsEngine->unregisterCaster(&mPlanet);
+    }
   });
 
   pActiveTileSourceDEM = dems.front()->getName();
@@ -186,7 +187,7 @@ bool LodBody::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool LodBody::GetBoundingBox(VistaBoundingBox& bb) {
+bool LodBody::GetBoundingBox(VistaBoundingBox& /*bb*/) {
   return false;
 }
 

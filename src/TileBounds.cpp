@@ -92,7 +92,7 @@ BoundingBox<double> calcTileBounds(
     TileBase const& tile, double radiusE, double radiusP, double heightScale) {
   switch (tile.getDataType()) {
   case TileDataType::eFloat32: {
-    auto& casted_tile = dynamic_cast<Tile<float> const&>(tile);
+    auto const& casted_tile = dynamic_cast<Tile<float> const&>(tile);
     return calcTileBounds(casted_tile.getMinMaxPyramid()->getMin(),
         casted_tile.getMinMaxPyramid()->getMax(), casted_tile.getLevel(), casted_tile.getPatchIdx(),
         radiusE, radiusP, heightScale);

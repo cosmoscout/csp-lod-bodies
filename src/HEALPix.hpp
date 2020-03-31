@@ -100,13 +100,13 @@ class HEALPixLevel {
   static glm::int64 extractEvenBits(glm::int64 value);
 
   /// Returns the value formed by the odd numbered bits of value.
-  static glm::int64 extractOddBits(glm::int64 value) ;
+  static glm::int64 extractOddBits(glm::int64 value);
 
-  void extractBits(glm::int64 value, glm::int64& evenBits, glm::int64& oddBits) const;
+  static void extractBits(glm::int64 value, glm::int64& evenBits, glm::int64& oddBits);
 
   static glm::int64 replaceEvenBits(glm::int64 value);
-  static glm::int64        replaceOddBits(glm::int64 value) ;
-  glm::int64        replaceBits(glm::int64 evenBits, glm::int64 oddBits) const;
+  static glm::int64 replaceOddBits(glm::int64 value);
+  static glm::int64 replaceBits(glm::int64 evenBits, glm::int64 oddBits);
 
   glm::dvec2 bxy2geo(glm::i64vec3 const& bxy) const;
 

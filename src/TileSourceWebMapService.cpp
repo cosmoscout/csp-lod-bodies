@@ -58,15 +58,15 @@ bool loadImpl(
 
   if (tile->getDataType() == TileDataType::eFloat32) {
     TIFFSetWarningHandler(nullptr);
-    auto data = TIFFOpen(cacheFile.c_str(), "r");
+    auto* data = TIFFOpen(cacheFile.c_str(), "r");
     if (!data) {
       spdlog::error("Tile loading failed: Cannot open '{}' with libtiff!", cacheFile);
       return false;
     }
 
-    unsigned imagelength;
+    int imagelength{};
     TIFFGetField(data, TIFFTAG_IMAGELENGTH, &imagelength);
-    for (unsigned y = 0; y < imagelength; y++) {
+    for (int y = 0; y < imagelength; y++) {
       if (which == CopyPixels::eAll) {
         TIFFReadScanline(data, &tile->data()[257 * y], y);
       } else if (which == CopyPixels::eAboveDiagonal) {
@@ -74,21 +74,27 @@ bool loadImpl(
         TIFFReadScanline(data, tmp.data(), y);
         int offset = 257 * y;
         int count  = 257 - y - 1;
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, tmp.data(), count * sizeof(float));
       } else if (which == CopyPixels::eBelowDiagonal) {
         std::array<float, 257> tmp{};
         TIFFReadScanline(data, tmp.data(), y);
         int offset = 257 * y + (257 - y);
         int count  = y;
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, tmp.data() + 257 - y, count * sizeof(float));
       }
     }
     TIFFClose(data);
   } else {
-    int width, height, bpp;
+    int width{};
+    int height{};
+    int bpp{};
     int channels = tile->getDataType() == TileDataType::eU8Vec3 ? 3 : 1;
 
-    auto data = reinterpret_cast<T*>(stbi_load(cacheFile.c_str(), &width, &height, &bpp, channels));
+    auto* data = reinterpret_cast<T*>(stbi_load(cacheFile.c_str(), &width, &height, &bpp, channels));
 
     if (!data) {
       spdlog::error("Tile loading failed: Cannot open '{}' with stbi!", cacheFile);
@@ -101,12 +107,16 @@ bool loadImpl(
       for (int y = 0; y < height; ++y) {
         int offset = width * y;
         int count  = channels * (width - y - 1);
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, data + offset, count);
       }
     } else if (which == CopyPixels::eBelowDiagonal) {
       for (int y = 0; y < height; ++y) {
         int offset = width * y + (width - y);
         int count  = channels * y;
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, data + offset, count);
       }
     }
@@ -122,7 +132,7 @@ bool loadImpl(
 template <typename T>
 void fillDiagonal(TileNode* node) {
   auto tile = static_cast<Tile<T>*>(node->getTile());
-  for (unsigned y = 1; y <= 257; y++) {
+  for (int y = 1; y <= 257; y++) {
     int pixelPos           = y * (257 - 1);
     tile->data()[pixelPos] = (y < 257) ? tile->data()[pixelPos - 1] : tile->data()[pixelPos + 1];
   }
@@ -132,16 +142,18 @@ void fillDiagonal(TileNode* node) {
 
 template <typename T>
 TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 patchIdx) {
-  auto* node = new TileNode();
+  auto* node = new TileNode(); // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
 
+  // NOLINTNEXTLINE(cppcoreguidelines-owning-memory): TODO this is bad!
   node->setTile(new Tile<T>(level, patchIdx));
   node->setChildMaxLevel(std::min(level + 1, source->getMaxLevel()));
 
-  int  x, y;
+  int  x{};
+  int  y{};
   bool onDiag = source->getXY(level, patchIdx, x, y);
   if (onDiag) {
     if (!loadImpl<T>(source, node, level, x, y, CopyPixels::eBelowDiagonal)) {
-      delete node;
+      delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
       return nullptr;
     }
 
@@ -149,14 +161,14 @@ TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 p
     y -= 4 * (1 << level);
 
     if (!loadImpl<T>(source, node, level, x, y, CopyPixels::eAboveDiagonal)) {
-      delete node;
+      delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
       return nullptr;
     }
 
     fillDiagonal<T>(node);
   } else {
     if (!loadImpl<T>(source, node, level, x, y, CopyPixels::eAll)) {
-      delete node;
+      delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
       return nullptr;
     }
   }

@@ -39,41 +39,40 @@ std::map<std::string, cs::graphics::ColorMap> PlanetShader::mColorMaps;
 PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
     std::shared_ptr<Plugin::Properties>                              pProperties,
     std::shared_ptr<cs::core::GuiManager> const&                     pGuiManager)
-    : csp::lodbodies::TerrainShader()
-    , mGraphicsEngine(std::move(graphicsEngine))
+    : mGraphicsEngine(std::move(graphicsEngine))
     , mGuiManager(pGuiManager)
     , mProperties(std::move(pProperties))
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
   // clang-format off
     pTextureIsRGB.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     pEnableTexture.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
 
     mProperties->mEnableHeightlines.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mProperties->mColorMappingType.connect(
-        [this](Plugin::Properties::ColorMappingType) { mShaderDirty = true; });
+        [this](Plugin::Properties::ColorMappingType /*ignored*/) { mShaderDirty = true; });
     mProperties->mTerrainProjectionType.connect(
-        [this](Plugin::Properties::TerrainProjectionType) { mShaderDirty = true; });
+        [this](Plugin::Properties::TerrainProjectionType /*ignored*/) { mShaderDirty = true; });
     mEnableLightingConnection = mGraphicsEngine->pEnableLighting.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mEnableShadowsDebugConnection = mGraphicsEngine->pEnableShadowsDebug.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mEnableShadowsConnection = mGraphicsEngine->pEnableShadows.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mEnableHDRConnection = mGraphicsEngine->pEnableHDR.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mLightingQualityConnection = mGraphicsEngine->pLightingQuality.connect(
-        [this](int) { mShaderDirty = true; });
+        [this](int /*ignored*/) { mShaderDirty = true; });
     mProperties->mEnableTilesDebug.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mProperties->mEnableLatLongGridLabels.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mProperties->mEnableLatLongGrid.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
     mProperties->mEnableColorMixing.connect(
-        [this](bool) { mShaderDirty = true; });
+        [this](bool /*ignored*/) { mShaderDirty = true; });
   // clang-format on
 
   // TODO: color map mangement could be done in a separate class
@@ -171,35 +170,35 @@ void PlanetShader::bind() {
   TerrainShader::bind();
 
   GLint loc = -1;
-  loc       = mShader->GetUniformLocation("heightTex");
-  mShader->SetUniform(loc, TEXUNITLUT);
+  loc       = mShader.GetUniformLocation("heightTex");
+  mShader.SetUniform(loc, TEXUNITLUT);
 
-  loc = mShader->GetUniformLocation("fontTex");
-  mShader->SetUniform(loc, TEXUNITFONT);
+  loc = mShader.GetUniformLocation("fontTex");
+  mShader.SetUniform(loc, TEXUNITFONT);
 
-  loc = mShader->GetUniformLocation("heightMin");
-  mShader->SetUniform(loc, mProperties->mHeightMin.get());
+  loc = mShader.GetUniformLocation("heightMin");
+  mShader.SetUniform(loc, mProperties->mHeightMin.get());
 
-  loc = mShader->GetUniformLocation("heightMax");
-  mShader->SetUniform(loc, mProperties->mHeightMax.get());
+  loc = mShader.GetUniformLocation("heightMax");
+  mShader.SetUniform(loc, mProperties->mHeightMax.get());
 
-  loc = mShader->GetUniformLocation("slopeMin");
-  mShader->SetUniform(loc, mProperties->mSlopeMin.get());
+  loc = mShader.GetUniformLocation("slopeMin");
+  mShader.SetUniform(loc, mProperties->mSlopeMin.get());
 
-  loc = mShader->GetUniformLocation("slopeMax");
-  mShader->SetUniform(loc, mProperties->mSlopeMax.get());
+  loc = mShader.GetUniformLocation("slopeMax");
+  mShader.SetUniform(loc, mProperties->mSlopeMax.get());
 
-  loc = mShader->GetUniformLocation("ambientBrightness");
-  mShader->SetUniform(loc, mGraphicsEngine->pAmbientBrightness.get());
+  loc = mShader.GetUniformLocation("ambientBrightness");
+  mShader.SetUniform(loc, mGraphicsEngine->pAmbientBrightness.get());
 
-  loc = mShader->GetUniformLocation("texGamma");
-  mShader->SetUniform(loc, mProperties->mTextureGamma.get());
+  loc = mShader.GetUniformLocation("texGamma");
+  mShader.SetUniform(loc, mProperties->mTextureGamma.get());
 
-  loc = mShader->GetUniformLocation("uSunDirIlluminance");
-  mShader->SetUniform(loc, mSunDirection.x, mSunDirection.y, mSunDirection.z, mSunIlluminance);
+  loc = mShader.GetUniformLocation("uSunDirIlluminance");
+  mShader.SetUniform(loc, mSunDirection.x, mSunDirection.y, mSunDirection.z, mSunIlluminance);
 
-  loc = mShader->GetUniformLocation("farClip");
-  mShader->SetUniform(loc, cs::utils::getCurrentFarClipDistance());
+  loc = mShader.GetUniformLocation("farClip");
+  mShader.SetUniform(loc, cs::utils::getCurrentFarClipDistance());
 
   mFontTexture->Bind(TEXUNITNAMEFONT);
 

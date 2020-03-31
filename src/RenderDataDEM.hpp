@@ -18,7 +18,7 @@ class RenderDataDEM : public RenderData {
  public:
   enum Flags { eRender = 0x01 };
 
-  static RenderDataDEM* create(TileNode* node = NULL);
+  // static RenderDataDEM* create(TileNode* node = NULL);
 
   explicit RenderDataDEM(TileNode* node = NULL);
   virtual ~RenderDataDEM();
