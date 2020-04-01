@@ -46,7 +46,7 @@ class TileNode {
 
   /// Sets the tile to be owned by this. Exclusive ownership of the tile is taken by this and when
   /// this TileNode is destroyed the tile is destroyed as well.
-  void setTile(TileBase* tile);
+  void setTile(std::unique_ptr<TileBase> tile);
 
   /// Returns the child at childIdx (must be in [0, 3]).
   TileNode* getChild(int childIdx) const;

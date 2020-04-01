@@ -46,8 +46,8 @@ GLsizeiptr const NumVertices = SizeX * SizeY;
 //                                      * (3 indices per triangle)
 GLsizeiptr const NumIndices = (SizeX - 1) * (SizeY - 1) * 6;
 
-std::string const BoundsVertexShaderName("VistaPlanetTileBounds.vert");
-std::string const BoundsFragmentShaderName("VistaPlanetTileBounds.frag");
+const char* BoundsVertexShaderName("VistaPlanetTileBounds.vert");
+const char* BoundsFragmentShaderName("VistaPlanetTileBounds.frag");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

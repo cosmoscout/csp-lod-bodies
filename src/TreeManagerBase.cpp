@@ -72,8 +72,9 @@ bool TreeManagerBase::AgeLess::operator()(RDMapValue const* lhs, RDMapValue cons
   int ageLHS = lhs->second->getAge(mFrame);
   int ageRHS = rhs->second->getAge(mFrame);
 
-  if (ageLHS == ageRHS)
+  if (ageLHS == ageRHS) {
     return lhs->first.level() < rhs->first.level();
+  }
 
   return ageLHS < ageRHS;
 }
@@ -93,15 +94,7 @@ TreeManagerBase::TreeManagerBase(
     PlanetParameters const& params, std::shared_ptr<GLResources> glResources)
     : mParams(&params)
     , mGlMgr(std::move(glResources))
-    , mRdMap()
-    , mAgeStore()
-    , mTree()
     , mSrc()
-    , mPendingTiles()
-    , mUnmergedNodes()
-    , mLoadedMtx()
-    , mLoadedNodes()
-    , mName()
     , mFrameCount(0)
     , mAsyncLoading(true) {
   mRdMap.reserve(preAllocNodeCount);
@@ -195,8 +188,9 @@ void TreeManagerBase::clear() {
   mRdMap.clear();
   mAgeStore.clear();
 
-  for (int i = 0; i < TileQuadTree::sNumRoots; ++i)
+  for (int i = 0; i < TileQuadTree::sNumRoots; ++i) {
     mTree.setRoot(i, nullptr);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,8 +211,9 @@ RenderData const* TreeManagerBase::findRData(TileId const& tileId) const {
   RenderData const* result = nullptr;
   auto              rdIt   = mRdMap.find(tileId);
 
-  if (rdIt != mRdMap.end())
+  if (rdIt != mRdMap.end()) {
     result = rdIt->second;
+  }
 
   return result;
 }
@@ -229,8 +224,9 @@ RenderData* TreeManagerBase::findRData(TileId const& tileId) {
   RenderData* result = nullptr;
   auto        rdIt   = mRdMap.find(tileId);
 
-  if (rdIt != mRdMap.end())
+  if (rdIt != mRdMap.end()) {
     result = rdIt->second;
+  }
 
   return result;
 }
@@ -262,7 +258,7 @@ void TreeManagerBase::onNodeLoaded(
   } else {
     // source has changed or loading failed, discard node
     mPendingTiles.erase(TileId(level, patchIdx));
-    delete node;
+    delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO where does it get created?
   }
 }
 
@@ -385,7 +381,7 @@ void TreeManagerBase::merge() {
       mPendingTiles.erase(node->getTileId());
       mUnmergedNodes.erase(mUnmergedNodes.begin() + i);
 
-      delete node;
+      delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO where does it get created?
     } else {
       ++i;
     }
