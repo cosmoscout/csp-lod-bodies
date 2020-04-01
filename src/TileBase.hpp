@@ -12,8 +12,8 @@
 #include "TileId.hpp"
 
 #include <boost/noncopyable.hpp>
-#include <typeinfo>
 #include <memory>
+#include <typeinfo>
 
 namespace csp::lodbodies {
 
