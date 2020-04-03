@@ -20,8 +20,14 @@ namespace csp::lodbodies {
 class TileSourceWebMapService : public TileSource {
  public:
   TileSourceWebMapService();
-  virtual ~TileSourceWebMapService() {
-  }
+
+  TileSourceWebMapService(TileSourceWebMapService const& other) = delete;
+  TileSourceWebMapService(TileSourceWebMapService&& other)      = delete;
+
+  TileSourceWebMapService& operator=(TileSourceWebMapService const& other) = delete;
+  TileSourceWebMapService& operator=(TileSourceWebMapService&& other) = delete;
+
+  ~TileSourceWebMapService() override = default;
 
   void init() override {
   }

@@ -40,9 +40,8 @@ class BoundingBox {
   /// @param      epsilon          The error allowed for floating point comparisons.
   ///
   /// @return If an intersection occurred at all.
-  bool GetIntersectionDistance(glm::tvec3<FloatT> origin, glm::tvec3<FloatT> direction,
-      const bool isRay, FloatT& fMinIntersection, FloatT& fMaxIntersection,
-      FloatT epsilon = 0.00001);
+  bool GetIntersectionDistance(glm::tvec3<FloatT> origin, glm::tvec3<FloatT> direction, bool isRay,
+      FloatT& fMinIntersection, FloatT& fMaxIntersection, FloatT epsilon = 0.00001);
 
  private:
   glm::tvec3<FloatT> mMin;
@@ -83,8 +82,8 @@ void BoundingBox<FloatT>::setMax(glm::tvec3<FloatT> const& p) {
 
 template <typename FloatT>
 bool BoundingBox<FloatT>::GetIntersectionDistance(glm::tvec3<FloatT> origin,
-    glm::tvec3<FloatT> direction, const bool isRay, FloatT& fMinIntersection,
-    FloatT& fMaxIntersection, FloatT epsilon) {
+    glm::tvec3<FloatT> direction, bool isRay, FloatT& fMinIntersection, FloatT& fMaxIntersection,
+    FloatT epsilon) {
   FloatT directionNorm[3];
   directionNorm[0] = direction[0];
   directionNorm[1] = direction[1];

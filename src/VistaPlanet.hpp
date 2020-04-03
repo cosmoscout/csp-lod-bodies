@@ -46,13 +46,20 @@ class TerrainShader;
 class VistaPlanet : public IVistaOpenGLDraw, public cs::graphics::ShadowCaster {
  public:
   explicit VistaPlanet(std::shared_ptr<GLResources> const& glResources);
-  virtual ~VistaPlanet();
 
-  virtual void doShadows() override;
-  virtual bool getWorldTransform(VistaTransformMatrix& matTransform) const override;
+  VistaPlanet(VistaPlanet const& other) = delete;
+  VistaPlanet(VistaPlanet&& other)      = delete;
 
-  virtual bool Do() override;
-  virtual bool GetBoundingBox(VistaBoundingBox& bb) override;
+  VistaPlanet& operator=(VistaPlanet const& other) = delete;
+  VistaPlanet& operator=(VistaPlanet&& other) = delete;
+
+  ~VistaPlanet() override;
+
+  void doShadows() override;
+  bool getWorldTransform(VistaTransformMatrix& matTransform) const override;
+
+  bool Do() override;
+  bool GetBoundingBox(VistaBoundingBox& bb) override;
 
   void       setWorldTransform(glm::dmat4 const& mat);
   glm::dmat4 getWorldTransform() const;

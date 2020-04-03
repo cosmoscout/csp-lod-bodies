@@ -26,8 +26,8 @@ class TreeManagerBase;
 /// produces lists of tiles to load and draw respectively.
 class LODVisitor : public TileVisitor<LODVisitor> {
  public:
-  explicit LODVisitor(PlanetParameters const& params, TreeManagerBase* treeMgrDEM = NULL,
-      TreeManagerBase* treeMgrIMG = NULL);
+  explicit LODVisitor(PlanetParameters const& params, TreeManagerBase* treeMgrDEM = nullptr,
+      TreeManagerBase* treeMgrIMG = nullptr);
 
   TreeManagerBase* getTreeManagerDEM() const;
   void             setTreeManagerDEM(TreeManagerBase* treeMgr);
@@ -96,28 +96,28 @@ class LODVisitor : public TileVisitor<LODVisitor> {
   /// State tracked during traversal of the tile quad trees.
   class LODState : public TileVisitor<LODVisitor>::StateBase {
    public:
-    TileNode* mLastDEM;
-    TileNode* mLastIMG;
+    TileNode* mLastDEM{};
+    TileNode* mLastIMG{};
 
-    RenderDataDEM* mRdDEM;
-    RenderDataImg* mRdIMG;
+    RenderDataDEM* mRdDEM{};
+    RenderDataImg* mRdIMG{};
 
-    int mMaxLevel;
+    int mMaxLevel{};
   };
 
-  bool preTraverse();
-  void postTraverse();
+  bool preTraverse() override;
+  void postTraverse() override;
 
-  bool preVisitRoot(TileId const& tileId);
-  void postVisitRoot(TileId const& tileId);
+  bool preVisitRoot(TileId const& tileId) override;
+  void postVisitRoot(TileId const& tileId) override;
 
-  bool preVisit(TileId const& tileId);
-  void postVisit(TileId const& tileId);
+  bool preVisit(TileId const& tileId) override;
+  void postVisit(TileId const& tileId) override;
 
-  void             pushState();
-  void             popState();
-  StateBase&       getState();
-  StateBase const& getState() const;
+  void             pushState() override;
+  void             popState() override;
+  StateBase&       getState() override;
+  StateBase const& getState() const override;
   LODState&        getLODState(int level = -1);
   LODState const&  getLODState(int level = -1) const;
 

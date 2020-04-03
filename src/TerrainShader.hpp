@@ -17,9 +17,15 @@ namespace csp::lodbodies {
 /// The base class for the PlanetShader. It builds the shader from various sources and links it.
 class TerrainShader {
  public:
-  TerrainShader() {
-  }
+  TerrainShader() = default;
   TerrainShader(std::string vertexSource, std::string fragmentSource);
+
+  TerrainShader(TerrainShader const& other) = delete;
+  TerrainShader(TerrainShader&& other)      = delete;
+
+  TerrainShader& operator=(TerrainShader const& other) = delete;
+  TerrainShader& operator=(TerrainShader&& other) = delete;
+
   virtual ~TerrainShader() = default;
 
   virtual void bind();

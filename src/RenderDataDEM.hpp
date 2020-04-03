@@ -18,10 +18,15 @@ class RenderDataDEM : public RenderData {
  public:
   enum Flags { eRender = 0x01 };
 
-  // static RenderDataDEM* create(TileNode* node = NULL);
+  explicit RenderDataDEM(TileNode* node = nullptr);
 
-  explicit RenderDataDEM(TileNode* node = NULL);
-  virtual ~RenderDataDEM();
+  RenderDataDEM(RenderDataDEM const& other) = delete;
+  RenderDataDEM(RenderDataDEM&& other)      = delete;
+
+  RenderDataDEM& operator=(RenderDataDEM const& other) = delete;
+  RenderDataDEM& operator=(RenderDataDEM&& other) = delete;
+
+  ~RenderDataDEM() override;
 
   int  getEdgeDelta(int idx) const;
   void setEdgeDelta(int idx, int delta);

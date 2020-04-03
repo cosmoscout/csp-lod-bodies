@@ -32,8 +32,8 @@ class TreeManagerBase;
 /// Renders tiles with elevation (DEM) and optionally image (IMG) data.
 class TileRenderer : private boost::noncopyable {
  public:
-  explicit TileRenderer(PlanetParameters const& params, TreeManagerBase* treeMgrDEM = NULL,
-      TreeManagerBase* treeMgrIMG = NULL);
+  explicit TileRenderer(PlanetParameters const& params, TreeManagerBase* treeMgrDEM = nullptr,
+      TreeManagerBase* treeMgrIMG = nullptr);
 
   TreeManagerBase* getTreeManagerDEM() const;
   void             setTreeManagerDEM(TreeManagerBase* treeMgr);

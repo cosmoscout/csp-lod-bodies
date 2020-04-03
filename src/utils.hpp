@@ -8,9 +8,9 @@
 #define CSP_LOD_BODIES_UTIL_HPP
 
 #define _USE_MATH_DEFINES // Use Math.h defines like M_PI
+#include <cmath>          // C++ Math
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-#include <math.h> // C++ Math
 
 class VistaTransformNode;
 class VistaOpenGLNode;
