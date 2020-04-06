@@ -313,6 +313,12 @@ void Plugin::init() {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceIMG = name;
+          for (auto const& source : body->getIMGtileSources()) {
+            if (source->getName() == name) {
+              mGuiManager->getGui()->callJavascript(
+                "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
+            }
+          }
         }
       }));
 
@@ -322,6 +328,12 @@ void Plugin::init() {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceDEM = name;
+          for (auto const& source : body->getDEMtileSources()) {
+            if (source->getName() == name) {
+              mGuiManager->getGui()->callJavascript(
+                "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
+            }
+          }
         }
       }));
 
