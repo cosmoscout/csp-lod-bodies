@@ -94,50 +94,44 @@ class TileVisitor {
   void visitRoot(TileNode* rootDEM, TileNode* rootIMG, TileId tileId);
   void visitLevel(TileNode* nodeDEM, TileNode* nodeIMG, TileId tileId);
 
-  virtual /// Called before visiting the first root node. Returns if traversal should commence or
-          /// not.
-      /// Reimplement in the derived class, the default just returns true.
-      bool
-      preTraverse();
+  /// Called before visiting the first root node. Returns if traversal should commence or
+  /// not.
+  /// Reimplement in the derived class, the default just returns true.
+  virtual bool preTraverse();
 
-  virtual /// Called after visiting the last node. Reimplement in the derived class, the default
-          /// just does
-      /// nothing.
-      void
-      postTraverse();
+  /// Called after visiting the last node. Reimplement in the derived class, the default
+  /// just does
+  /// nothing.
+  virtual void postTraverse();
 
-  virtual /// Called for each root node visited, before visiting any children. Returns if any
-          /// children
-      /// should be visited (true) or skipped (false).
-      /// Reimplement in the derived class, the default just returns false.
-      ///
-      /// For finer grained control over which children to visit, set the corresponding entries of
-      /// StateBase::children to true (visit child - the default) or false (skip child). These
-      /// entries are only considered if this functions returns true.
-      bool
-      preVisitRoot(TileId const& tileId);
+  /// Called for each root node visited, before visiting any children. Returns if any
+  /// children
+  /// should be visited (true) or skipped (false).
+  /// Reimplement in the derived class, the default just returns false.
+  ///
+  /// For finer grained control over which children to visit, set the corresponding entries of
+  /// StateBase::children to true (visit child - the default) or false (skip child). These
+  /// entries are only considered if this functions returns true.
+  virtual bool preVisitRoot(TileId const& tileId);
 
-  virtual /// Called for each root node visited, after visiting any children. Reimplement in the
-          /// derived
-      /// class, the default just does nothing.
-      void
-      postVisitRoot(TileId const& tileId);
+  /// Called for each root node visited, after visiting any children. Reimplement in the
+  /// derived
+  /// class, the default just does nothing.
+  virtual void postVisitRoot(TileId const& tileId);
 
-  virtual /// Called for each non-root node visited, before visiting the child nodes.
-      /// Returns if children should be visited (true) or skipped (false).
-      /// Reimplement in the derived class, the default just returns false.
-      ///
-      /// For finer grained control over which children to visit, set the corresponding entries of
-      /// StateBase::children to true (visit child - the default) or false (skip child). These
-      /// entries are only considered if this functions returns true.
-      bool
-      preVisit(TileId const& tileId);
+  /// Called for each non-root node visited, before visiting the child nodes.
+  /// Returns if children should be visited (true) or skipped (false).
+  /// Reimplement in the derived class, the default just returns false.
+  ///
+  /// For finer grained control over which children to visit, set the corresponding entries
+  /// of StateBase::children to true (visit child - the default) or false (skip child).
+  /// These entries are only considered if this functions returns true.
+  virtual bool preVisit(TileId const& tileId);
 
-  virtual /// Called for each node visited, after visiting the child nodes. Reimplement in the
-          /// derived
-      /// class, the default just does nothing.
-      void
-      postVisit(TileId const& tileId);
+  /// Called for each node visited, after visiting the child nodes. Reimplement in the
+  /// derived
+  /// class, the default just does nothing.
+  virtual void postVisit(TileId const& tileId);
 
   virtual void             pushState();
   virtual void             popState();
