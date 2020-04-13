@@ -150,7 +150,7 @@ TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 p
 
   int  x{};
   int  y{};
-  bool onDiag = source->getXY(level, patchIdx, x, y);
+  bool onDiag = csp::lodbodies::TileSourceWebMapService::getXY(level, patchIdx, x, y);
   if (onDiag) {
     if (!loadImpl<T>(source, node, level, x, y, CopyPixels::eBelowDiagonal)) {
       delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
