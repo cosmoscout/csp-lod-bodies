@@ -316,7 +316,7 @@ void Plugin::init() {
           for (auto const& source : body->getIMGtileSources()) {
             if (source->getName() == name) {
               mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
+                  "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
             }
           }
         }
@@ -331,7 +331,7 @@ void Plugin::init() {
           for (auto const& source : body->getDEMtileSources()) {
             if (source->getName() == name) {
               mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
+                  "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
             }
           }
         }
