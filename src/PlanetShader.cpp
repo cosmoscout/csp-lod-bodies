@@ -80,7 +80,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> graphicsEng
     auto files(cs::utils::filesystem::listFiles("../share/resources/colormaps"));
 
     bool first = true;
-    for (const auto& file : files) {
+    for (auto const& file : files) {
       std::string  name(file);
       const size_t lastSlashIdx = name.find_last_of("\\/");
       if (std::string::npos != lastSlashIdx) {
