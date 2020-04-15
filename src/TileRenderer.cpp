@@ -78,7 +78,7 @@ std::string const BoundsFragmentShaderName("VistaPlanetTileBounds.frag");
 // so on.
 int buildTileIndices(GLuint* buffer, int idx, int level, int baseX, int baseY) {
   // number of quads along one side at this level
-  int const numQuads = (SizeX - 1) / (1 << level);
+  int const numQuads = (SizeX - 1) / (int64_t(1) << level);
 
   if (numQuads == 1) {
     // lowest level, split single quad into triangles alternating
@@ -146,16 +146,16 @@ void calcOffsetScale(TileId const& idDEM, TileId const& idIMG, glm::ivec3& imgOS
 
     // number of indices is number of indices for full patch divided by
     // 4^(level difference) == 2^(2 * level difference)
-    idxCount = NumIndices / (1 << (2 * deltaLvl));
+    idxCount = NumIndices / (int64_t(1) << (2 * deltaLvl));
 
-    imgOS = glm::ivec3(0, 0, (SizeX - 1) / (1 << deltaLvl));
-    demOS = glm::ivec3(0, 0, (SizeX - 1) / (1 << deltaLvl));
+    imgOS = glm::ivec3(0, 0, (SizeX - 1) / (int64_t(1) << deltaLvl));
+    demOS = glm::ivec3(0, 0, (SizeX - 1) / (int64_t(1) << deltaLvl));
 
     for (int i = deltaLvl; i > 0; --i) {
       if (idx & 0x01)
-        demOS.x += (SizeX - 1) / (1 << i);
+        demOS.x += (SizeX - 1) / (int64_t(1) << i);
       if (idx & 0x02)
-        demOS.y += (SizeY - 1) / (1 << i);
+        demOS.y += (SizeY - 1) / (int64_t(1) << i);
 
       idx >>= 2;
     }
@@ -164,15 +164,15 @@ void calcOffsetScale(TileId const& idDEM, TileId const& idIMG, glm::ivec3& imgOS
     glm::int64 idx      = idDEM.patchIdx();
     int        deltaLvl = idDEM.level() - idIMG.level();
 
-    imgOS    = glm::ivec3(0, 0, (SizeX - 1) * (1 << deltaLvl));
+    imgOS    = glm::ivec3(0, 0, (SizeX - 1) * (int64_t(1) << deltaLvl));
     demOS    = glm::ivec3(0, 0, SizeX - 1);
     idxCount = NumIndices;
 
     for (int i = 0; i < deltaLvl; ++i) {
       if (idx & 0x01)
-        imgOS.x += (SizeX - 1) * (1 << i);
+        imgOS.x += (SizeX - 1) * (int64_t(1) << i);
       if (idx & 0x02)
-        imgOS.y += (SizeY - 1) * (1 << i);
+        imgOS.y += (SizeY - 1) * (int64_t(1) << i);
 
       idx >>= 2;
     }
@@ -215,7 +215,7 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
 
     for (int i = deltaLvl; i > 0; --i) {
       if (idx & 0x02)
-        result[0] += (SizeY - 1) / (1 << i);
+        result[0] += (SizeY - 1) / (int64_t(1) << i);
 
       idx >>= 2;
     }
@@ -233,7 +233,7 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
 
     for (int i = deltaLvl; i > 0; --i) {
       if (idx & 0x01)
-        result[1] += (SizeX - 1) / (1 << i);
+        result[1] += (SizeX - 1) / (int64_t(1) << i);
 
       idx >>= 2;
     }
@@ -251,7 +251,7 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
 
     for (int i = deltaLvl; i > 0; --i) {
       if (idx & 0x02)
-        result[2] += (SizeY - 1) / (1 << i);
+        result[2] += (SizeY - 1) / (int64_t(1) << i);
 
       idx >>= 2;
     }
@@ -269,7 +269,7 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
 
     for (int i = deltaLvl; i > 0; --i) {
       if (idx & 0x01)
-        result[3] += (SizeX - 1) / (1 << i);
+        result[3] += (SizeX - 1) / (int64_t(1) << i);
 
       idx >>= 2;
     }
@@ -384,7 +384,8 @@ void TileRenderer::preRenderTiles(cs::graphics::ShadowMap* shadowMap) {
   loc = shader->GetUniformLocation("VP_heightScale");
   shader->SetUniform(loc, static_cast<float>(mParams->mHeightScale));
   loc = shader->GetUniformLocation("VP_radius");
-  shader->SetUniform(loc, mParams->mEquatorialRadius, mParams->mPolarRadius);
+  shader->SetUniform(loc, static_cast<float>(mParams->mEquatorialRadius),
+      static_cast<float>(mParams->mPolarRadius));
   loc = shader->GetUniformLocation("VP_texDEM");
   shader->SetUniform(loc, texUnitDEM);
   loc = shader->GetUniformLocation("VP_texIMG");
@@ -396,14 +397,14 @@ void TileRenderer::preRenderTiles(cs::graphics::ShadowMap* shadowMap) {
     shader->SetUniform(shader->GetUniformLocation("VP_shadowBias"), shadowMap->getBias());
     shader->SetUniform(
         shader->GetUniformLocation("VP_shadowCascades"), (int)shadowMap->getMaps().size());
-    for (int i = 0; i < shadowMap->getMaps().size(); ++i) {
+    for (size_t i = 0; i < shadowMap->getMaps().size(); ++i) {
       GLint locSamplers = glGetUniformLocation(
           shader->GetProgram(), ("VP_shadowMaps[" + std::to_string(i) + "]").c_str());
       GLint locMatrices = glGetUniformLocation(shader->GetProgram(),
           ("VP_shadowProjectionViewMatrices[" + std::to_string(i) + "]").c_str());
 
-      shadowMap->getMaps()[i]->Bind(GL_TEXTURE0 + texUnitShadow + i);
-      glUniform1i(locSamplers, texUnitShadow + i);
+      shadowMap->getMaps()[i]->Bind(GL_TEXTURE0 + texUnitShadow + static_cast<int>(i));
+      glUniform1i(locSamplers, texUnitShadow + static_cast<int>(i));
 
       auto mat = shadowMap->getShadowMatrices()[i];
       glUniformMatrix4fv(locMatrices, 1, GL_FALSE, mat.GetData());
@@ -434,7 +435,7 @@ void TileRenderer::renderTiles(
   int missingIMG = 0;
 
   // iterate over both std::vector<RenderData*>s together
-  for (int i(0); i < renderDEM.size(); ++i) {
+  for (size_t i(0); i < renderDEM.size(); ++i) {
     // get data associated with nodes
     RenderDataDEM* rdDEM = dynamic_cast<RenderDataDEM*>(renderDEM[i]);
     RenderDataImg* rdIMG =

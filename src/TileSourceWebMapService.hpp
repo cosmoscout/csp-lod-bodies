@@ -32,7 +32,7 @@ class TileSourceWebMapService : public TileSource {
   TileNode* loadTile(int level, glm::int64 patchIdx) override;
 
   void loadTileAsync(int level, glm::int64 patchIdx, OnLoadCallback cb) override;
-  int  getPendingRequests();
+  int  getPendingRequests() override;
 
   void     setMaxLevel(uint32_t maxLevel);
   uint32_t getMaxLevel() const;

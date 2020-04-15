@@ -146,9 +146,7 @@ double getHeight(
     hP1              = ptr[vB + sizeY * (uB + 1)];
     hP2              = ptr[vB + 1 + sizeY * uB];
     hPP              = ptr[vB + 1 + sizeY * (uB + 1)];
-  }
-
-  if (child->getTileDataType() == TileDataType::eUInt8) {
+  } else {
     const unsigned char* ptr = child->getTile()->getTypedPtr<unsigned char>();
     h                        = ptr[vB + sizeY * uB];
     hP1                      = ptr[vB + sizeY * (uB + 1)];
@@ -256,8 +254,10 @@ bool intersectPlanet(
       glm::dvec4 entry     = origin + direction * min_dist;
       glm::dvec4 exit      = origin + direction * max_dist;
       auto       sampleDir = (exit - entry).xyz();
-      glm::dvec3 sampleCartesian, lastSampleCartesian;
-      glm::dvec3 sampleLngLatHeight, lastSampleLngLatHeight;
+      glm::dvec3 lastSampleCartesian{};
+      glm::dvec3 sampleCartesian{};
+      glm::dvec3 lastSampleLngLatHeight{};
+      glm::dvec3 sampleLngLatHeight{};
       double     height(0.0), lastHeight(0.0);
       bool       first_sample(true);
 
@@ -335,8 +335,7 @@ bool intersectPlanet(
           hP1              = ptr[vB + sizeY * (uB + 1)];
           hP2              = ptr[vB + 1 + sizeY * uB];
           hPP              = ptr[vB + 1 + sizeY * (uB + 1)];
-        }
-        if (parent->getTileDataType() == TileDataType::eUInt8) {
+        } else {
           const unsigned char* ptr = parent->getTile()->getTypedPtr<unsigned char>();
           height                   = ptr[vB + sizeY * uB];
           hP1                      = ptr[vB + sizeY * (uB + 1)];

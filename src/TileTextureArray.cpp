@@ -90,37 +90,6 @@ GLenum getType(TileDataType dataType) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Functor to sort upload queue.
-// The queue is processed from the back, so older tiles are considered less
-// than younger tiles and in case of a tie levels closer to the root
-// are prioritized.
-class RDLess {
- public:
-  explicit RDLess(int frameCount);
-
-  bool operator()(RenderData const* lhs, RenderData const* rhs);
-
- private:
-  int frame_;
-};
-
-/* explicit */
-RDLess::RDLess(int frameCount)
-    : frame_(frameCount) {
-}
-
-bool RDLess::operator()(RenderData const* lhs, RenderData const* rhs) {
-  int ageL = lhs->getAge(frame_);
-  int ageR = rhs->getAge(frame_);
-
-  if (ageL == ageR)
-    return lhs->getTileId().level() > rhs->getTileId().level();
-
-  return ageL > ageR;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 } // namespace
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

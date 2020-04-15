@@ -176,7 +176,7 @@ void Plugin::init() {
       "Specifies the amount of detail of the planet's surface. Should be in the range 1-100.",
       std::function([this](double value) {
         if (!mProperties->mAutoLOD.get()) {
-          mProperties->mLODFactor = value;
+          mProperties->mLODFactor = static_cast<float>(value);
         }
       }));
 
@@ -186,8 +186,9 @@ void Plugin::init() {
       std::function([this](bool enable) { mProperties->mAutoLOD = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTextureGamma",
-      "A multiplier for the brightness of the image channel.",
-      std::function([this](double value) { mProperties->mTextureGamma = value; }));
+      "A multiplier for the brightness of the image channel.", std::function([this](double value) {
+        mProperties->mTextureGamma = static_cast<float>(value);
+      }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setHeightRange",
       "Sets one end of the height range for the color mapping. The first parameter is the actual "
@@ -195,9 +196,9 @@ void Plugin::init() {
       "end.",
       std::function([this](double val, double handle) {
         if (handle == 0.0)
-          mProperties->mHeightMin = val * 1000;
+          mProperties->mHeightMin = static_cast<float>(val * 1000);
         else
-          mProperties->mHeightMax = val * 1000;
+          mProperties->mHeightMax = static_cast<float>(val * 1000);
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSlopeRange",
@@ -206,9 +207,9 @@ void Plugin::init() {
       "end.",
       std::function([this](double val, double handle) {
         if (handle == 0.0)
-          mProperties->mSlopeMin = cs::utils::convert::toRadians(val);
+          mProperties->mSlopeMin = static_cast<float>(cs::utils::convert::toRadians(val));
         else
-          mProperties->mSlopeMax = cs::utils::convert::toRadians(val);
+          mProperties->mSlopeMax = static_cast<float>(cs::utils::convert::toRadians(val));
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
@@ -432,13 +433,13 @@ void Plugin::update() {
     double maxTime      = 14.5;
 
     if (mFrameTimings->pFrameTime.get() > maxTime) {
-      mProperties->mLODFactor = std::max(
+      mProperties->mLODFactor = static_cast<float>(std::max(
           minLODFactor, mProperties->mLODFactor.get() -
-                            std::min(1.0, 0.1 * (mFrameTimings->pFrameTime.get() - maxTime)));
+                            std::min(1.0, 0.1 * (mFrameTimings->pFrameTime.get() - maxTime))));
     } else if (mFrameTimings->pFrameTime.get() < minTime) {
-      mProperties->mLODFactor = std::min(
+      mProperties->mLODFactor = static_cast<float>(std::min(
           maxLODFactor, mProperties->mLODFactor.get() +
-                            std::min(1.0, 0.02 * (minTime - mFrameTimings->pFrameTime.get())));
+                            std::min(1.0, 0.02 * (minTime - mFrameTimings->pFrameTime.get()))));
     }
   }
 }
