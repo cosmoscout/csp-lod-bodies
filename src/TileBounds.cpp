@@ -49,7 +49,7 @@ BoundingBox<double> calcTileBounds(double tmin, double tmax, int tileLevel, glm:
   // tile corners
   auto corners = hp.getCornersLngLat(patchIdx);
 
-  for (auto& corner : corners) {
+  for (auto const& corner : corners) {
     // lowest/highest point at corner
     glm::dvec3 pMin(cs::utils::convert::toCartesian(corner, radiusE, radiusP, tMin));
     glm::dvec3 pMax(cs::utils::convert::toCartesian(corner, radiusE, radiusP, tMax));
