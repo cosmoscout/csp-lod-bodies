@@ -63,7 +63,7 @@ bool testInFrustum(Frustum const& frustum, BoundingBox<double> const& tb) {
 
     // test if any BB corner is inside the halfspace defined
     // by the current plane
-    for (auto& tbPnt : tbPnts) {
+    for (auto const& tbPnt : tbPnts) {
       if (glm::dot(normal, tbPnt) >= d) {
         // corner j is inside - stop testing
         outside = false;
@@ -114,7 +114,7 @@ bool testFrontFacing(glm::dvec3 const& camPos, PlanetParameters const* params,
           glm::dvec3(tbMax[0], tbMax[1], tbMax[2]), glm::dvec3(tbMin[0], tbMax[1], tbMax[2])}};
 
   // Simple ray-sphere intersection test for every corner point
-  for (auto& tbPnt : tbPnts) {
+  for (auto const& tbPnt : tbPnts) {
     double     dRayLength = glm::length(tbPnt - camPos);
     glm::dvec3 vRayDir    = (tbPnt - camPos) / dRayLength;
     double     b          = glm::dot(camPos, vRayDir);

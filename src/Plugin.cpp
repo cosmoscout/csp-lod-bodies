@@ -20,18 +20,6 @@
 #include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
 #include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
 
-#ifdef _WIN32
-
-#ifdef min
-#undef min
-#endif
-
-#ifdef max
-#undef max
-#endif
-
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN cs::core::PluginBase* create() {

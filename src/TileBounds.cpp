@@ -63,7 +63,7 @@ BoundingBox<double> calcTileBounds(double tmin, double tmax, int tileLevel, glm:
   // tile edge center points
   auto edges = hp.getEdgeCentersLngLat(patchIdx);
 
-  for (auto& edge : edges) {
+  for (auto const& edge : edges) {
     // lowest/highest point at edge center
     glm::dvec3 pMin(cs::utils::convert::toCartesian(edge, radiusE, radiusP, tMin));
     glm::dvec3 pMax(cs::utils::convert::toCartesian(edge, radiusE, radiusP, tMax));
