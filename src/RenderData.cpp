@@ -15,13 +15,12 @@ namespace csp::lodbodies {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* virtual */
-RenderData::~RenderData() {
-}
+RenderData::~RenderData() = default;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TileId const& RenderData::getTileId() const {
-  assert(mNode != NULL);
+  assert(mNode != nullptr);
   return mNode->getTileId();
 }
 
@@ -29,8 +28,7 @@ TileId const& RenderData::getTileId() const {
 
 /* explicit */
 RenderData::RenderData(TileNode* node)
-    : mHasBounds(false)
-    , mNode(node)
+    : mNode(node)
     , mTexLayer(-1)
     , mLastFrame(-1) {
 }

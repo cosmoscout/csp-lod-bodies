@@ -21,7 +21,14 @@ class MinMaxPyramid {
 
  public:
   MinMaxPyramid();
-  MinMaxPyramid(Tile<float>* tile);
+  explicit MinMaxPyramid(Tile<float>* tile);
+
+  MinMaxPyramid(MinMaxPyramid const& other) = default;
+  MinMaxPyramid(MinMaxPyramid&& other)      = default;
+
+  MinMaxPyramid& operator=(MinMaxPyramid const& other) = default;
+  MinMaxPyramid& operator=(MinMaxPyramid&& other) = default;
+
   virtual ~MinMaxPyramid();
 
   std::vector<std::vector<float>>& getMinPyramid();
@@ -48,23 +55,23 @@ class MinMaxPyramid {
   /// 57  58  59  60  61  62  63  64
   /// @endcode
   float getMin(std::vector<int> const& quadrants);
-  float getMin() {
+  float getMin() const {
     return mMinValue;
   }
 
   /// Returns the maximum value in the given quadrant.
   float getMax(std::vector<int> const& quadrants);
-  float getMax() {
+  float getMax() const {
     return mMaxValue;
   }
 
   /// The average value of the whole pyramid.
-  float getAverage() {
+  float getAverage() const {
     return mAvgValue;
   }
 
  protected:
-  float getData(std::vector<std::vector<float>>& pyramid, std::vector<int> const& quadrants);
+  static float getData(std::vector<std::vector<float>>& pyramid, std::vector<int> const& quadrants);
 
  private:
   std::vector<std::vector<float>> mMinPyramid;
@@ -72,7 +79,7 @@ class MinMaxPyramid {
 
   float mMinValue = std::numeric_limits<float>::max();
   float mMaxValue = std::numeric_limits<float>::lowest();
-  float mAvgValue = 0.f;
+  float mAvgValue = 0.F;
 };
 
 } // namespace csp::lodbodies

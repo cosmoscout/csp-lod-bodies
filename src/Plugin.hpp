@@ -34,19 +34,19 @@ class Plugin : public cs::core::PluginBase {
 
     cs::utils::Property<TerrainProjectionType> mTerrainProjectionType =
         TerrainProjectionType::eHybrid;
-    cs::utils::Property<float>            mLODFactor               = 15.f;
+    cs::utils::Property<float>            mLODFactor               = 15.F;
     cs::utils::Property<bool>             mAutoLOD                 = true;
-    cs::utils::Property<float>            mTextureGamma            = 1.f;
+    cs::utils::Property<float>            mTextureGamma            = 1.F;
     cs::utils::Property<bool>             mEnableHeightlines       = false;
     cs::utils::Property<bool>             mEnableLatLongGrid       = false;
     cs::utils::Property<bool>             mEnableLatLongGridLabels = false;
     cs::utils::Property<ColorMappingType> mColorMappingType        = ColorMappingType::eNone;
     cs::utils::Property<std::string>      mTerrainColorMap;
     cs::utils::Property<bool>             mEnableColorMixing = true;
-    cs::utils::Property<float>            mHeightMax         = 12000.f;
-    cs::utils::Property<float>            mHeightMin         = -8000.f;
-    cs::utils::Property<float>            mSlopeMax          = 0.25f * glm::pi<float>();
-    cs::utils::Property<float>            mSlopeMin          = 0.f;
+    cs::utils::Property<float>            mHeightMax         = 12000.F;
+    cs::utils::Property<float>            mHeightMin         = -8000.F;
+    cs::utils::Property<float>            mSlopeMax          = 0.25F * glm::pi<float>();
+    cs::utils::Property<float>            mSlopeMin          = 0.F;
     cs::utils::Property<bool>             mEnableWireframe   = false;
     cs::utils::Property<bool>             mEnableTilesDebug  = false;
     cs::utils::Property<bool>             mEnableTilesFreeze = false;
@@ -91,7 +91,7 @@ class Plugin : public cs::core::PluginBase {
   std::vector<std::unique_ptr<VistaOpenGLNode>> mOpenGLNodes;
   std::vector<std::shared_ptr<LodBody>>         mLodBodies;
   std::shared_ptr<Properties>                   mProperties;
-  float                                         mNonAutoLod;
+  float                                         mNonAutoLod{};
 
   int mActiveBodyConnection = -1;
 };

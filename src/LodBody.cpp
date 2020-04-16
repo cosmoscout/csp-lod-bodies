@@ -6,6 +6,8 @@
 
 #include "LodBody.hpp"
 
+#include <utility>
+
 #include "../../../src/cs-core/GraphicsEngine.hpp"
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
@@ -19,7 +21,7 @@ namespace csp::lodbodies {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-    std::shared_ptr<cs::core::SolarSystem> const&                 solarSystem,
+    std::shared_ptr<cs::core::SolarSystem>                        solarSystem,
     std::shared_ptr<Plugin::Properties> const&                    pProperties,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
@@ -28,7 +30,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     double tEndExistence)
     : cs::scene::CelestialBody(sCenterName, sFrameName, tStartExistence, tEndExistence)
     , mGraphicsEngine(graphicsEngine)
-    , mSolarSystem(solarSystem)
+    , mSolarSystem(std::move(solarSystem))
     , mProperties(pProperties)
     , mGuiManager(pGuiManager)
     , mDEMtileSources(dems)
@@ -38,10 +40,11 @@ LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine
     , mRadii(cs::core::SolarSystem::getRadii(sCenterName)) {
 
   pVisible.connect([this](bool val) {
-    if (val)
+    if (val) {
       mGraphicsEngine->registerCaster(&mPlanet);
-    else
+    } else {
       mGraphicsEngine->unregisterCaster(&mPlanet);
+    }
   });
 
   pActiveTileSourceDEM = dems.front()->getName();
@@ -184,7 +187,7 @@ bool LodBody::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool LodBody::GetBoundingBox(VistaBoundingBox& bb) {
+bool LodBody::GetBoundingBox(VistaBoundingBox& /*bb*/) {
   return false;
 }
 

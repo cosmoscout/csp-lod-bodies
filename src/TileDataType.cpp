@@ -42,12 +42,13 @@ std::istream& operator>>(std::istream& is, TileDataType& tdt) {
   std::string s;
   is >> s;
 
-  if (s == "Float32")
+  if (s == "Float32") {
     tdt = TileDataType::eFloat32;
-  else if (s == "UInt8")
+  } else if (s == "UInt8") {
     tdt = TileDataType::eUInt8;
-  else if (s == "U8Vec3")
+  } else if (s == "U8Vec3") {
     tdt = TileDataType::eU8Vec3;
+  }
 
   return is;
 }

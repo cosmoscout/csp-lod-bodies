@@ -45,14 +45,21 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   cs::utils::Property<std::string> pActiveTileSourceIMG;
 
   LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<cs::core::SolarSystem> const&        solarSystem,
+      std::shared_ptr<cs::core::SolarSystem>               solarSystem,
       std::shared_ptr<Plugin::Properties> const&           pProperties,
       std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
       std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
       std::vector<std::shared_ptr<TileSource>> const& dems,
       std::vector<std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
       double tEndExistence);
-  virtual ~LodBody();
+
+  LodBody(LodBody const& other) = delete;
+  LodBody(LodBody&& other)      = delete;
+
+  LodBody& operator=(LodBody const& other) = delete;
+  LodBody& operator=(LodBody&& other) = delete;
+
+  ~LodBody() override;
 
   PlanetShader const& getShader() const;
 
@@ -69,10 +76,10 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   double     getHeight(glm::dvec2 lngLat) const override;
   glm::dvec3 getRadii() const override;
 
-  virtual void update(double tTime, cs::scene::CelestialObserver const& oObs) override;
+  void update(double tTime, cs::scene::CelestialObserver const& oObs) override;
 
-  virtual bool Do() override;
-  virtual bool GetBoundingBox(VistaBoundingBox& bb) override;
+  bool Do() override;
+  bool GetBoundingBox(VistaBoundingBox& bb) override;
 
  private:
   std::shared_ptr<cs::core::GraphicsEngine>         mGraphicsEngine;

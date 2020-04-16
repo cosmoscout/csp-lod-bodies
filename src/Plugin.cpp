@@ -29,7 +29,7 @@ EXPORT_FN cs::core::PluginBase* create() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
-  delete pluginBase;
+  delete pluginBase; // NOLINT(cppcoreguidelines-owning-memory)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,10 +161,11 @@ void Plugin::init() {
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
-        if (handle == 0.0)
+        if (handle == 0.0) {
           mProperties->mHeightMin = static_cast<float>(val * 1000);
-        else
+        } else {
           mProperties->mHeightMax = static_cast<float>(val * 1000);
+        }
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSlopeRange",
@@ -172,10 +173,11 @@ void Plugin::init() {
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
-        if (handle == 0.0)
+        if (handle == 0.0) {
           mProperties->mSlopeMin = static_cast<float>(cs::utils::convert::toRadians(val));
-        else
+        } else {
           mProperties->mSlopeMax = static_cast<float>(cs::utils::convert::toRadians(val));
+        }
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
@@ -260,7 +262,7 @@ void Plugin::init() {
     mSolarSystem->registerBody(body);
 
     body->setSun(mSolarSystem->getSun());
-    auto parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), body.get());
+    auto* parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), body.get());
     VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
         parent, static_cast<int>(cs::utils::DrawOrder::ePlanets));
 

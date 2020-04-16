@@ -17,7 +17,7 @@ namespace csp::lodbodies {
 /* explicit */
 UpdateBoundsVisitor::UpdateBoundsVisitor(
     TreeManagerBase* treeMgrDEM, PlanetParameters const& params)
-    : TileVisitor<UpdateBoundsVisitor>(treeMgrDEM->getTree(), NULL)
+    : TileVisitor<UpdateBoundsVisitor>(treeMgrDEM->getTree(), nullptr)
     , mTreeMgrDEM(treeMgrDEM)
     , mParams(&params) {
 }
@@ -35,8 +35,8 @@ bool UpdateBoundsVisitor::preVisitRoot(TileId const& tileId) {
   TileNode* node   = getState().mNodeDEM;
 
   if (node) {
-    TileBase*      tile  = node->getTile();
-    RenderDataDEM* rdDEM = mTreeMgrDEM->find<RenderDataDEM>(tileId);
+    TileBase* tile  = node->getTile();
+    auto*     rdDEM = mTreeMgrDEM->find<RenderDataDEM>(tileId);
 
     rdDEM->setBounds(calcTileBounds(
         *tile, mParams->mEquatorialRadius, mParams->mPolarRadius, mParams->mHeightScale));
@@ -50,9 +50,9 @@ bool UpdateBoundsVisitor::preVisitRoot(TileId const& tileId) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool UpdateBoundsVisitor::preVisit(TileId const& tileId) {
-  TileNode*      node  = getState().mNodeDEM;
-  TileBase*      tile  = node->getTile();
-  RenderDataDEM* rdDEM = mTreeMgrDEM->find<RenderDataDEM>(tileId);
+  TileNode* node  = getState().mNodeDEM;
+  TileBase* tile  = node->getTile();
+  auto*     rdDEM = mTreeMgrDEM->find<RenderDataDEM>(tileId);
 
   rdDEM->setBounds(calcTileBounds(
       *tile, mParams->mEquatorialRadius, mParams->mPolarRadius, mParams->mHeightScale));

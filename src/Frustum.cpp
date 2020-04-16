@@ -45,7 +45,7 @@ std::ostream& operator<<(std::ostream& os, FrustumPlaneIdx fpi) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* static */ Frustum Frustum::fromMatrix(glm::dmat4 const& mat) {
-  Frustum result;
+  Frustum result{};
   result.setFromMatrix(mat);
 
   return result;
@@ -57,7 +57,7 @@ void Frustum::setPlane(FrustumPlaneIdx fpi, glm::dvec4 const& plane) {
   glm::dvec3 normal(plane);
   double     len = glm::length(normal);
 
-  mPlanes[cs::utils::enumCast(fpi)] =
+  mPlanes.at(cs::utils::enumCast(fpi)) =
       glm::dvec4(normal[0] / len, normal[1] / len, normal[2] / len, plane[3] / len);
 }
 
@@ -81,8 +81,8 @@ void Frustum::setFromMatrix(glm::dmat4 const& mat) {
 double Frustum::getHorizontalFOV() const {
   return glm::pi<double>() -
          std::acos(
-             std::min(1.0, glm::dot(mPlanes[cs::utils::enumCast(FrustumPlaneIdx::eLeft)].xyz(),
-                               mPlanes[cs::utils::enumCast(FrustumPlaneIdx::eRight)].xyz())));
+             std::min(1.0, glm::dot(mPlanes.at(cs::utils::enumCast(FrustumPlaneIdx::eLeft)).xyz(),
+                               mPlanes.at(cs::utils::enumCast(FrustumPlaneIdx::eRight)).xyz())));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,33 +90,29 @@ double Frustum::getHorizontalFOV() const {
 double Frustum::getVerticalFOV() const {
   return glm::pi<double>() -
          std::acos(
-             std::min(1.0, glm::dot(mPlanes[cs::utils::enumCast(FrustumPlaneIdx::eTop)].xyz(),
-                               mPlanes[cs::utils::enumCast(FrustumPlaneIdx::eBottom)].xyz())));
+             std::min(1.0, glm::dot(mPlanes.at(cs::utils::enumCast(FrustumPlaneIdx::eTop)).xyz(),
+                               mPlanes.at(cs::utils::enumCast(FrustumPlaneIdx::eBottom)).xyz())));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::array<glm::dvec4, 6> const& Frustum::getPlanes() const {
+std::array<glm::dvec4, Frustum::NUM_PLANES> const& Frustum::getPlanes() const {
   return mPlanes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 glm::dvec4 const& Frustum::getPlane(FrustumPlaneIdx fpi) const {
-  return mPlanes[cs::utils::enumCast(fpi)];
+  return mPlanes.at(cs::utils::enumCast(fpi));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::ostream& operator<<(std::ostream& os, Frustum const& frustum) {
-  auto fIt  = frustum.getPlanes().begin();
-  auto fEnd = frustum.getPlanes().end();
-
-  for (int i = 0; fIt != fEnd; ++fIt, ++i) {
-    if (i > 0)
-      os << " ";
-
-    os << static_cast<FrustumPlaneIdx>(i) << " " << *fIt;
+  int index = 0;
+  for (auto const& plane : frustum.getPlanes()) {
+    os << ' ' << static_cast<FrustumPlaneIdx>(index++) << " (" << plane.x << ", " << plane.y << ", "
+       << plane.z << ", " << plane.w << ")";
   }
 
   return os;

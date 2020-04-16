@@ -20,11 +20,8 @@ class VistaTexture;
 
 namespace cs::core {
 class GuiManager;
-} // namespace cs::core
-
-namespace cs::graphics {
 class GraphicsEngine;
-} // namespace cs::graphics
+} // namespace cs::core
 
 namespace csp::lodbodies {
 
@@ -34,15 +31,22 @@ class PlanetShader : public TerrainShader {
   cs::utils::Property<bool> pTextureIsRGB  = true;
   cs::utils::Property<bool> pEnableTexture = true; ///< If false the image data will not be drawn.
 
-  PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<Plugin::Properties> const&                pProperties,
-      std::shared_ptr<cs::core::GuiManager> const&              pGuiManager);
-  virtual ~PlanetShader();
+  PlanetShader(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
+      std::shared_ptr<Plugin::Properties>                pProperties,
+      std::shared_ptr<cs::core::GuiManager> const&       pGuiManager);
+
+  PlanetShader(PlanetShader const& other) = delete;
+  PlanetShader(PlanetShader&& other)      = delete;
+
+  PlanetShader& operator=(PlanetShader const& other) = delete;
+  PlanetShader& operator=(PlanetShader&& other) = delete;
+
+  ~PlanetShader() override;
 
   void setSun(glm::vec3 const& direction, float illuminance);
 
-  virtual void bind() override;
-  virtual void release() override;
+  void bind() override;
+  void release() override;
 
  private:
   void compile() override;
@@ -51,7 +55,7 @@ class PlanetShader : public TerrainShader {
   std::shared_ptr<cs::core::GuiManager>     mGuiManager;
   std::shared_ptr<Plugin::Properties>       mProperties;
   glm::vec3                                 mSunDirection                 = glm::vec3(0, 1, 0);
-  float                                     mSunIlluminance               = 1.f;
+  float                                     mSunIlluminance               = 1.F;
   VistaTexture*                             mFontTexture                  = nullptr;
   int                                       mEnableLightingConnection     = -1;
   int                                       mEnableShadowsDebugConnection = -1;
