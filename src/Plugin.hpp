@@ -78,8 +78,6 @@ class Plugin : public cs::core::PluginBase {
     std::map<std::string, Body> mBodies;           ///< A list of planets with their anchor names.
   };
 
-  Plugin();
-
   void init() override;
   void deInit() override;
 
@@ -90,7 +88,7 @@ class Plugin : public cs::core::PluginBase {
   std::shared_ptr<GLResources>                  mGLResources;
   std::vector<std::unique_ptr<VistaOpenGLNode>> mOpenGLNodes;
   std::vector<std::shared_ptr<LodBody>>         mLodBodies;
-  std::shared_ptr<Properties>                   mProperties;
+  std::shared_ptr<Properties>                   mProperties = std::make_shared<Properties>();
   float                                         mNonAutoLod{};
 
   int mActiveBodyConnection = -1;
