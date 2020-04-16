@@ -31,9 +31,9 @@ class PlanetShader : public TerrainShader {
   cs::utils::Property<bool> pTextureIsRGB  = true;
   cs::utils::Property<bool> pEnableTexture = true; ///< If false the image data will not be drawn.
 
-  PlanetShader(std::shared_ptr<cs::core::Settings> const& settings,
-      std::shared_ptr<Plugin::Properties>                 pProperties,
-      std::shared_ptr<cs::core::GuiManager> const&        pGuiManager);
+  PlanetShader(std::shared_ptr<cs::core::Settings> settings,
+      std::shared_ptr<Plugin::Properties>          pProperties,
+      std::shared_ptr<cs::core::GuiManager> const& pGuiManager);
 
   PlanetShader(PlanetShader const& other) = delete;
   PlanetShader(PlanetShader&& other)      = delete;

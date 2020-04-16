@@ -36,11 +36,10 @@ std::map<std::string, cs::graphics::ColorMap> PlanetShader::mColorMaps;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> const& settings,
-    std::shared_ptr<Plugin::Properties>                               pProperties,
-    std::shared_ptr<cs::core::GuiManager> const&                      pGuiManager)
-    : csp::lodbodies::TerrainShader()
-    , mSettings(settings)
+PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> settings,
+    std::shared_ptr<Plugin::Properties>                        pProperties,
+    std::shared_ptr<cs::core::GuiManager> const&               pGuiManager)
+    : mSettings(std::move(settings))
     , mGuiManager(pGuiManager)
     , mProperties(std::move(pProperties))
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
@@ -54,7 +53,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> const& settings,
     mProperties->mColorMappingType.connect(
         [this](Plugin::Properties::ColorMappingType /*ignored*/) { mShaderDirty = true; });
     mProperties->mTerrainProjectionType.connect(
-        [this](Plugin::Properties::TerrainProjectionType) { mShaderDirty = true; });
+        [this](Plugin::Properties::TerrainProjectionType /*unused*/) { mShaderDirty = true; });
     mEnableLightingConnection = mSettings->mGraphics.pEnableLighting.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
     mEnableShadowsDebugConnection = mSettings->mGraphics.pEnableShadowsDebug.connect(

@@ -21,7 +21,7 @@ namespace csp::lodbodies {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
-    std::shared_ptr<cs::core::GraphicsEngine> const&        graphicsEngine,
+    std::shared_ptr<cs::core::GraphicsEngine>               graphicsEngine,
     std::shared_ptr<cs::core::SolarSystem>                  solarSystem,
     std::shared_ptr<Plugin::Properties> const&              pProperties,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
@@ -31,7 +31,7 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     double tEndExistence)
     : cs::scene::CelestialBody(sCenterName, sFrameName, tStartExistence, tEndExistence)
     , mSettings(settings)
-    , mGraphicsEngine(graphicsEngine)
+    , mGraphicsEngine(std::move(graphicsEngine))
     , mSolarSystem(std::move(solarSystem))
     , mProperties(pProperties)
     , mGuiManager(pGuiManager)
