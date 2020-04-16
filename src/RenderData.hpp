@@ -9,16 +9,21 @@
 
 #include "TileBounds.hpp"
 #include "TileId.hpp"
+#include "TileNode.hpp"
 
 #include <boost/noncopyable.hpp>
 
 namespace csp::lodbodies {
 
-class TileNode;
-
 /// The base class for all render data of a single TileNode.
 class RenderData : private boost::noncopyable {
  public:
+  RenderData(RenderData const& other) = delete;
+  RenderData(RenderData&& other)      = delete;
+
+  RenderData& operator=(RenderData const& other) = delete;
+  RenderData& operator=(RenderData&& other) = delete;
+
   virtual ~RenderData();
 
   TileNode*     getNode() const;
@@ -40,14 +45,14 @@ class RenderData : private boost::noncopyable {
   bool                       hasBounds() const;
 
  protected:
-  explicit RenderData(TileNode* node = NULL);
+  explicit RenderData(TileNode* node = nullptr);
   BoundingBox<double> mTb;
-  bool                mHasBounds;
+  bool                mHasBounds{};
 
  private:
-  TileNode* mNode;
-  int       mTexLayer;
-  int       mLastFrame;
+  TileNode* mNode{};
+  int       mTexLayer{};
+  int       mLastFrame{};
 };
 
 } // namespace csp::lodbodies

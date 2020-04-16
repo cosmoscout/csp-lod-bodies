@@ -39,7 +39,9 @@
      */
     // eslint-disable-next-line class-methods-use-this
     setElevationDataCopyright(copyright) {
-      $('#lodbodies-img-data-copyright').tooltip({title: `© ${copyright}`, placement: 'top'});
+      $('#lodbodies-dem-data-copyright')
+          .tooltip({placement: 'top'})
+          .attr('data-original-title', `© ${copyright}`);
     }
 
     /**
@@ -50,7 +52,9 @@
      */
     // eslint-disable-next-line class-methods-use-this
     setMapDataCopyright(copyright) {
-      $('#lodbodies-dem-data-copyright').tooltip({title: `© ${copyright}`, placement: 'bottom'});
+      $('#lodbodies-img-data-copyright')
+          .tooltip({placement: 'bottom'})
+          .attr('data-original-title', `© ${copyright}`);
     }
   }
 

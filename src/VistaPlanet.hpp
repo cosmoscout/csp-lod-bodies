@@ -46,13 +46,20 @@ class TerrainShader;
 class VistaPlanet : public IVistaOpenGLDraw, public cs::graphics::ShadowCaster {
  public:
   explicit VistaPlanet(std::shared_ptr<GLResources> const& glResources);
-  virtual ~VistaPlanet();
 
-  virtual void doShadows() override;
-  virtual bool getWorldTransform(VistaTransformMatrix& matTransform) const override;
+  VistaPlanet(VistaPlanet const& other) = delete;
+  VistaPlanet(VistaPlanet&& other)      = delete;
 
-  virtual bool Do() override;
-  virtual bool GetBoundingBox(VistaBoundingBox& bb) override;
+  VistaPlanet& operator=(VistaPlanet const& other) = delete;
+  VistaPlanet& operator=(VistaPlanet&& other) = delete;
+
+  ~VistaPlanet() override;
+
+  void doShadows() override;
+  bool getWorldTransform(VistaTransformMatrix& matTransform) const override;
+
+  bool Do() override;
+  bool GetBoundingBox(VistaBoundingBox& bb) override;
 
   void       setWorldTransform(glm::dmat4 const& mat);
   glm::dmat4 getWorldTransform() const;
@@ -118,9 +125,9 @@ class VistaPlanet : public IVistaOpenGLDraw, public cs::graphics::ShadowCaster {
   void renderTiles(int frameCount, glm::dmat4 const& matVM, glm::fmat4x4 const& matP,
       cs::graphics::ShadowMap* shadowMap);
 
-  glm::dmat4 getModelviewMatrix() const;
-  glm::dmat4 getProjectionMatrix() const;
-  glm::ivec4 getViewport() const;
+  glm::dmat4        getModelviewMatrix() const;
+  static glm::dmat4 getProjectionMatrix();
+  static glm::ivec4 getViewport();
 
   static glm::uint8 const sFlagTileBoundsInvalid = 0x01;
   static bool             sGlewInitialized;

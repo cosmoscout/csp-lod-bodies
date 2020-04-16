@@ -13,13 +13,13 @@ namespace csp::lodbodies {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TileNode* TileQuadTree::getRoot(int idx) const {
-  return mRoots[idx].get();
+  return mRoots.at(idx).get();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TileQuadTree::setRoot(int idx, TileNode* root) {
-  mRoots[idx].reset(root);
+  mRoots.at(idx).reset(root);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ bool insertNode(TileQuadTree* tree, TileNode* node) {
   TileId const& tileId = node->getTileId();
 
   if (tileId.level() == 0) {
-    assert(tree->getRoot(HEALPix::getRootIdx(tileId)) == NULL);
+    assert(tree->getRoot(HEALPix::getRootIdx(tileId)) == nullptr);
 
     tree->setRoot(HEALPix::getRootIdx(tileId), node);
   } else {
@@ -41,7 +41,7 @@ bool insertNode(TileQuadTree* tree, TileNode* node) {
 
     if (parent) {
       // Catch cases where an existing child would be overwritten
-      assert(parent->getChild(HEALPix::getChildIdxAtLevel(tileId, tileId.level())) == NULL);
+      assert(parent->getChild(HEALPix::getChildIdxAtLevel(tileId, tileId.level())) == nullptr);
 
       parent->setChild(HEALPix::getChildIdxAtLevel(tileId, tileId.level()), node);
     } else {
@@ -64,13 +64,13 @@ bool removeNode(TileQuadTree* tree, TileNode* node) {
     int childIdx = HEALPix::getChildIdx(node->getTileId());
     assert(parent->getChild(childIdx) == node);
 
-    parent->setChild(childIdx, NULL);
+    parent->setChild(childIdx, nullptr);
     result = true;
   } else {
     int childIdx = HEALPix::getChildIdx(node->getTileId());
     assert(tree->getRoot(childIdx) == node);
 
-    tree->setRoot(childIdx, NULL);
+    tree->setRoot(childIdx, nullptr);
     result = true;
   }
 

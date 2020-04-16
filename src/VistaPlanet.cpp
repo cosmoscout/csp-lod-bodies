@@ -28,12 +28,11 @@ namespace csp::lodbodies {
 /* explicit */
 VistaPlanet::VistaPlanet(std::shared_ptr<GLResources> const& glResources)
     : mWorldTransform(1.0)
-    , mParams()
     , mLodVisitor(mParams)
     , mRenderer(mParams)
-    , mSrcDEM(NULL)
+    , mSrcDEM(nullptr)
     , mTreeMgrDEM(mParams, glResources)
-    , mSrcIMG(NULL)
+    , mSrcIMG(nullptr)
     , mTreeMgrIMG(mParams, glResources)
     , mLastFrameClock(GetVistaSystem()->GetFrameClock())
     , mSumFrameClock(0.0)
@@ -54,11 +53,13 @@ VistaPlanet::~VistaPlanet() {
   mTreeMgrDEM.clear();
   mTreeMgrIMG.clear();
 
-  if (mSrcDEM)
+  if (mSrcDEM) {
     mSrcDEM->fini();
+  }
 
-  if (mSrcIMG)
+  if (mSrcIMG) {
     mSrcIMG->fini();
+  }
 
 #if !defined(NDEBUG) && !defined(VISTAPLANET_NO_VERBOSE)
   vstr::outi() << "[VistaPlanet::~VistaPlanet] maxDrawTiles " << mMaxDrawTiles << " maxLoadTiles "
@@ -100,8 +101,8 @@ bool VistaPlanet::getWorldTransform(VistaTransformMatrix& matTransform) const {
   //     Turns out ViSTA never calls this function, so it does not really
   //     matter..
   //     -- neume 2014-03-12
-  VistaVector3D bbMin(0.f, 0.f, 0.f);
-  VistaVector3D bbMax(0.f, 0.f, 0.f);
+  VistaVector3D bbMin(0.F, 0.F, 0.F);
+  VistaVector3D bbMax(0.F, 0.F, 0.F);
 
   bb.SetBounds(bbMin, bbMax);
 
@@ -139,9 +140,9 @@ void VistaPlanet::setDEMSource(TileSource* srcDEM) {
   if (mSrcDEM) {
     mSrcDEM->fini();
 
-    mLodVisitor.setTreeManagerDEM(NULL);
-    mRenderer.setTreeManagerDEM(NULL);
-    mTreeMgrDEM.setSource(NULL);
+    mLodVisitor.setTreeManagerDEM(nullptr);
+    mRenderer.setTreeManagerDEM(nullptr);
+    mTreeMgrDEM.setSource(nullptr);
   }
 
   mSrcDEM = srcDEM;
@@ -169,9 +170,9 @@ void VistaPlanet::setIMGSource(TileSource* srcIMG) {
   if (mSrcIMG) {
     mSrcIMG->fini();
 
-    mLodVisitor.setTreeManagerIMG(NULL);
-    mRenderer.setTreeManagerIMG(NULL);
-    mTreeMgrIMG.setSource(NULL);
+    mLodVisitor.setTreeManagerIMG(nullptr);
+    mRenderer.setTreeManagerIMG(nullptr);
+    mTreeMgrIMG.setSource(nullptr);
   }
 
   mSrcIMG = srcIMG;
@@ -253,8 +254,9 @@ void VistaPlanet::updateStatistics(int frameCount) {
                  << "] avg. load tiles [" << (mSumLoadTiles / 60.0) << "]"
                  << std::setprecision(6); // reset to default
 
-    if ((mSumFrameClock / 60.0) > 0.017)
+    if ((mSumFrameClock / 60.0) > 0.017) {
       vstr::out() << " -- frame budget exceeded!";
+    }
 
     vstr::out() << std::endl;
 #endif
@@ -352,28 +354,28 @@ void VistaPlanet::renderTiles(int frameCount, glm::dmat4 const& matVM, glm::fmat
 // matrices replace the implementation of getModelviewMatrix() and
 // getProjectionMatrix().
 glm::dmat4 VistaPlanet::getModelviewMatrix() const {
-  GLfloat glMat[16];
-  glGetFloatv(GL_MODELVIEW_MATRIX, &glMat[0]);
+  std::array<GLfloat, 16> glMat{};
+  glGetFloatv(GL_MODELVIEW_MATRIX, glMat.data());
 
-  return glm::dmat4(glm::make_mat4x4(glMat)) * mWorldTransform;
+  return glm::dmat4(glm::make_mat4x4(glMat.data())) * mWorldTransform;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::dmat4 VistaPlanet::getProjectionMatrix() const {
-  GLfloat glMat[16];
-  glGetFloatv(GL_PROJECTION_MATRIX, &glMat[0]);
+glm::dmat4 VistaPlanet::getProjectionMatrix() {
+  std::array<GLfloat, 16> glMat{};
+  glGetFloatv(GL_PROJECTION_MATRIX, glMat.data());
 
-  return glm::make_mat4x4(glMat);
+  return glm::make_mat4x4(glMat.data());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-glm::ivec4 VistaPlanet::getViewport() const {
-  GLint glVP[4];
-  glGetIntegerv(GL_VIEWPORT, &glVP[0]);
+glm::ivec4 VistaPlanet::getViewport() {
+  std::array<GLint, 4> glVP{};
+  glGetIntegerv(GL_VIEWPORT, glVP.data());
 
-  return glm::make_vec4(glVP);
+  return glm::make_vec4(glVP.data());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

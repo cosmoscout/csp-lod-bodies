@@ -22,10 +22,12 @@ std::ostream& operator<<(std::ostream& os, FrustumPlaneIdx fpi);
 /// length) normal and the `w` component contains the distance from the origin.
 class Frustum {
  public:
+  static const size_t NUM_PLANES = 6;
+
   /// Constructs a new Frustum and initializes its planes from mat.
   static Frustum fromMatrix(glm::dmat4 const& mat);
 
-  std::array<glm::dvec4, 6> const& getPlanes() const;
+  std::array<glm::dvec4, NUM_PLANES> const& getPlanes() const;
 
   glm::dvec4 const& getPlane(FrustumPlaneIdx fpi) const;
   void              setPlane(FrustumPlaneIdx fpi, glm::dvec4 const& plane);
@@ -39,7 +41,7 @@ class Frustum {
   double getVerticalFOV() const;
 
  private:
-  std::array<glm::dvec4, 6> mPlanes;
+  std::array<glm::dvec4, NUM_PLANES> mPlanes;
 };
 
 std::ostream& operator<<(std::ostream& os, Frustum const& frustum);

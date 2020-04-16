@@ -12,9 +12,7 @@ namespace csp::lodbodies {
 
 /* explicit */
 TestTileVisitor::TestTileVisitor(TileQuadTree* treeDEM, TileQuadTree* treeIMG)
-    : TileVisitor<TestTileVisitor>(treeDEM, treeIMG)
-    , mLoadTilesDEM()
-    , mLoadTilesIMG() {
+    : TileVisitor<TestTileVisitor>(treeDEM, treeIMG) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,8 +53,9 @@ bool TestTileVisitor::preVisitRoot(TileId const& tileId) {
     result = false;
   }
 
-  if (result)
+  if (result) {
     result = visitLevel(tileId);
+  }
 
   return result;
 }
@@ -93,7 +92,7 @@ bool TestTileVisitor::visitLevel(TileId const& tileId) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool TestTileVisitor::refineTile() {
-  return getLevel() < 2 ? true : false;
+  return getLevel() < 2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

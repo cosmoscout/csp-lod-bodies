@@ -4,20 +4,19 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_BODIES_RENDERDATAIMG_HPP
-#define CSP_LOD_BODIES_RENDERDATAIMG_HPP
+#include "logger.hpp"
 
-#include "RenderData.hpp"
+#include "../../../src/cs-utils/logger.hpp"
 
 namespace csp::lodbodies {
 
-/// Render data for image data.
-class RenderDataImg : public RenderData {
- public:
-  explicit RenderDataImg(TileNode* node = nullptr);
-  virtual ~RenderDataImg();
-};
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+spdlog::logger& logger() {
+  static auto logger = cs::utils::createLogger("csp-lodbodies");
+  return *logger;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace csp::lodbodies
-
-#endif // CSP_LOD_BODIES_RENDERDATAIMG_HPP

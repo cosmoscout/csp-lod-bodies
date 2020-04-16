@@ -20,9 +20,17 @@ class TileNode;
 class TileSource {
  public:
   /// Type of the callback functor that can be passed to loadTileAsync.
-  typedef std::function<void(TileSource*, int, glm::int64, TileNode*)> OnLoadCallback;
+  using OnLoadCallback = std::function<void(TileSource*, int, glm::int64, TileNode*)>;
 
-  virtual ~TileSource(){};
+  TileSource() = default;
+
+  TileSource(TileSource const& other)     = default;
+  TileSource(TileSource&& other) noexcept = default;
+
+  TileSource& operator=(TileSource const& other) = default;
+  TileSource& operator=(TileSource&& other) noexcept = default;
+
+  virtual ~TileSource() = default;
 
   /// Perform initialization of the source. Must be called before the first tile is requested with
   /// loadTile or loadTileAsync. Sub-classes need to make sure that it is safe to call this

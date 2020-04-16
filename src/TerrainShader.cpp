@@ -11,19 +11,15 @@
 #include <VistaOGLExt/VistaGLSLShader.h>
 #include <VistaOGLExt/VistaShaderRegistry.h>
 
+#include <utility>
+
 namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TerrainShader::TerrainShader(std::string const& vertexSource, std::string const& fragmentSource)
-    : mVertexSource(vertexSource)
-    , mFragmentSource(fragmentSource) {
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-TerrainShader::~TerrainShader() {
-  delete mShader;
+TerrainShader::TerrainShader(std::string vertexSource, std::string fragmentSource)
+    : mVertexSource(std::move(vertexSource))
+    , mFragmentSource(std::move(fragmentSource)) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,13 +30,13 @@ void TerrainShader::bind() {
     mShaderDirty = false;
   }
 
-  mShader->Bind();
+  mShader.Bind();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TerrainShader::release() {
-  mShader->Release();
+  mShader.Release();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,11 +54,10 @@ void TerrainShader::compile() {
   cs::utils::replaceString(mFragmentSource, "$VP_TERRAIN_SHADER_UNIFORMS",
       reg.RetrieveShader("VistaPlanetTerrainShaderUniforms.glsl"));
 
-  delete mShader;
-  mShader = new VistaGLSLShader();
-  mShader->InitVertexShaderFromString(mVertexSource);
-  mShader->InitFragmentShaderFromString(mFragmentSource);
-  mShader->Link();
+  mShader = VistaGLSLShader();
+  mShader.InitVertexShaderFromString(mVertexSource);
+  mShader.InitFragmentShaderFromString(mFragmentSource);
+  mShader.Link();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

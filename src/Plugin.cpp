@@ -8,6 +8,7 @@
 
 #include "LodBody.hpp"
 #include "TileSourceWebMapService.hpp"
+#include "logger.hpp"
 
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/InputManager.hpp"
@@ -29,7 +30,7 @@ EXPORT_FN cs::core::PluginBase* create() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
-  delete pluginBase;
+  delete pluginBase; // NOLINT(cppcoreguidelines-owning-memory)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,18 +119,9 @@ void to_json(nlohmann::json& j, Plugin::Settings const& o) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Plugin::Plugin()
-    : mProperties(std::make_shared<Properties>()) {
-
-  // Create default logger for this plugin.
-  spdlog::set_default_logger(cs::utils::logger::createLogger("csp-lod-bodies"));
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void Plugin::init() {
 
-  spdlog::info("Loading plugin...");
+  logger().info("Loading plugin...");
 
   mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
 
@@ -195,10 +187,11 @@ void Plugin::init() {
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
-        if (handle == 0.0)
+        if (handle == 0.0) {
           mProperties->mHeightMin = static_cast<float>(val * 1000);
-        else
+        } else {
           mProperties->mHeightMax = static_cast<float>(val * 1000);
+        }
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSlopeRange",
@@ -206,10 +199,11 @@ void Plugin::init() {
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
-        if (handle == 0.0)
+        if (handle == 0.0) {
           mProperties->mSlopeMin = static_cast<float>(cs::utils::convert::toRadians(val));
-        else
+        } else {
           mProperties->mSlopeMax = static_cast<float>(cs::utils::convert::toRadians(val));
+        }
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
@@ -292,7 +286,7 @@ void Plugin::init() {
     mSolarSystem->registerBody(body);
 
     body->setSun(mSolarSystem->getSun());
-    auto parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), body.get());
+    auto* parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), body.get());
     VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
         parent, static_cast<int>(cs::utils::DrawOrder::ePlanets));
 
@@ -345,6 +339,12 @@ void Plugin::init() {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceIMG = name;
+          for (auto const& source : body->getIMGtileSources()) {
+            if (source->getName() == name) {
+              mGuiManager->getGui()->callJavascript(
+                  "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
+            }
+          }
         }
       }));
 
@@ -354,6 +354,12 @@ void Plugin::init() {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
           body->pActiveTileSourceDEM = name;
+          for (auto const& source : body->getDEMtileSources()) {
+            if (source->getName() == name) {
+              mGuiManager->getGui()->callJavascript(
+                  "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
+            }
+          }
         }
       }));
 
@@ -376,13 +382,13 @@ void Plugin::init() {
     }
   });
 
-  spdlog::info("Loading done.");
+  logger().info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
-  spdlog::info("Unloading plugin...");
+  logger().info("Unloading plugin...");
 
   for (auto const& body : mLodBodies) {
     mInputManager->unregisterSelectable(body);
@@ -419,7 +425,7 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesImg");
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesDem");
 
-  spdlog::info("Unloading done.");
+  logger().info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
