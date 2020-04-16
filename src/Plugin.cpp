@@ -87,7 +87,7 @@ void from_json(const nlohmann::json& j, Plugin::Settings& o) {
 
 void Plugin::init() {
 
-  logger()->info("Loading plugin...");
+  logger().info("Loading plugin...");
 
   mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
 
@@ -350,13 +350,13 @@ void Plugin::init() {
     }
   });
 
-  logger()->info("Loading done.");
+  logger().info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
-  logger()->info("Unloading plugin...");
+  logger().info("Unloading plugin...");
 
   for (auto const& body : mLodBodies) {
     mInputManager->unregisterSelectable(body);
@@ -393,7 +393,7 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesImg");
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesDem");
 
-  logger()->info("Unloading done.");
+  logger().info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

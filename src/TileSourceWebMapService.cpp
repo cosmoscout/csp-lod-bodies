@@ -48,7 +48,7 @@ bool loadImpl(
   try {
     cacheFile = source->loadData(level, x, y);
   } catch (std::exception const& e) {
-    logger()->error("Tile loading failed: {}", e.what());
+    logger().error("Tile loading failed: {}", e.what());
     return false;
   }
 
@@ -56,7 +56,7 @@ bool loadImpl(
     TIFFSetWarningHandler(nullptr);
     auto* data = TIFFOpen(cacheFile.c_str(), "r");
     if (!data) {
-      logger()->error("Tile loading failed: Cannot open '{}' with libtiff!", cacheFile);
+      logger().error("Tile loading failed: Cannot open '{}' with libtiff!", cacheFile);
       return false;
     }
 
@@ -94,7 +94,7 @@ bool loadImpl(
         reinterpret_cast<T*>(stbi_load(cacheFile.c_str(), &width, &height, &bpp, channels));
 
     if (!data) {
-      logger()->error("Tile loading failed: Cannot open '{}' with stbi!", cacheFile);
+      logger().error("Tile loading failed: Cannot open '{}' with stbi!", cacheFile);
       return false;
     }
 
@@ -336,7 +336,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
         cs::utils::filesystem::createDirectoryRecursively(
             cacheDirPath, boost::filesystem::perms::all_all);
       } catch (std::exception& e) {
-        logger()->error("Failed to create cache directory: {}", e.what());
+        logger().error("Failed to create cache directory: {}", e.what());
       }
     }
   }
@@ -347,7 +347,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
     out.open(cacheFile.str(), std::ofstream::out | std::ofstream::binary);
 
     if (!out) {
-      logger()->error(
+      logger().error(
           "Failed to download tile data: Cannot open '{}' for writing!", cacheFile.str());
     }
 

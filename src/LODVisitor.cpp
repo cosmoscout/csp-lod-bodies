@@ -631,7 +631,7 @@ bool LODVisitor::testVisible(TileId const& tileId, TreeManagerBase* treeMgrDEM) 
         state.mRdIMG->setBounds(tb);
       }
     } else {
-      logger()->error("Failed to test visibility of Tile: Unknown tile template type!");
+      logger().error("Failed to test visibility of Tile: Unknown tile template type!");
     }
 
     result = testInFrustum(mCullData.mFrustumMS, tb);
