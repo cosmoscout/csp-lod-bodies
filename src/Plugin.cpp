@@ -8,6 +8,7 @@
 
 #include "LodBody.hpp"
 #include "TileSourceWebMapService.hpp"
+#include "logger.hpp"
 
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/InputManager.hpp"
@@ -86,7 +87,7 @@ void from_json(const nlohmann::json& j, Plugin::Settings& o) {
 
 void Plugin::init() {
 
-  spdlog::info("Loading plugin...");
+  logger()->info("Loading plugin...");
 
   mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
 
@@ -349,13 +350,13 @@ void Plugin::init() {
     }
   });
 
-  spdlog::info("Loading done.");
+  logger()->info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
-  spdlog::info("Unloading plugin...");
+  logger()->info("Unloading plugin...");
 
   for (auto const& body : mLodBodies) {
     mInputManager->unregisterSelectable(body);
@@ -392,7 +393,7 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesImg");
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesDem");
 
-  spdlog::info("Unloading done.");
+  logger()->info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

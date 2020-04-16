@@ -11,10 +11,10 @@
 #include "RenderDataImg.hpp"
 #include "TileTextureArray.hpp"
 #include "TreeManagerBase.hpp"
+#include "logger.hpp"
 
 #include <VistaBase/VistaStreamUtils.h>
 #include <glm/gtc/matrix_inverse.hpp>
-#include <spdlog/spdlog.h>
 
 namespace csp::lodbodies {
 
@@ -631,7 +631,7 @@ bool LODVisitor::testVisible(TileId const& tileId, TreeManagerBase* treeMgrDEM) 
         state.mRdIMG->setBounds(tb);
       }
     } else {
-      spdlog::error("Failed to test visibility of Tile: Unknown tile template type!");
+      logger()->error("Failed to test visibility of Tile: Unknown tile template type!");
     }
 
     result = testInFrustum(mCullData.mFrustumMS, tb);
