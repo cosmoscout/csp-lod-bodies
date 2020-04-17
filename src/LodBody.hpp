@@ -47,7 +47,7 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   LodBody(std::shared_ptr<cs::core::Settings> const& settings,
       std::shared_ptr<cs::core::GraphicsEngine>      graphicsEngine,
       std::shared_ptr<cs::core::SolarSystem>         solarSystem,
-      std::shared_ptr<Plugin::Properties> const&     pProperties,
+      std::shared_ptr<Plugin::Settings> const&       pluginSettings,
       std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
       std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
       std::vector<std::shared_ptr<TileSource>> const& dems,
@@ -86,7 +86,7 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   std::shared_ptr<cs::core::Settings>               mSettings;
   std::shared_ptr<cs::core::GraphicsEngine>         mGraphicsEngine;
   std::shared_ptr<cs::core::SolarSystem>            mSolarSystem;
-  std::shared_ptr<Plugin::Properties>               mProperties;
+  std::shared_ptr<Plugin::Settings>                 mPluginSettings;
   std::shared_ptr<const cs::scene::CelestialObject> mSun;
   std::shared_ptr<cs::core::GuiManager>             mGuiManager;
 

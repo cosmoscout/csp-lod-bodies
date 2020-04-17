@@ -23,7 +23,7 @@ namespace csp::lodbodies {
 LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     std::shared_ptr<cs::core::GraphicsEngine>               graphicsEngine,
     std::shared_ptr<cs::core::SolarSystem>                  solarSystem,
-    std::shared_ptr<Plugin::Properties> const&              pProperties,
+    std::shared_ptr<Plugin::Settings> const&                pluginSettings,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
     std::vector<std::shared_ptr<TileSource>> const& dems,
@@ -33,12 +33,12 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     , mSettings(settings)
     , mGraphicsEngine(std::move(graphicsEngine))
     , mSolarSystem(std::move(solarSystem))
-    , mProperties(pProperties)
+    , mPluginSettings(pluginSettings)
     , mGuiManager(pGuiManager)
     , mDEMtileSources(dems)
     , mIMGtileSources(imgs)
     , mPlanet(glResources)
-    , mShader(settings, pProperties, pGuiManager)
+    , mShader(settings, pluginSettings, pGuiManager)
     , mRadii(cs::core::SolarSystem::getRadii(sCenterName)) {
 
   pVisible.connect([this](bool val) {
@@ -53,7 +53,6 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
   pActiveTileSourceIMG = imgs.front()->getName();
 
   mPlanet.setTerrainShader(&mShader);
-  mPlanet.setLODFactor(mProperties->mLODFactor.get());
 
   // per-planet settings -----------------------------------------------------
   mPlanet.setEquatorialRadius(static_cast<float>(mRadii[0]));
@@ -89,12 +88,12 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
   mHeightScaleConnection = mSettings->mGraphics.pHeightScale.connectAndTouch(
       [this](float val) { mPlanet.setHeightScale(val); });
 
-  mProperties->mLODFactor.connect([this](float val) { mPlanet.setLODFactor(val); });
+  mPluginSettings->mLODFactor.connectAndTouch([this](float val) { mPlanet.setLODFactor(val); });
 
-  mProperties->mEnableWireframe.connect(
+  mPluginSettings->mEnableWireframe.connectAndTouch(
       [this](bool val) { mPlanet.getTileRenderer().setWireframe(val); });
 
-  mProperties->mEnableTilesFreeze.connect([this](bool val) {
+  mPluginSettings->mEnableTilesFreeze.connectAndTouch([this](bool val) {
     mPlanet.getLODVisitor().setUpdateLOD(!val);
     mPlanet.getLODVisitor().setUpdateCulling(!val);
   });

@@ -102,6 +102,23 @@ void to_json(nlohmann::json& j, Plugin::Settings::Body const& o) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(nlohmann::json const& j, Plugin::Settings& o) {
+  cs::core::Settings::deserialize(j, "terrainProjectionType", o.mTerrainProjectionType);
+  cs::core::Settings::deserialize(j, "lodFactor", o.mLODFactor);
+  cs::core::Settings::deserialize(j, "autoLod", o.mAutoLOD);
+  cs::core::Settings::deserialize(j, "textureGamma", o.mTextureGamma);
+  cs::core::Settings::deserialize(j, "enableHeightlines", o.mEnableHeightlines);
+  cs::core::Settings::deserialize(j, "enableLatLongGrid", o.mEnableLatLongGrid);
+  cs::core::Settings::deserialize(j, "enableLatLongGridLabels", o.mEnableLatLongGridLabels);
+  cs::core::Settings::deserialize(j, "colorMappingType", o.mColorMappingType);
+  cs::core::Settings::deserialize(j, "terrainColorMap", o.mTerrainColorMap);
+  cs::core::Settings::deserialize(j, "enableColorMixing", o.mEnableColorMixing);
+  cs::core::Settings::deserialize(j, "heightMax", o.mHeightMax);
+  cs::core::Settings::deserialize(j, "heightMin", o.mHeightMin);
+  cs::core::Settings::deserialize(j, "slopeMax", o.mSlopeMax);
+  cs::core::Settings::deserialize(j, "slopeMin", o.mSlopeMin);
+  cs::core::Settings::deserialize(j, "enableWireframe", o.mEnableWireframe);
+  cs::core::Settings::deserialize(j, "enableTilesDebug", o.mEnableTilesDebug);
+  cs::core::Settings::deserialize(j, "enableTilesFreeze", o.mEnableTilesFreeze);
   cs::core::Settings::deserialize(j, "maxGPUTilesColor", o.mMaxGPUTilesColor);
   cs::core::Settings::deserialize(j, "maxGPUTilesGray", o.mMaxGPUTilesGray);
   cs::core::Settings::deserialize(j, "maxGPUTilesDEM", o.mMaxGPUTilesDEM);
@@ -110,6 +127,23 @@ void from_json(nlohmann::json const& j, Plugin::Settings& o) {
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings const& o) {
+  cs::core::Settings::serialize(j, "terrainProjectionType", o.mTerrainProjectionType);
+  cs::core::Settings::serialize(j, "lodFactor", o.mLODFactor);
+  cs::core::Settings::serialize(j, "autoLod", o.mAutoLOD);
+  cs::core::Settings::serialize(j, "textureGamma", o.mTextureGamma);
+  cs::core::Settings::serialize(j, "enableHeightlines", o.mEnableHeightlines);
+  cs::core::Settings::serialize(j, "enableLatLongGrid", o.mEnableLatLongGrid);
+  cs::core::Settings::serialize(j, "enableLatLongGridLabels", o.mEnableLatLongGridLabels);
+  cs::core::Settings::serialize(j, "colorMappingType", o.mColorMappingType);
+  cs::core::Settings::serialize(j, "terrainColorMap", o.mTerrainColorMap);
+  cs::core::Settings::serialize(j, "enableColorMixing", o.mEnableColorMixing);
+  cs::core::Settings::serialize(j, "heightMax", o.mHeightMax);
+  cs::core::Settings::serialize(j, "heightMin", o.mHeightMin);
+  cs::core::Settings::serialize(j, "slopeMax", o.mSlopeMax);
+  cs::core::Settings::serialize(j, "slopeMin", o.mSlopeMin);
+  cs::core::Settings::serialize(j, "enableWireframe", o.mEnableWireframe);
+  cs::core::Settings::serialize(j, "enableTilesDebug", o.mEnableTilesDebug);
+  cs::core::Settings::serialize(j, "enableTilesFreeze", o.mEnableTilesFreeze);
   cs::core::Settings::serialize(j, "maxGPUTilesColor", o.mMaxGPUTilesColor);
   cs::core::Settings::serialize(j, "maxGPUTilesGray", o.mMaxGPUTilesGray);
   cs::core::Settings::serialize(j, "maxGPUTilesDEM", o.mMaxGPUTilesDEM);
@@ -123,7 +157,10 @@ void Plugin::init() {
 
   logger().info("Loading plugin...");
 
-  mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
+  mOnLoadConnection = mAllSettings->onLoad().connect([this]() { onLoad(); });
+
+  mOnSaveConnection = mAllSettings->onSave().connect(
+      [this]() { mAllSettings->mPlugins["csp-lod-bodies"] = *mPluginSettings; });
 
   mGuiManager->addPluginTabToSideBarFromHTML(
       "Body Settings", "landscape", "../share/resources/gui/lod_body_tab.html");
@@ -134,52 +171,52 @@ void Plugin::init() {
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesFreeze",
       "If set to true, the level of detail and the frustum culling of the planet's tiles will not "
       "be updated anymore.",
-      std::function([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableTilesFreeze = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesDebug",
-      "Enables or disables coloring of the planet's tiles.",
-      std::function([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
+      "Enables or disables debug coloring of the planet's tiles.",
+      std::function([this](bool enable) { mPluginSettings->mEnableTilesDebug = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableWireframe",
       "Enables or disables wireframe rendering of the planet.",
-      std::function([this](bool enable) { mProperties->mEnableWireframe = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableWireframe = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableHeightlines",
       "Enables or disables rendering of iso-altitude lines.",
-      std::function([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableHeightlines = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGrid",
       "Enables or disables rendering of a latidude-longitude-grid.",
       std::function([this](bool enable) {
-        mProperties->mEnableLatLongGrid       = enable;
-        mProperties->mEnableLatLongGridLabels = enable;
+        mPluginSettings->mEnableLatLongGrid       = enable;
+        mPluginSettings->mEnableLatLongGridLabels = enable;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGridLabels",
       "If the latitude-longitude-grid is enabled, this function can be used to enable or disable "
       "rendering of grid labels.",
-      std::function([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableLatLongGridLabels = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableColorMixing",
       "When enabled, the values of the colormap will be multiplied with the image channel.",
-      std::function([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableColorMixing = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainLod",
       "Specifies the amount of detail of the planet's surface. Should be in the range 1-100.",
       std::function([this](double value) {
-        if (!mProperties->mAutoLOD.get()) {
-          mProperties->mLODFactor = static_cast<float>(value);
+        if (!mPluginSettings->mAutoLOD.get()) {
+          mPluginSettings->mLODFactor = static_cast<float>(value);
         }
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableAutoTerrainLod",
       "If set to true, the level-of-detail will be chosen automatically based on the current "
       "rendering performance.",
-      std::function([this](bool enable) { mProperties->mAutoLOD = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mAutoLOD = enable; }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTextureGamma",
       "A multiplier for the brightness of the image channel.", std::function([this](double value) {
-        mProperties->mTextureGamma = static_cast<float>(value);
+        mPluginSettings->mTextureGamma = static_cast<float>(value);
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setHeightRange",
@@ -188,9 +225,9 @@ void Plugin::init() {
       "end.",
       std::function([this](double val, double handle) {
         if (handle == 0.0) {
-          mProperties->mHeightMin = static_cast<float>(val * 1000);
+          mPluginSettings->mHeightMin = static_cast<float>(val * 1000);
         } else {
-          mProperties->mHeightMax = static_cast<float>(val * 1000);
+          mPluginSettings->mHeightMax = static_cast<float>(val * 1000);
         }
       }));
 
@@ -200,50 +237,50 @@ void Plugin::init() {
       "end.",
       std::function([this](double val, double handle) {
         if (handle == 0.0) {
-          mProperties->mSlopeMin = static_cast<float>(cs::utils::convert::toRadians(val));
+          mPluginSettings->mSlopeMin = static_cast<float>(cs::utils::convert::toRadians(val));
         } else {
-          mProperties->mSlopeMax = static_cast<float>(cs::utils::convert::toRadians(val));
+          mPluginSettings->mSlopeMax = static_cast<float>(cs::utils::convert::toRadians(val));
         }
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
       "Call this to deselect any surface coloring.", std::function([this] {
-        mProperties->mColorMappingType = Properties::ColorMappingType::eNone;
+        mPluginSettings->mColorMappingType = Settings::ColorMappingType::eNone;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
       "Call this to enable height based surface coloring.", std::function([this] {
-        mProperties->mColorMappingType = Properties::ColorMappingType::eHeight;
+        mPluginSettings->mColorMappingType = Settings::ColorMappingType::eHeight;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
       "Call this to enable slope based surface coloring.", std::function([this] {
-        mProperties->mColorMappingType = Properties::ColorMappingType::eSlope;
+        mPluginSettings->mColorMappingType = Settings::ColorMappingType::eSlope;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0",
       "Call this to use a GPU-based HEALPix projection for the planet's surface.",
       std::function([this] {
-        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
+        mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eHEALPix;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1",
       "Call this to use a CPU-based HEALPix projection and a linear interpolation on the GPU-side "
       "for the planet's surface.",
       std::function([this] {
-        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
+        mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eLinear;
       }));
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2",
       "Call this to choose a projection for the planet's surface based on the observer's distance.",
       std::function([this] {
-        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
+        mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eHybrid;
       }));
 
-  mGLResources = std::make_shared<csp::lodbodies::GLResources>(mPluginSettings.mMaxGPUTilesDEM,
-      mPluginSettings.mMaxGPUTilesGray, mPluginSettings.mMaxGPUTilesColor);
+  mGLResources = std::make_shared<csp::lodbodies::GLResources>(mPluginSettings->mMaxGPUTilesDEM,
+      mPluginSettings->mMaxGPUTilesGray, mPluginSettings->mMaxGPUTilesColor);
 
-  for (auto const& bodySettings : mPluginSettings.mBodies) {
+  for (auto const& bodySettings : mPluginSettings->mBodies) {
     auto anchor = mAllSettings->mAnchors.find(bodySettings.first);
 
     if (anchor == mAllSettings->mAnchors.end()) {
@@ -257,7 +294,7 @@ void Plugin::init() {
     std::vector<std::shared_ptr<TileSource>> IMGs;
     for (auto const& dataset : bodySettings.second.mDemDatasets) {
       auto dem = std::make_shared<TileSourceWebMapService>();
-      dem->setCacheDirectory(mPluginSettings.mMapCache);
+      dem->setCacheDirectory(mPluginSettings->mMapCache);
       dem->setMaxLevel(dataset.mMaxLevel);
       dem->setLayers(dataset.mLayers);
       dem->setUrl(dataset.mURL);
@@ -269,7 +306,7 @@ void Plugin::init() {
 
     for (auto const& dataset : bodySettings.second.mImgDatasets) {
       auto img = std::make_shared<TileSourceWebMapService>();
-      img->setCacheDirectory(mPluginSettings.mMapCache);
+      img->setCacheDirectory(mPluginSettings->mMapCache);
       img->setMaxLevel(dataset.mMaxLevel);
       img->setLayers(dataset.mLayers);
       img->setUrl(dataset.mURL);
@@ -279,9 +316,9 @@ void Plugin::init() {
       IMGs.push_back(img);
     }
 
-    auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem, mProperties,
-        mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources, DEMs, IMGs,
-        tStartExistence, tEndExistence);
+    auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem,
+        mPluginSettings, mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources,
+        DEMs, IMGs, tStartExistence, tEndExistence);
 
     mSolarSystem->registerBody(body);
 
@@ -363,20 +400,20 @@ void Plugin::init() {
         }
       }));
 
-  mNonAutoLod = mProperties->mLODFactor.get();
+  mNonAutoLod = mPluginSettings->mLODFactor.get();
 
-  mProperties->mAutoLOD.connect([this](bool enabled) {
+  mPluginSettings->mAutoLOD.connect([this](bool enabled) {
     if (enabled) {
-      mNonAutoLod = mProperties->mLODFactor.get();
+      mNonAutoLod = mPluginSettings->mLODFactor.get();
     } else {
-      mProperties->mLODFactor = mNonAutoLod;
+      mPluginSettings->mLODFactor = mNonAutoLod;
       mGuiManager->getGui()->callJavascript(
           "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", mNonAutoLod);
     }
   });
 
-  mProperties->mLODFactor.connect([this](float value) {
-    if (mProperties->mAutoLOD()) {
+  mPluginSettings->mLODFactor.connect([this](float value) {
+    if (mPluginSettings->mAutoLOD()) {
       mGuiManager->getGui()->callJavascript(
           "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", value);
     }
@@ -431,7 +468,7 @@ void Plugin::deInit() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::update() {
-  if (mProperties->mAutoLOD.get()) {
+  if (mPluginSettings->mAutoLOD.get()) {
 
     double minLODFactor = 15.0;
     double maxLODFactor = 50.0;
@@ -439,12 +476,12 @@ void Plugin::update() {
     double maxTime      = 14.5;
 
     if (mFrameTimings->pFrameTime.get() > maxTime) {
-      mProperties->mLODFactor = static_cast<float>(std::max(
-          minLODFactor, mProperties->mLODFactor.get() -
+      mPluginSettings->mLODFactor = static_cast<float>(std::max(
+          minLODFactor, mPluginSettings->mLODFactor.get() -
                             std::min(1.0, 0.1 * (mFrameTimings->pFrameTime.get() - maxTime))));
     } else if (mFrameTimings->pFrameTime.get() < minTime) {
-      mProperties->mLODFactor = static_cast<float>(std::min(
-          maxLODFactor, mProperties->mLODFactor.get() +
+      mPluginSettings->mLODFactor = static_cast<float>(std::min(
+          maxLODFactor, mPluginSettings->mLODFactor.get() +
                             std::min(1.0, 0.02 * (minTime - mFrameTimings->pFrameTime.get()))));
     }
   }

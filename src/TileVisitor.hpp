@@ -58,9 +58,9 @@ class TileNode;
 template <typename DerivedT>
 class TileVisitor {
  public:
-  typedef DerivedT DerivedType;
+  using DerivedType = DerivedT;
 
-  explicit TileVisitor(TileQuadTree* treeDEM, TileQuadTree* treeIMG = NULL);
+  explicit TileVisitor(TileQuadTree* treeDEM, TileQuadTree* treeIMG = nullptr);
 
   /// Start traversal of the trees passed to the constructor.
   void visit();
@@ -155,7 +155,7 @@ void TileVisitor<DerivedT>::visit() {
   if (self().preTraverse()) {
     for (int i = 0; i < TileQuadTree::sNumRoots; ++i) {
       TileNode* rootDEM = mTreeDEM->getRoot(i);
-      TileNode* rootIMG = mTreeIMG ? mTreeIMG->getRoot(i) : NULL;
+      TileNode* rootIMG = mTreeIMG ? mTreeIMG->getRoot(i) : nullptr;
 
       // if (i==7)
       visitRoot(rootDEM, rootIMG, TileId(0, i));
@@ -240,11 +240,12 @@ void TileVisitor<DerivedT>::visitRoot(TileNode* rootDEM, TileNode* rootIMG, Tile
 
   if (self().preVisitRoot(tileId)) {
     for (int i = 0; i < 4; ++i) {
-      if (!state.mChildren[i])
+      if (!state.mChildren[i]) {
         continue;
+      }
 
-      TileNode* childDEM = rootDEM ? rootDEM->getChild(i) : NULL;
-      TileNode* childIMG = rootIMG ? rootIMG->getChild(i) : NULL;
+      TileNode* childDEM = rootDEM ? rootDEM->getChild(i) : nullptr;
+      TileNode* childIMG = rootIMG ? rootIMG->getChild(i) : nullptr;
 
       if (childDEM || childIMG) {
         TileId childId = HEALPix::getChildTileId(tileId, i);
@@ -277,11 +278,12 @@ void TileVisitor<DerivedT>::visitLevel(TileNode* nodeDEM, TileNode* nodeIMG, Til
 
   if (self().preVisit(tileId)) {
     for (int i = 0; i < 4; ++i) {
-      if (!state.mChildren[i])
+      if (!state.mChildren[i]) {
         continue;
+      }
 
-      TileNode* childDEM = nodeDEM ? nodeDEM->getChild(i) : NULL;
-      TileNode* childIMG = nodeIMG ? nodeIMG->getChild(i) : NULL;
+      TileNode* childDEM = nodeDEM ? nodeDEM->getChild(i) : nullptr;
+      TileNode* childIMG = nodeIMG ? nodeIMG->getChild(i) : nullptr;
 
       if (childDEM || childIMG) {
         TileId childId = HEALPix::getChildTileId(tileId, i);
@@ -306,7 +308,7 @@ void TileVisitor<DerivedT>::postTraverse() {
 }
 
 template <typename DerivedT>
-bool TileVisitor<DerivedT>::preVisitRoot(TileId const& tileId) {
+bool TileVisitor<DerivedT>::preVisitRoot(TileId const& /*tileId*/) {
   // default impl - do not visit children
   return false;
 }
@@ -317,7 +319,7 @@ void TileVisitor<DerivedT>::postVisitRoot(TileId const& tileId) {
 }
 
 template <typename DerivedT>
-bool TileVisitor<DerivedT>::preVisit(TileId const& tileId) {
+bool TileVisitor<DerivedT>::preVisit(TileId const& /*tileId*/) {
   // default impl - do not visit children
   return false;
 }

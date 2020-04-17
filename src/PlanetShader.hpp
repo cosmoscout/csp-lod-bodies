@@ -32,7 +32,7 @@ class PlanetShader : public TerrainShader {
   cs::utils::Property<bool> pEnableTexture = true; ///< If false the image data will not be drawn.
 
   PlanetShader(std::shared_ptr<cs::core::Settings> settings,
-      std::shared_ptr<Plugin::Properties>          pProperties,
+      std::shared_ptr<Plugin::Settings>            pluginSettings,
       std::shared_ptr<cs::core::GuiManager> const& pGuiManager);
 
   PlanetShader(PlanetShader const& other) = delete;
@@ -53,7 +53,7 @@ class PlanetShader : public TerrainShader {
 
   std::shared_ptr<cs::core::Settings>   mSettings;
   std::shared_ptr<cs::core::GuiManager> mGuiManager;
-  std::shared_ptr<Plugin::Properties>   mProperties;
+  std::shared_ptr<Plugin::Settings>     mPluginSettings;
   glm::vec3                             mSunDirection                 = glm::vec3(0, 1, 0);
   float                                 mSunIlluminance               = 1.F;
   VistaTexture*                         mFontTexture                  = nullptr;

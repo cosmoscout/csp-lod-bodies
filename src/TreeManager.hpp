@@ -53,8 +53,7 @@ TreeManager<RDataT>::TreeManager(
 
 template <typename RDataT>
 /* virtual */
-TreeManager<RDataT>::~TreeManager() {
-}
+TreeManager<RDataT>::~TreeManager() = default;
 
 template <typename RDataT>
 /* virtual */ RenderData* TreeManager<RDataT>::allocateRenderData(TileNode* node) {

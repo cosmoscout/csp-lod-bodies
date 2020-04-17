@@ -16,7 +16,7 @@ namespace csp::lodbodies {
 template <typename FloatT>
 class BoundingBox {
  public:
-  typedef FloatT scalar_type;
+  using scalar_type = FloatT;
 
   BoundingBox();
   BoundingBox(glm::tvec3<FloatT> const& bbMin, glm::tvec3<FloatT> const& bbMax);
@@ -124,32 +124,40 @@ bool BoundingBox<FloatT>::GetIntersectionDistance(glm::tvec3<FloatT> origin,
         tmin = tmpmin;
         tmax = tmpmax;
 
-        if (tmax < -epsilon)
+        if (tmax < -epsilon) {
           return false;
-        if (tmin < 0)
+        }
+        if (tmin < 0) {
           tmin = 0;
+        }
 
         if (!isRay) { // is a line segment
           // First intersection is outside the scope of
           // the line segment.
-          if (tmin > 1 + epsilon)
+          if (tmin > 1 + epsilon) {
             return false;
-          if (tmax > 1)
+          }
+          if (tmax > 1) {
             tmax = 1;
+          }
         }
 
         init = false;
       } else {
         // This is the regular check if the direction
         // vector is non-zero along the current axis.
-        if (tmpmin > tmax + epsilon)
+        if (tmpmin > tmax + epsilon) {
           return false;
-        if (tmpmax < tmin - epsilon)
+        }
+        if (tmpmax < tmin - epsilon) {
           return false;
-        if (tmpmin > tmin)
+        }
+        if (tmpmin > tmin) {
           tmin = tmpmin;
-        if (tmpmax < tmax)
+        }
+        if (tmpmax < tmax) {
           tmax = tmpmax;
+        }
       }
     } else { // line parallel to box
       // If the ray or line segment is parallel to an axis

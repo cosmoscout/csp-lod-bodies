@@ -37,23 +37,23 @@ std::map<std::string, cs::graphics::ColorMap> PlanetShader::mColorMaps;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> settings,
-    std::shared_ptr<Plugin::Properties>                        pProperties,
+    std::shared_ptr<Plugin::Settings>                          pluginSettings,
     std::shared_ptr<cs::core::GuiManager> const&               pGuiManager)
     : mSettings(std::move(settings))
     , mGuiManager(pGuiManager)
-    , mProperties(std::move(pProperties))
+    , mPluginSettings(std::move(pluginSettings))
     , mFontTexture(VistaOGLUtils::LoadTextureFromTga("../share/resources/textures/font.tga")) {
   // clang-format off
     pTextureIsRGB.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
     pEnableTexture.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
-    mProperties->mEnableHeightlines.connect(
+    mPluginSettings->mEnableHeightlines.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
-    mProperties->mColorMappingType.connect(
-        [this](Plugin::Properties::ColorMappingType /*ignored*/) { mShaderDirty = true; });
-    mProperties->mTerrainProjectionType.connect(
-        [this](Plugin::Properties::TerrainProjectionType /*unused*/) { mShaderDirty = true; });
+    mPluginSettings->mColorMappingType.connect(
+        [this](Plugin::Settings::ColorMappingType /*ignored*/) { mShaderDirty = true; });
+    mPluginSettings->mTerrainProjectionType.connect(
+        [this](Plugin::Settings::TerrainProjectionType /*unused*/) { mShaderDirty = true; });
     mEnableLightingConnection = mSettings->mGraphics.pEnableLighting.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
     mEnableShadowsDebugConnection = mSettings->mGraphics.pEnableShadowsDebug.connect(
@@ -64,13 +64,13 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> settings,
         [this](bool /*ignored*/) { mShaderDirty = true; });
     mLightingQualityConnection = mSettings->mGraphics.pLightingQuality.connect(
         [this](int /*ignored*/) { mShaderDirty = true; });
-    mProperties->mEnableTilesDebug.connect(
+    mPluginSettings->mEnableTilesDebug.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
-    mProperties->mEnableLatLongGridLabels.connect(
+    mPluginSettings->mEnableLatLongGridLabels.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
-    mProperties->mEnableLatLongGrid.connect(
+    mPluginSettings->mEnableLatLongGrid.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
-    mProperties->mEnableColorMixing.connect(
+    mPluginSettings->mEnableColorMixing.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
   // clang-format on
 
@@ -90,14 +90,14 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> settings,
       pGuiManager->getGui()->callJavascript(
           "CosmoScout.gui.addDropdownValue", "lodBodies.setColormap", name, name, first);
       if (first) {
-        first                         = false;
-        mProperties->mTerrainColorMap = name;
+        first                             = false;
+        mPluginSettings->mTerrainColorMap = name;
       }
     }
 
     pGuiManager->getGui()->registerCallback("lodBodies.setColormap",
         "Make the planet shader use the colormap with the given name.",
-        std::function([this](std::string&& name) { mProperties->mTerrainColorMap = name; }));
+        std::function([this](std::string&& name) { mPluginSettings->mTerrainColorMap = name; }));
   }
 }
 
@@ -131,11 +131,11 @@ void PlanetShader::compile() {
   cs::utils::replaceString(
       mFragmentSource, "$TEXTURE_IS_RGB", cs::utils::toString(pTextureIsRGB.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_HEIGHT_LINES",
-      cs::utils::toString(mProperties->mEnableHeightlines.get()));
+      cs::utils::toString(mPluginSettings->mEnableHeightlines.get()));
   cs::utils::replaceString(
       mFragmentSource, "$SHOW_TEXTURE", cs::utils::toString(pEnableTexture.get()));
   cs::utils::replaceString(mFragmentSource, "$COLOR_MAPPING_TYPE",
-      cs::utils::toString(static_cast<int>(mProperties->mColorMappingType.get())));
+      cs::utils::toString(static_cast<int>(mPluginSettings->mColorMappingType.get())));
   cs::utils::replaceString(mFragmentSource, "$ENABLE_LIGHTING",
       cs::utils::toString(mSettings->mGraphics.pEnableLighting.get()));
   cs::utils::replaceString(
@@ -147,18 +147,18 @@ void PlanetShader::compile() {
   cs::utils::replaceString(mFragmentSource, "$LIGHTING_QUALITY",
       cs::utils::toString(mSettings->mGraphics.pLightingQuality.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_TILE_BORDER",
-      cs::utils::toString(mProperties->mEnableTilesDebug.get()));
+      cs::utils::toString(mPluginSettings->mEnableTilesDebug.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_LAT_LONG_LABELS",
-      cs::utils::toString(mProperties->mEnableLatLongGridLabels.get()));
+      cs::utils::toString(mPluginSettings->mEnableLatLongGridLabels.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_LAT_LONG",
-      cs::utils::toString(mProperties->mEnableLatLongGrid.get()));
-  cs::utils::replaceString(
-      mFragmentSource, "$MIX_COLORS", cs::utils::toString(mProperties->mEnableColorMixing.get()));
+      cs::utils::toString(mPluginSettings->mEnableLatLongGrid.get()));
+  cs::utils::replaceString(mFragmentSource, "$MIX_COLORS",
+      cs::utils::toString(mPluginSettings->mEnableColorMixing.get()));
 
   cs::utils::replaceString(mVertexSource, "$LIGHTING_QUALITY",
       cs::utils::toString(mSettings->mGraphics.pLightingQuality.get()));
   cs::utils::replaceString(mVertexSource, "$TERRAIN_PROJECTION_TYPE",
-      cs::utils::toString(static_cast<int>(mProperties->mTerrainProjectionType.get())));
+      cs::utils::toString(static_cast<int>(mPluginSettings->mTerrainProjectionType.get())));
 
   TerrainShader::compile();
 }
@@ -176,22 +176,22 @@ void PlanetShader::bind() {
   mShader.SetUniform(loc, TEXUNITFONT);
 
   loc = mShader.GetUniformLocation("heightMin");
-  mShader.SetUniform(loc, mProperties->mHeightMin.get());
+  mShader.SetUniform(loc, mPluginSettings->mHeightMin.get());
 
   loc = mShader.GetUniformLocation("heightMax");
-  mShader.SetUniform(loc, mProperties->mHeightMax.get());
+  mShader.SetUniform(loc, mPluginSettings->mHeightMax.get());
 
   loc = mShader.GetUniformLocation("slopeMin");
-  mShader.SetUniform(loc, mProperties->mSlopeMin.get());
+  mShader.SetUniform(loc, mPluginSettings->mSlopeMin.get());
 
   loc = mShader.GetUniformLocation("slopeMax");
-  mShader.SetUniform(loc, mProperties->mSlopeMax.get());
+  mShader.SetUniform(loc, mPluginSettings->mSlopeMax.get());
 
   loc = mShader.GetUniformLocation("ambientBrightness");
   mShader.SetUniform(loc, mSettings->mGraphics.pAmbientBrightness.get());
 
   loc = mShader.GetUniformLocation("texGamma");
-  mShader.SetUniform(loc, mProperties->mTextureGamma.get());
+  mShader.SetUniform(loc, mPluginSettings->mTextureGamma.get());
 
   loc = mShader.GetUniformLocation("uSunDirIlluminance");
   mShader.SetUniform(loc, mSunDirection.x, mSunDirection.y, mSunDirection.z, mSunIlluminance);
@@ -201,7 +201,7 @@ void PlanetShader::bind() {
 
   mFontTexture->Bind(TEXUNITNAMEFONT);
 
-  auto it(mColorMaps.find(mProperties->mTerrainColorMap.get()));
+  auto it(mColorMaps.find(mPluginSettings->mTerrainColorMap.get()));
   if (it != mColorMaps.end()) {
     it->second.bind(TEXUNITNAMELUT);
   }
@@ -210,7 +210,7 @@ void PlanetShader::bind() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PlanetShader::release() {
-  auto it(mColorMaps.find(mProperties->mTerrainColorMap.get()));
+  auto it(mColorMaps.find(mPluginSettings->mTerrainColorMap.get()));
   if (it != mColorMaps.end()) {
     it->second.unbind(TEXUNITNAMELUT);
   }

@@ -15,7 +15,7 @@ namespace csp::lodbodies {
 class RenderDataImg : public RenderData {
  public:
   explicit RenderDataImg(TileNode* node = nullptr);
-  virtual ~RenderDataImg();
+  ~RenderDataImg() override;
 };
 
 } // namespace csp::lodbodies
