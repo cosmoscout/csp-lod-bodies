@@ -6,15 +6,18 @@
 
 #include "LodBody.hpp"
 
-#include <utility>
-
 #include "../../../src/cs-core/GraphicsEngine.hpp"
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-gui/GuiItem.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
-
 #include "utils.hpp"
+
+#include <VistaKernel/GraphicsManager/VistaGroupNode.h>
+#include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
+#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
+#include <VistaKernel/VistaSystem.h>
+#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
 
 namespace csp::lodbodies {
 
@@ -100,6 +103,12 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
 
   pActiveTileSourceDEM.touch();
   pActiveTileSourceIMG.touch();
+
+  // Add to scenegraph.
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  mGLNode.reset(pSG->NewOpenGLNode(pSG->GetRoot(), this));
+  VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
+      mGLNode.get(), static_cast<int>(cs::utils::DrawOrder::ePlanets));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,6 +116,9 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
 LodBody::~LodBody() {
   mGraphicsEngine->unregisterCaster(&mPlanet);
   mSettings->mGraphics.pHeightScale.disconnect(mHeightScaleConnection);
+
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  pSG->GetRoot()->DisconnectChild(mGLNode.get());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -16,11 +16,6 @@
 #include "../../../src/cs-utils/convert.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 
-#include <VistaKernel/GraphicsManager/VistaGroupNode.h>
-#include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
-#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
-#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN cs::core::PluginBase* create() {
@@ -277,61 +272,39 @@ void Plugin::init() {
         mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eHybrid;
       }));
 
-  mGLResources = std::make_shared<csp::lodbodies::GLResources>(mPluginSettings->mMaxGPUTilesDEM,
-      mPluginSettings->mMaxGPUTilesGray, mPluginSettings->mMaxGPUTilesColor);
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
+      "Set the current planet's image channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
+        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
+        if (body) {
+          body->pActiveTileSourceIMG = name;
+          for (auto const& source : body->getIMGtileSources()) {
+            if (source->getName() == name) {
+              mGuiManager->getGui()->callJavascript(
+                  "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
+            }
+          }
+        }
+      }));
 
-  for (auto const& bodySettings : mPluginSettings->mBodies) {
-    auto anchor = mAllSettings->mAnchors.find(bodySettings.first);
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesDem",
+      "Set the current planet's elevation channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
+        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
+        if (body) {
+          body->pActiveTileSourceDEM = name;
+          for (auto const& source : body->getDEMtileSources()) {
+            if (source->getName() == name) {
+              mGuiManager->getGui()->callJavascript(
+                  "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
+            }
+          }
+        }
+      }));
 
-    if (anchor == mAllSettings->mAnchors.end()) {
-      throw std::runtime_error(
-          "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
-    }
-
-    auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
-
-    std::vector<std::shared_ptr<TileSource>> DEMs;
-    std::vector<std::shared_ptr<TileSource>> IMGs;
-    for (auto const& dataset : bodySettings.second.mDemDatasets) {
-      auto dem = std::make_shared<TileSourceWebMapService>();
-      dem->setCacheDirectory(mPluginSettings->mMapCache);
-      dem->setMaxLevel(dataset.mMaxLevel);
-      dem->setLayers(dataset.mLayers);
-      dem->setUrl(dataset.mURL);
-      dem->setDataType(dataset.mFormat);
-      dem->setName(dataset.mName);
-      dem->setCopyright(dataset.mCopyright);
-      DEMs.push_back(dem);
-    }
-
-    for (auto const& dataset : bodySettings.second.mImgDatasets) {
-      auto img = std::make_shared<TileSourceWebMapService>();
-      img->setCacheDirectory(mPluginSettings->mMapCache);
-      img->setMaxLevel(dataset.mMaxLevel);
-      img->setLayers(dataset.mLayers);
-      img->setUrl(dataset.mURL);
-      img->setDataType(dataset.mFormat);
-      img->setName(dataset.mName);
-      img->setCopyright(dataset.mCopyright);
-      IMGs.push_back(img);
-    }
-
-    auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem,
-        mPluginSettings, mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources,
-        DEMs, IMGs, tStartExistence, tEndExistence);
-
-    mSolarSystem->registerBody(body);
-
-    body->setSun(mSolarSystem->getSun());
-    auto* parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), body.get());
-    VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
-        parent, static_cast<int>(cs::utils::DrawOrder::ePlanets));
-
-    mOpenGLNodes.emplace_back(parent);
-
-    mInputManager->registerSelectable(body);
-    mLodBodies.push_back(body);
-  }
+  mGLResources =
+      std::make_shared<csp::lodbodies::GLResources>(mPluginSettings->mMaxGPUTilesDEM.get(),
+          mPluginSettings->mMaxGPUTilesGray.get(), mPluginSettings->mMaxGPUTilesColor.get());
 
   mActiveBodyConnection = mSolarSystem->pActiveBody.connectAndTouch(
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
@@ -370,36 +343,6 @@ void Plugin::init() {
         }
       });
 
-  mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
-      "Set the current planet's image channel to the TileSource with the given name.",
-      std::function([this](std::string&& name) {
-        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
-        if (body) {
-          body->pActiveTileSourceIMG = name;
-          for (auto const& source : body->getIMGtileSources()) {
-            if (source->getName() == name) {
-              mGuiManager->getGui()->callJavascript(
-                  "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
-            }
-          }
-        }
-      }));
-
-  mGuiManager->getGui()->registerCallback("lodBodies.setTilesDem",
-      "Set the current planet's elevation channel to the TileSource with the given name.",
-      std::function([this](std::string&& name) {
-        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
-        if (body) {
-          body->pActiveTileSourceDEM = name;
-          for (auto const& source : body->getDEMtileSources()) {
-            if (source->getName() == name) {
-              mGuiManager->getGui()->callJavascript(
-                  "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
-            }
-          }
-        }
-      }));
-
   mNonAutoLod = mPluginSettings->mLODFactor.get();
 
   mPluginSettings->mAutoLOD.connect([this](bool enabled) {
@@ -419,6 +362,38 @@ void Plugin::init() {
     }
   });
 
+  mPluginSettings->mMapCache.connect([this](std::string const& val) {
+    for (auto&& body : mLodBodies) {
+      for (auto&& src : body->getDEMtileSources()) {
+        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src);
+        if (wmsSrc) {
+          wmsSrc->setCacheDirectory(val);
+        }
+      }
+      for (auto&& src : body->getIMGtileSources()) {
+        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src);
+        if (wmsSrc) {
+          wmsSrc->setCacheDirectory(val);
+        }
+      }
+    }
+  });
+
+  mPluginSettings->mMaxGPUTilesColor.connect([](uint32_t /*val*/) {
+    logger().warn("Changing the maximum number of allocated color tiles at run-time is not "
+                  "supported. Please restart CosmoScout VR!");
+  });
+
+  mPluginSettings->mMaxGPUTilesGray.connect([](uint32_t /*val*/) {
+    logger().warn("Changing the maximum number of allocated gray-scale tiles at run-time is not "
+                  "supported. Please restart CosmoScout VR!");
+  });
+
+  mPluginSettings->mMaxGPUTilesDEM.connect([](uint32_t /*val*/) {
+    logger().warn("Changing the maximum number of allocated elevation tiles at run-time is not "
+                  "supported. Please restart CosmoScout VR!");
+  });
+
   logger().info("Loading done.");
 }
 
@@ -430,10 +405,6 @@ void Plugin::deInit() {
   for (auto const& body : mLodBodies) {
     mInputManager->unregisterSelectable(body);
     mSolarSystem->unregisterBody(body);
-  }
-
-  for (auto const& node : mOpenGLNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(node.get());
   }
 
   mSolarSystem->pActiveBody.disconnect(mActiveBodyConnection);
@@ -484,6 +455,62 @@ void Plugin::update() {
           maxLODFactor, mPluginSettings->mLODFactor.get() +
                             std::min(1.0, 0.02 * (minTime - mFrameTimings->pFrameTime.get()))));
     }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::onLoad() {
+
+  // Read settings from JSON.
+  from_json(mAllSettings->mPlugins.at("csp-lod-bodies"), *mPluginSettings);
+
+  for (auto const& bodySettings : mPluginSettings->mBodies) {
+    auto anchor = mAllSettings->mAnchors.find(bodySettings.first);
+
+    if (anchor == mAllSettings->mAnchors.end()) {
+      throw std::runtime_error(
+          "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
+    }
+
+    auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
+
+    std::vector<std::shared_ptr<TileSource>> DEMs;
+    std::vector<std::shared_ptr<TileSource>> IMGs;
+    for (auto const& dataset : bodySettings.second.mDemDatasets) {
+      auto dem = std::make_shared<TileSourceWebMapService>();
+      dem->setCacheDirectory(mPluginSettings->mMapCache.get());
+      dem->setMaxLevel(dataset.mMaxLevel);
+      dem->setLayers(dataset.mLayers);
+      dem->setUrl(dataset.mURL);
+      dem->setDataType(dataset.mFormat);
+      dem->setName(dataset.mName);
+      dem->setCopyright(dataset.mCopyright);
+      DEMs.push_back(dem);
+    }
+
+    for (auto const& dataset : bodySettings.second.mImgDatasets) {
+      auto img = std::make_shared<TileSourceWebMapService>();
+      img->setCacheDirectory(mPluginSettings->mMapCache.get());
+      img->setMaxLevel(dataset.mMaxLevel);
+      img->setLayers(dataset.mLayers);
+      img->setUrl(dataset.mURL);
+      img->setDataType(dataset.mFormat);
+      img->setName(dataset.mName);
+      img->setCopyright(dataset.mCopyright);
+      IMGs.push_back(img);
+    }
+
+    auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem,
+        mPluginSettings, mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources,
+        DEMs, IMGs, tStartExistence, tEndExistence);
+
+    mSolarSystem->registerBody(body);
+
+    body->setSun(mSolarSystem->getSun());
+
+    mInputManager->registerSelectable(body);
+    mLodBodies.push_back(body);
   }
 }
 

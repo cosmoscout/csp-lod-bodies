@@ -88,6 +88,18 @@ class Plugin : public cs::core::PluginBase {
     /// be updated anymore.
     cs::utils::DefaultProperty<bool> mEnableTilesFreeze{false};
 
+    /// The maximum allowed colored tiles.
+    cs::utils::DefaultProperty<uint32_t> mMaxGPUTilesColor{512};
+
+    /// The maximum allowed gray tiles.
+    cs::utils::DefaultProperty<uint32_t> mMaxGPUTilesGray{512};
+
+    /// The maximum allowed elevation tiles.
+    cs::utils::DefaultProperty<uint32_t> mMaxGPUTilesDEM{512};
+
+    /// Path to the map cache folder.
+    cs::utils::DefaultProperty<std::string> mMapCache{"map-cache"};
+
     /// A single data set containing either elevation or image data.
     struct Dataset {
       std::string  mURL;        ///< The URL of the mapserver including the "SERVICE=wms" parameter.
@@ -104,11 +116,7 @@ class Plugin : public cs::core::PluginBase {
       std::vector<Dataset> mImgDatasets; ///< The data sets containing image data.
     };
 
-    uint32_t                    mMaxGPUTilesColor{}; ///< The maximum allowed colored tiles.
-    uint32_t                    mMaxGPUTilesGray{};  ///< The maximum allowed gray tiles.
-    uint32_t                    mMaxGPUTilesDEM{};   ///< The maximum allowed elevation tiles.
-    std::string                 mMapCache;           ///< Path to the map cache folder.
-    std::map<std::string, Body> mBodies;             ///< A list of planets with their anchor names.
+    std::map<std::string, Body> mBodies; ///< A list of planets with their anchor names.
   };
 
   void init() override;
@@ -119,11 +127,10 @@ class Plugin : public cs::core::PluginBase {
  private:
   void onLoad();
 
-  std::shared_ptr<Settings>                     mPluginSettings = std::make_shared<Settings>();
-  std::shared_ptr<GLResources>                  mGLResources;
-  std::vector<std::unique_ptr<VistaOpenGLNode>> mOpenGLNodes;
-  std::vector<std::shared_ptr<LodBody>>         mLodBodies;
-  float                                         mNonAutoLod{};
+  std::shared_ptr<Settings>             mPluginSettings = std::make_shared<Settings>();
+  std::shared_ptr<GLResources>          mGLResources;
+  std::vector<std::shared_ptr<LodBody>> mLodBodies;
+  float                                 mNonAutoLod{};
 
   int mActiveBodyConnection = -1;
   int mOnLoadConnection     = -1;
