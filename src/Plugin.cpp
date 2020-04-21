@@ -364,13 +364,13 @@ void Plugin::init() {
 
   mPluginSettings->mMapCache.connect([this](std::string const& val) {
     for (auto&& body : mLodBodies) {
-      for (auto&& src : body->getDEMtileSources()) {
+      for (auto&& src : body.second->getDEMtileSources()) {
         auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src);
         if (wmsSrc) {
           wmsSrc->setCacheDirectory(val);
         }
       }
-      for (auto&& src : body->getIMGtileSources()) {
+      for (auto&& src : body.second->getIMGtileSources()) {
         auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src);
         if (wmsSrc) {
           wmsSrc->setCacheDirectory(val);
@@ -403,8 +403,8 @@ void Plugin::deInit() {
   logger().info("Unloading plugin...");
 
   for (auto const& body : mLodBodies) {
-    mInputManager->unregisterSelectable(body);
-    mSolarSystem->unregisterBody(body);
+    mInputManager->unregisterSelectable(body.second);
+    mSolarSystem->unregisterBody(body.second);
   }
 
   mSolarSystem->pActiveBody.disconnect(mActiveBodyConnection);
@@ -510,7 +510,7 @@ void Plugin::onLoad() {
     body->setSun(mSolarSystem->getSun());
 
     mInputManager->registerSelectable(body);
-    mLodBodies.push_back(body);
+    mLodBodies[bodySettings.first] = body;
   }
 }
 

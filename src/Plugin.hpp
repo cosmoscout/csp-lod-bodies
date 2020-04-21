@@ -127,10 +127,10 @@ class Plugin : public cs::core::PluginBase {
  private:
   void onLoad();
 
-  std::shared_ptr<Settings>             mPluginSettings = std::make_shared<Settings>();
-  std::shared_ptr<GLResources>          mGLResources;
-  std::vector<std::shared_ptr<LodBody>> mLodBodies;
-  float                                 mNonAutoLod{};
+  std::shared_ptr<Settings>                       mPluginSettings = std::make_shared<Settings>();
+  std::shared_ptr<GLResources>                    mGLResources;
+  std::map<std::string, std::shared_ptr<LodBody>> mLodBodies;
+  float                                           mNonAutoLod{};
 
   int mActiveBodyConnection = -1;
   int mOnLoadConnection     = -1;
