@@ -294,6 +294,9 @@ void Plugin::init() {
             body->pActiveTileSourceIMG = src->second;
             mGuiManager->getGui()->callJavascript(
                 "CosmoScout.lodBodies.setMapDataCopyright", src->second->getCopyright());
+          } else {
+            body->pActiveTileSourceIMG = nullptr;
+            mGuiManager->getGui()->callJavascript("CosmoScout.lodBodies.setMapDataCopyright", "");
           }
         }
       }));
@@ -311,10 +314,6 @@ void Plugin::init() {
           }
         }
       }));
-
-  mGLResources =
-      std::make_shared<csp::lodbodies::GLResources>(mPluginSettings->mMaxGPUTilesDEM.get(),
-          mPluginSettings->mMaxGPUTilesGray.get(), mPluginSettings->mMaxGPUTilesColor.get());
 
   mActiveBodyConnection = mSolarSystem->pActiveBody.connectAndTouch(
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
@@ -389,20 +388,7 @@ void Plugin::init() {
     }
   });
 
-  mPluginSettings->mMaxGPUTilesColor.connect([](uint32_t /*val*/) {
-    logger().warn("Changing the maximum number of allocated color tiles at run-time is not "
-                  "supported. Please restart CosmoScout VR!");
-  });
-
-  mPluginSettings->mMaxGPUTilesGray.connect([](uint32_t /*val*/) {
-    logger().warn("Changing the maximum number of allocated gray-scale tiles at run-time is not "
-                  "supported. Please restart CosmoScout VR!");
-  });
-
-  mPluginSettings->mMaxGPUTilesDEM.connect([](uint32_t /*val*/) {
-    logger().warn("Changing the maximum number of allocated elevation tiles at run-time is not "
-                  "supported. Please restart CosmoScout VR!");
-  });
+  onLoad();
 
   logger().info("Loading done.");
 }
@@ -474,6 +460,28 @@ void Plugin::onLoad() {
 
   // Read settings from JSON.
   from_json(mAllSettings->mPlugins.at("csp-lod-bodies"), *mPluginSettings);
+
+  // For now, we cannot re-create the GLResources.
+  if (!mGLResources) {
+    mGLResources =
+        std::make_shared<csp::lodbodies::GLResources>(mPluginSettings->mMaxGPUTilesDEM.get(),
+            mPluginSettings->mMaxGPUTilesGray.get(), mPluginSettings->mMaxGPUTilesColor.get());
+
+    mPluginSettings->mMaxGPUTilesColor.connect([](uint32_t /*val*/) {
+      logger().warn("Changing the maximum number of allocated color tiles at run-time is not "
+                    "supported. Please restart CosmoScout VR!");
+    });
+
+    mPluginSettings->mMaxGPUTilesGray.connect([](uint32_t /*val*/) {
+      logger().warn("Changing the maximum number of allocated gray-scale tiles at run-time is not "
+                    "supported. Please restart CosmoScout VR!");
+    });
+
+    mPluginSettings->mMaxGPUTilesDEM.connect([](uint32_t /*val*/) {
+      logger().warn("Changing the maximum number of allocated elevation tiles at run-time is not "
+                    "supported. Please restart CosmoScout VR!");
+    });
+  }
 
   // First try to re-configure existing lodBodies. We assume that they are similar if they have
   // the same name in the settings (which means they are attached to an anchor with the same name).
