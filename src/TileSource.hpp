@@ -60,14 +60,6 @@ class TileSource {
   /// Returns the number of currently active async requests.
   virtual int getPendingRequests() = 0;
 
-  /// Can be used to identify this tile source.
-  void setName(std::string const& name) {
-    mName = name;
-  }
-  std::string const& getName() const {
-    return mName;
-  }
-
   /// Can be used to display required copyright information to the user.
   void setCopyright(std::string const& copyright) {
     mCopyright = copyright;

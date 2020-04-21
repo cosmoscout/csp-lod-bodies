@@ -39,10 +39,10 @@ namespace csp::lodbodies {
 class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
  public:
   /// The currently selected data source for elevation data.
-  cs::utils::Property<std::string> pActiveTileSourceDEM;
+  cs::utils::Property<std::shared_ptr<TileSource>> pActiveTileSourceDEM;
 
   /// The currently selected data source for image data.
-  cs::utils::Property<std::string> pActiveTileSourceIMG;
+  cs::utils::Property<std::shared_ptr<TileSource>> pActiveTileSourceIMG;
 
   LodBody(std::shared_ptr<cs::core::Settings> const& settings,
       std::shared_ptr<cs::core::GraphicsEngine>      graphicsEngine,
@@ -50,8 +50,8 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
       std::shared_ptr<Plugin::Settings> const&       pluginSettings,
       std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
       std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
-      std::vector<std::shared_ptr<TileSource>> const& dems,
-      std::vector<std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
+      std::map<std::string, std::shared_ptr<TileSource>> const& dems,
+      std::map<std::string, std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
       double tEndExistence);
 
   LodBody(LodBody const& other) = delete;
@@ -67,10 +67,10 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
   void setSun(std::shared_ptr<const cs::scene::CelestialObject> const& sun);
 
   /// A list of all data sources for elevation data.
-  std::vector<std::shared_ptr<TileSource>> const& getDEMtileSources() const;
+  std::map<std::string, std::shared_ptr<TileSource>> const& getDEMtileSources() const;
 
   /// A list of all data sources for image data.
-  std::vector<std::shared_ptr<TileSource>> const& getIMGtileSources() const;
+  std::map<std::string, std::shared_ptr<TileSource>> const& getIMGtileSources() const;
 
   bool getIntersection(
       glm::dvec3 const& rayPos, glm::dvec3 const& rayDir, glm::dvec3& pos) const override;
@@ -92,8 +92,8 @@ class LodBody : public cs::scene::CelestialBody, public IVistaOpenGLDraw {
 
   std::unique_ptr<VistaOpenGLNode> mGLNode;
 
-  std::vector<std::shared_ptr<TileSource>> mDEMtileSources;
-  std::vector<std::shared_ptr<TileSource>> mIMGtileSources;
+  std::map<std::string, std::shared_ptr<TileSource>> mDEMtileSources;
+  std::map<std::string, std::shared_ptr<TileSource>> mIMGtileSources;
 
   VistaPlanet  mPlanet;
   PlanetShader mShader;

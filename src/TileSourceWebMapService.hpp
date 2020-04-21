@@ -64,14 +64,12 @@ class TileSourceWebMapService : public TileSource {
   static std::mutex mTileSystemMutex;
 
   cs::utils::ThreadPool mThreadPool;
-  std::string           mConfig;
-
-  std::string  mUrl;
-  std::string  mCache = "cache/img";
-  std::string  mLayers;
-  std::string  mStyles;
-  TileDataType mFormat   = TileDataType::eU8Vec3;
-  uint32_t     mMaxLevel = 10;
+  std::string           mUrl;
+  std::string           mCache = "cache/img";
+  std::string           mLayers;
+  std::string           mStyles;
+  TileDataType          mFormat   = TileDataType::eU8Vec3;
+  uint32_t              mMaxLevel = 10;
 };
 } // namespace csp::lodbodies
 

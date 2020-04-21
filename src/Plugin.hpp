@@ -11,6 +11,7 @@
 #include "../../../src/cs-utils/DefaultProperty.hpp"
 
 #include "TileDataType.hpp"
+#include "TileSourceWebMapService.hpp"
 
 #include <glm/gtc/constants.hpp>
 #include <vector>
@@ -104,16 +105,20 @@ class Plugin : public cs::core::PluginBase {
     struct Dataset {
       std::string  mURL;        ///< The URL of the mapserver including the "SERVICE=wms" parameter.
       TileDataType mFormat;     ///< In the config either "Float32", "UInt8" or "U8Vec3".
-      std::string  mName;       ///< The name of the data set as shown in the UI.
       std::string  mCopyright;  ///< The copyright holder of the data set (also shown in the UI).
       std::string  mLayers;     ///< A comma,seperated list of WMS layers.
       uint32_t     mMaxLevel{}; ///< The maximum quadtree depth to load.
+
+      /// Convenience method for applying the settings above to the given TileSource.
+      void configure(std::shared_ptr<TileSourceWebMapService>& tileSource) const;
     };
 
     /// The startup settings for a planet.
     struct Body {
-      std::vector<Dataset> mDemDatasets; ///< The data sets containing elevation data.
-      std::vector<Dataset> mImgDatasets; ///< The data sets containing image data.
+      std::string mActiveDemDataset; ///< The name of the currently active elevation data set.
+      std::string mActiveImgDataset; ///< The name of the currently active image data set.
+      std::map<std::string, Dataset> mDemDatasets; ///< The data sets containing elevation data.
+      std::map<std::string, Dataset> mImgDatasets; ///< The data sets containing image data.
     };
 
     std::map<std::string, Body> mBodies; ///< A list of planets with their anchor names.

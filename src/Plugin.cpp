@@ -7,7 +7,6 @@
 #include "Plugin.hpp"
 
 #include "LodBody.hpp"
-#include "TileSourceWebMapService.hpp"
 #include "logger.hpp"
 
 #include "../../../src/cs-core/GuiManager.hpp"
@@ -66,7 +65,6 @@ void to_json(nlohmann::json& j, TileDataType o) {
 
 void from_json(nlohmann::json const& j, Plugin::Settings::Dataset& o) {
   cs::core::Settings::deserialize(j, "format", o.mFormat);
-  cs::core::Settings::deserialize(j, "name", o.mName);
   cs::core::Settings::deserialize(j, "copyright", o.mCopyright);
   cs::core::Settings::deserialize(j, "layers", o.mLayers);
   cs::core::Settings::deserialize(j, "maxLevel", o.mMaxLevel);
@@ -75,7 +73,6 @@ void from_json(nlohmann::json const& j, Plugin::Settings::Dataset& o) {
 
 void to_json(nlohmann::json& j, Plugin::Settings::Dataset const& o) {
   cs::core::Settings::serialize(j, "format", o.mFormat);
-  cs::core::Settings::serialize(j, "name", o.mName);
   cs::core::Settings::serialize(j, "copyright", o.mCopyright);
   cs::core::Settings::serialize(j, "layers", o.mLayers);
   cs::core::Settings::serialize(j, "maxLevel", o.mMaxLevel);
@@ -85,11 +82,15 @@ void to_json(nlohmann::json& j, Plugin::Settings::Dataset const& o) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(nlohmann::json const& j, Plugin::Settings::Body& o) {
+  cs::core::Settings::deserialize(j, "activeDemDataset", o.mActiveDemDataset);
+  cs::core::Settings::deserialize(j, "activeImgDataset", o.mActiveImgDataset);
   cs::core::Settings::deserialize(j, "demDatasets", o.mDemDatasets);
   cs::core::Settings::deserialize(j, "imgDatasets", o.mImgDatasets);
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings::Body const& o) {
+  cs::core::Settings::serialize(j, "activeDemDataset", o.mActiveDemDataset);
+  cs::core::Settings::serialize(j, "activeImgDataset", o.mActiveImgDataset);
   cs::core::Settings::serialize(j, "demDatasets", o.mDemDatasets);
   cs::core::Settings::serialize(j, "imgDatasets", o.mImgDatasets);
 }
@@ -144,6 +145,17 @@ void to_json(nlohmann::json& j, Plugin::Settings const& o) {
   cs::core::Settings::serialize(j, "maxGPUTilesDEM", o.mMaxGPUTilesDEM);
   cs::core::Settings::serialize(j, "mapCache", o.mMapCache);
   cs::core::Settings::serialize(j, "bodies", o.mBodies);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::Settings::Dataset::configure(
+    std::shared_ptr<TileSourceWebMapService>& tileSource) const {
+  tileSource->setMaxLevel(mMaxLevel);
+  tileSource->setLayers(mLayers);
+  tileSource->setUrl(mURL);
+  tileSource->setDataType(mFormat);
+  tileSource->setCopyright(mCopyright);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,12 +289,11 @@ void Plugin::init() {
       std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
-          body->pActiveTileSourceIMG = name;
-          for (auto const& source : body->getIMGtileSources()) {
-            if (source->getName() == name) {
-              mGuiManager->getGui()->callJavascript(
-                  "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
-            }
+          auto src = body->getIMGtileSources().find(name);
+          if (src != body->getIMGtileSources().end()) {
+            body->pActiveTileSourceIMG = src->second;
+            mGuiManager->getGui()->callJavascript(
+                "CosmoScout.lodBodies.setMapDataCopyright", src->second->getCopyright());
           }
         }
       }));
@@ -292,12 +303,11 @@ void Plugin::init() {
       std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
-          body->pActiveTileSourceDEM = name;
-          for (auto const& source : body->getDEMtileSources()) {
-            if (source->getName() == name) {
-              mGuiManager->getGui()->callJavascript(
-                  "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
-            }
+          auto src = body->getDEMtileSources().find(name);
+          if (src != body->getDEMtileSources().end()) {
+            body->pActiveTileSourceDEM = src->second;
+            mGuiManager->getGui()->callJavascript(
+                "CosmoScout.lodBodies.setElevationDataCopyright", src->second->getCopyright());
           }
         }
       }));
@@ -324,21 +334,21 @@ void Plugin::init() {
         mGuiManager->getGui()->callJavascript(
             "CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg", "None", "None", "false");
         for (auto const& source : lodBody->getIMGtileSources()) {
-          bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
+          bool active = source.second == lodBody->pActiveTileSourceIMG.get();
           mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
-              "lodBodies.setTilesImg", source->getName(), source->getName(), active);
+              "lodBodies.setTilesImg", source.first, source.first, active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setMapDataCopyright", source.second->getCopyright());
           }
         }
         for (auto const& source : lodBody->getDEMtileSources()) {
-          bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
+          bool active = source.second == lodBody->pActiveTileSourceDEM.get();
           mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
-              "lodBodies.setTilesDem", source->getName(), source->getName(), active);
+              "lodBodies.setTilesDem", source.first, source.first, active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setElevationDataCopyright", source.second->getCopyright());
           }
         }
       });
@@ -365,13 +375,13 @@ void Plugin::init() {
   mPluginSettings->mMapCache.connect([this](std::string const& val) {
     for (auto&& body : mLodBodies) {
       for (auto&& src : body.second->getDEMtileSources()) {
-        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src);
+        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src.second);
         if (wmsSrc) {
           wmsSrc->setCacheDirectory(val);
         }
       }
       for (auto&& src : body.second->getIMGtileSources()) {
-        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src);
+        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src.second);
         if (wmsSrc) {
           wmsSrc->setCacheDirectory(val);
         }
@@ -465,52 +475,88 @@ void Plugin::onLoad() {
   // Read settings from JSON.
   from_json(mAllSettings->mPlugins.at("csp-lod-bodies"), *mPluginSettings);
 
-  for (auto const& bodySettings : mPluginSettings->mBodies) {
-    auto anchor = mAllSettings->mAnchors.find(bodySettings.first);
+  // First try to re-configure existing lodBodies. We assume that they are similar if they have
+  // the same name in the settings (which means they are attached to an anchor with the same name).
+  auto lodBody = mLodBodies.begin();
+  while (lodBody != mLodBodies.end()) {
+    auto settings = mPluginSettings->mBodies.find(lodBody->first);
+    if (settings != mPluginSettings->mBodies.end()) {
+      // If there are settings for this lodBody, reconfigure it.
+      auto anchor                           = mAllSettings->mAnchors.find(settings->first);
+      auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
+      lodBody->second->setStartExistence(tStartExistence);
+      lodBody->second->setEndExistence(tEndExistence);
+      lodBody->second->setCenterName(anchor->second.mCenter);
+      lodBody->second->setFrameName(anchor->second.mFrame);
+
+      // Reconfigure data sources. We create them anew, but we make sure that we reuse the currently
+      // active dataset if it did not change.
+      std::map<std::string, std::shared_ptr<TileSource>> DEMs;
+      for (auto const& dataset : settings->second.mDemDatasets) {
+        auto dem = std::make_shared<TileSourceWebMapService>();
+        dem->setCacheDirectory(mPluginSettings->mMapCache.get());
+        dataset.second.configure(dem);
+        DEMs.emplace(dataset.first, dem);
+      }
+
+      std::map<std::string, std::shared_ptr<TileSource>> IMGs;
+      for (auto const& dataset : settings->second.mImgDatasets) {
+        auto img = std::make_shared<TileSourceWebMapService>();
+        img->setCacheDirectory(mPluginSettings->mMapCache.get());
+        dataset.second.configure(img);
+        IMGs.emplace(dataset.first, img);
+      }
+
+      ++lodBody;
+    } else {
+      // Else delete it.
+      mSolarSystem->unregisterBody(lodBody->second);
+      mInputManager->unregisterSelectable(lodBody->second);
+      lodBody = mLodBodies.erase(lodBody);
+    }
+  }
+
+  // Then add new lodBodies.
+  for (auto const& settings : mPluginSettings->mBodies) {
+    if (mLodBodies.find(settings.first) != mLodBodies.end()) {
+      continue;
+    }
+
+    auto anchor = mAllSettings->mAnchors.find(settings.first);
 
     if (anchor == mAllSettings->mAnchors.end()) {
       throw std::runtime_error(
-          "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
+          "There is no Anchor \"" + settings.first + "\" defined in the settings.");
+    }
+
+    std::map<std::string, std::shared_ptr<TileSource>> DEMs;
+    for (auto const& dataset : settings.second.mDemDatasets) {
+      auto dem = std::make_shared<TileSourceWebMapService>();
+      dem->setCacheDirectory(mPluginSettings->mMapCache.get());
+      dataset.second.configure(dem);
+      DEMs.emplace(dataset.first, dem);
+    }
+
+    std::map<std::string, std::shared_ptr<TileSource>> IMGs;
+    for (auto const& dataset : settings.second.mImgDatasets) {
+      auto img = std::make_shared<TileSourceWebMapService>();
+      img->setCacheDirectory(mPluginSettings->mMapCache.get());
+      dataset.second.configure(img);
+      IMGs.emplace(dataset.first, img);
     }
 
     auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
-
-    std::vector<std::shared_ptr<TileSource>> DEMs;
-    std::vector<std::shared_ptr<TileSource>> IMGs;
-    for (auto const& dataset : bodySettings.second.mDemDatasets) {
-      auto dem = std::make_shared<TileSourceWebMapService>();
-      dem->setCacheDirectory(mPluginSettings->mMapCache.get());
-      dem->setMaxLevel(dataset.mMaxLevel);
-      dem->setLayers(dataset.mLayers);
-      dem->setUrl(dataset.mURL);
-      dem->setDataType(dataset.mFormat);
-      dem->setName(dataset.mName);
-      dem->setCopyright(dataset.mCopyright);
-      DEMs.push_back(dem);
-    }
-
-    for (auto const& dataset : bodySettings.second.mImgDatasets) {
-      auto img = std::make_shared<TileSourceWebMapService>();
-      img->setCacheDirectory(mPluginSettings->mMapCache.get());
-      img->setMaxLevel(dataset.mMaxLevel);
-      img->setLayers(dataset.mLayers);
-      img->setUrl(dataset.mURL);
-      img->setDataType(dataset.mFormat);
-      img->setName(dataset.mName);
-      img->setCopyright(dataset.mCopyright);
-      IMGs.push_back(img);
-    }
 
     auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem,
         mPluginSettings, mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources,
         DEMs, IMGs, tStartExistence, tEndExistence);
 
-    mSolarSystem->registerBody(body);
-
     body->setSun(mSolarSystem->getSun());
 
+    mSolarSystem->registerBody(body);
     mInputManager->registerSelectable(body);
-    mLodBodies[bodySettings.first] = body;
+
+    mLodBodies.emplace(settings.first, body);
   }
 }
 

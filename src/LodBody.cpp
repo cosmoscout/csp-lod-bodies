@@ -29,8 +29,8 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     std::shared_ptr<Plugin::Settings> const&                pluginSettings,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
-    std::vector<std::shared_ptr<TileSource>> const& dems,
-    std::vector<std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
+    std::map<std::string, std::shared_ptr<TileSource>> const& dems,
+    std::map<std::string, std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
     double tEndExistence)
     : cs::scene::CelestialBody(sCenterName, sFrameName, tStartExistence, tEndExistence)
     , mSettings(settings)
@@ -52,8 +52,8 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     }
   });
 
-  pActiveTileSourceDEM = dems.front()->getName();
-  pActiveTileSourceIMG = imgs.front()->getName();
+  pActiveTileSourceDEM = dems.begin()->second;
+  pActiveTileSourceIMG = imgs.begin()->second;
 
   mPlanet.setTerrainShader(&mShader);
 
@@ -62,28 +62,17 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
   mPlanet.setPolarRadius(static_cast<float>(mRadii[0]));
   pVisibleRadius = mRadii[0];
 
-  pActiveTileSourceDEM.connect([this](std::string const& val) {
-    for (auto const& s : mDEMtileSources) {
-      if (s->getName() == val) {
-        mPlanet.setDEMSource(s.get());
-        break;
-      }
-    }
-  });
+  pActiveTileSourceDEM.connect(
+      [this](std::shared_ptr<TileSource> const& val) { mPlanet.setDEMSource(val.get()); });
 
-  pActiveTileSourceIMG.connect([this](std::string const& val) {
-    if (val == "None") {
+  pActiveTileSourceIMG.connect([this](std::shared_ptr<TileSource> const& val) {
+    if (val) {
+      mPlanet.setIMGSource(val.get());
+      mShader.pEnableTexture = true;
+      mShader.pTextureIsRGB  = (val->getDataType() == TileDataType::eU8Vec3);
+    } else {
       mShader.pEnableTexture = false;
       mPlanet.setIMGSource(nullptr);
-    } else {
-      for (auto const& s : mIMGtileSources) {
-        if (s->getName() == val) {
-          mShader.pEnableTexture = true;
-          mShader.pTextureIsRGB  = (s->getDataType() == TileDataType::eU8Vec3);
-          mPlanet.setIMGSource(s.get());
-          break;
-        }
-      }
     }
   });
 
@@ -154,13 +143,13 @@ glm::dvec3 LodBody::getRadii() const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::shared_ptr<TileSource>> const& LodBody::getDEMtileSources() const {
+std::map<std::string, std::shared_ptr<TileSource>> const& LodBody::getDEMtileSources() const {
   return mDEMtileSources;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::shared_ptr<TileSource>> const& LodBody::getIMGtileSources() const {
+std::map<std::string, std::shared_ptr<TileSource>> const& LodBody::getIMGtileSources() const {
   return mIMGtileSources;
 }
 
