@@ -59,20 +59,8 @@ class TileSource {
 
   /// Returns the number of currently active async requests.
   virtual int getPendingRequests() = 0;
-
-  /// Can be used to display required copyright information to the user.
-  void setCopyright(std::string const& copyright) {
-    mCopyright = copyright;
-  }
-
-  std::string const& getCopyright() const {
-    return mCopyright;
-  }
-
- private:
-  std::string mName;
-  std::string mCopyright;
 };
+
 } // namespace csp::lodbodies
 
 #endif // CSP_LOD_BODIES_TILESOURCE_HPP

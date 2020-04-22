@@ -149,17 +149,6 @@ void to_json(nlohmann::json& j, Plugin::Settings const& o) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Plugin::Settings::Dataset::configure(
-    std::shared_ptr<TileSourceWebMapService>& tileSource) const {
-  tileSource->setMaxLevel(mMaxLevel);
-  tileSource->setLayers(mLayers);
-  tileSource->setUrl(mURL);
-  tileSource->setDataType(mFormat);
-  tileSource->setCopyright(mCopyright);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void Plugin::init() {
 
   logger().info("Loading plugin...");
@@ -289,15 +278,7 @@ void Plugin::init() {
       std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
-          auto src = body->getIMGtileSources().find(name);
-          if (src != body->getIMGtileSources().end()) {
-            body->pActiveTileSourceIMG = src->second;
-            mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setMapDataCopyright", src->second->getCopyright());
-          } else {
-            body->pActiveTileSourceIMG = nullptr;
-            mGuiManager->getGui()->callJavascript("CosmoScout.lodBodies.setMapDataCopyright", "");
-          }
+          setImageSource(body, name);
         }
       }));
 
@@ -306,12 +287,7 @@ void Plugin::init() {
       std::function([this](std::string&& name) {
         auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
         if (body) {
-          auto src = body->getDEMtileSources().find(name);
-          if (src != body->getDEMtileSources().end()) {
-            body->pActiveTileSourceDEM = src->second;
-            mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setElevationDataCopyright", src->second->getCopyright());
-          }
+          setElevationSource(body, name);
         }
       }));
 
@@ -332,22 +308,25 @@ void Plugin::init() {
             "CosmoScout.gui.clearDropdown", "lodBodies.setTilesDem");
         mGuiManager->getGui()->callJavascript(
             "CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg", "None", "None", "false");
-        for (auto const& source : lodBody->getIMGtileSources()) {
-          bool active = source.second == lodBody->pActiveTileSourceIMG.get();
+
+        auto const& settings = getBodySettings(lodBody);
+        for (auto const& source : settings.mImgDatasets) {
+          bool active = source.first == settings.mActiveImgDataset;
           mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
               "lodBodies.setTilesImg", source.first, source.first, active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setMapDataCopyright", source.second->getCopyright());
+                "CosmoScout.lodBodies.setMapDataCopyright", source.second.mCopyright);
           }
         }
-        for (auto const& source : lodBody->getDEMtileSources()) {
-          bool active = source.second == lodBody->pActiveTileSourceDEM.get();
+
+        for (auto const& source : settings.mDemDatasets) {
+          bool active = source.first == settings.mActiveDemDataset;
           mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
               "lodBodies.setTilesDem", source.first, source.first, active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setElevationDataCopyright", source.second->getCopyright());
+                "CosmoScout.lodBodies.setElevationDataCopyright", source.second.mCopyright);
           }
         }
       });
@@ -373,17 +352,14 @@ void Plugin::init() {
 
   mPluginSettings->mMapCache.connect([this](std::string const& val) {
     for (auto&& body : mLodBodies) {
-      for (auto&& src : body.second->getDEMtileSources()) {
-        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src.second);
-        if (wmsSrc) {
-          wmsSrc->setCacheDirectory(val);
-        }
+      auto src =
+          std::dynamic_pointer_cast<TileSourceWebMapService>(body.second->getDEMtileSource());
+      if (src) {
+        src->setCacheDirectory(val);
       }
-      for (auto&& src : body.second->getIMGtileSources()) {
-        auto wmsSrc = std::dynamic_pointer_cast<TileSourceWebMapService>(src.second);
-        if (wmsSrc) {
-          wmsSrc->setCacheDirectory(val);
-        }
+      src = std::dynamic_pointer_cast<TileSourceWebMapService>(body.second->getIMGtileSource());
+      if (src) {
+        src->setCacheDirectory(val);
       }
     }
   });
@@ -497,23 +473,8 @@ void Plugin::onLoad() {
       lodBody->second->setCenterName(anchor->second.mCenter);
       lodBody->second->setFrameName(anchor->second.mFrame);
 
-      // Reconfigure data sources. We create them anew, but we make sure that we reuse the currently
-      // active dataset if it did not change.
-      std::map<std::string, std::shared_ptr<TileSource>> DEMs;
-      for (auto const& dataset : settings->second.mDemDatasets) {
-        auto dem = std::make_shared<TileSourceWebMapService>();
-        dem->setCacheDirectory(mPluginSettings->mMapCache.get());
-        dataset.second.configure(dem);
-        DEMs.emplace(dataset.first, dem);
-      }
-
-      std::map<std::string, std::shared_ptr<TileSource>> IMGs;
-      for (auto const& dataset : settings->second.mImgDatasets) {
-        auto img = std::make_shared<TileSourceWebMapService>();
-        img->setCacheDirectory(mPluginSettings->mMapCache.get());
-        dataset.second.configure(img);
-        IMGs.emplace(dataset.first, img);
-      }
+      setImageSource(lodBody->second, settings->second.mActiveImgDataset);
+      setElevationSource(lodBody->second, settings->second.mActiveDemDataset);
 
       ++lodBody;
     } else {
@@ -537,27 +498,14 @@ void Plugin::onLoad() {
           "There is no Anchor \"" + settings.first + "\" defined in the settings.");
     }
 
-    std::map<std::string, std::shared_ptr<TileSource>> DEMs;
-    for (auto const& dataset : settings.second.mDemDatasets) {
-      auto dem = std::make_shared<TileSourceWebMapService>();
-      dem->setCacheDirectory(mPluginSettings->mMapCache.get());
-      dataset.second.configure(dem);
-      DEMs.emplace(dataset.first, dem);
-    }
-
-    std::map<std::string, std::shared_ptr<TileSource>> IMGs;
-    for (auto const& dataset : settings.second.mImgDatasets) {
-      auto img = std::make_shared<TileSourceWebMapService>();
-      img->setCacheDirectory(mPluginSettings->mMapCache.get());
-      dataset.second.configure(img);
-      IMGs.emplace(dataset.first, img);
-    }
-
     auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
 
     auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem,
         mPluginSettings, mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources,
-        DEMs, IMGs, tStartExistence, tEndExistence);
+        tStartExistence, tEndExistence);
+
+    setImageSource(body, settings.second.mActiveImgDataset);
+    setElevationSource(body, settings.second.mActiveDemDataset);
 
     body->setSun(mSolarSystem->getSun());
 
@@ -566,6 +514,74 @@ void Plugin::onLoad() {
 
     mLodBodies.emplace(settings.first, body);
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Plugin::Settings::Body& Plugin::getBodySettings(std::shared_ptr<LodBody> const& body) const {
+  auto name = std::find_if(
+      mLodBodies.begin(), mLodBodies.end(), [&](auto const& pair) { return pair.second == body; });
+  return mPluginSettings->mBodies.at(name->first);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::setImageSource(std::shared_ptr<LodBody> const& body, std::string const& name) const {
+  if (name == "None") {
+    body->setIMGtileSource(nullptr);
+    mGuiManager->getGui()->callJavascript("CosmoScout.lodBodies.setMapDataCopyright", "");
+  } else {
+    auto& settings = getBodySettings(body);
+    auto  dataset  = settings.mImgDatasets.find(name);
+    if (dataset == settings.mImgDatasets.end()) {
+      logger().warn("Cannot set image dataset '{}': There is no dataset defined with this name! "
+                    "Using first dataset instead...",
+          name);
+      dataset = settings.mImgDatasets.begin();
+    }
+
+    settings.mActiveImgDataset = name;
+
+    auto source = std::make_shared<TileSourceWebMapService>();
+    source->setCacheDirectory(mPluginSettings->mMapCache.get());
+    source->setMaxLevel(dataset->second.mMaxLevel);
+    source->setLayers(dataset->second.mLayers);
+    source->setUrl(dataset->second.mURL);
+    source->setDataType(dataset->second.mFormat);
+
+    body->setIMGtileSource(source);
+
+    mGuiManager->getGui()->callJavascript(
+        "CosmoScout.lodBodies.setMapDataCopyright", dataset->second.mCopyright);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::setElevationSource(
+    std::shared_ptr<LodBody> const& body, std::string const& name) const {
+  auto& settings = getBodySettings(body);
+  auto  dataset  = settings.mDemDatasets.find(name);
+  if (dataset == settings.mDemDatasets.end()) {
+    logger().warn("Cannot set elevation dataset '{}': There is no dataset defined with this name! "
+                  "Using first dataset instead...",
+        name);
+    dataset = settings.mDemDatasets.begin();
+  }
+
+  settings.mActiveDemDataset = name;
+
+  auto source = std::make_shared<TileSourceWebMapService>();
+  source->setCacheDirectory(mPluginSettings->mMapCache.get());
+  source->setMaxLevel(dataset->second.mMaxLevel);
+  source->setLayers(dataset->second.mLayers);
+  source->setUrl(dataset->second.mURL);
+  source->setDataType(dataset->second.mFormat);
+
+  body->setDEMtileSource(source);
+
+  mGuiManager->getGui()->callJavascript(
+      "CosmoScout.lodBodies.setElevationDataCopyright", dataset->second.mCopyright);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

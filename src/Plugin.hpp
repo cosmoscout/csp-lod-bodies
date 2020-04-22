@@ -108,9 +108,6 @@ class Plugin : public cs::core::PluginBase {
       std::string  mCopyright;  ///< The copyright holder of the data set (also shown in the UI).
       std::string  mLayers;     ///< A comma,seperated list of WMS layers.
       uint32_t     mMaxLevel{}; ///< The maximum quadtree depth to load.
-
-      /// Convenience method for applying the settings above to the given TileSource.
-      void configure(std::shared_ptr<TileSourceWebMapService>& tileSource) const;
     };
 
     /// The startup settings for a planet.
@@ -131,6 +128,10 @@ class Plugin : public cs::core::PluginBase {
 
  private:
   void onLoad();
+
+  Settings::Body& getBodySettings(std::shared_ptr<LodBody> const& body) const;
+  void setImageSource(std::shared_ptr<LodBody> const& body, std::string const& name) const;
+  void setElevationSource(std::shared_ptr<LodBody> const& body, std::string const& name) const;
 
   std::shared_ptr<Settings>                       mPluginSettings = std::make_shared<Settings>();
   std::shared_ptr<GLResources>                    mGLResources;

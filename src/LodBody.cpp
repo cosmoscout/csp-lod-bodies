@@ -29,17 +29,13 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     std::shared_ptr<Plugin::Settings> const&                pluginSettings,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
-    std::map<std::string, std::shared_ptr<TileSource>> const& dems,
-    std::map<std::string, std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
-    double tEndExistence)
+    double tStartExistence, double tEndExistence)
     : cs::scene::CelestialBody(sCenterName, sFrameName, tStartExistence, tEndExistence)
     , mSettings(settings)
     , mGraphicsEngine(std::move(graphicsEngine))
     , mSolarSystem(std::move(solarSystem))
     , mPluginSettings(pluginSettings)
     , mGuiManager(pGuiManager)
-    , mDEMtileSources(dems)
-    , mIMGtileSources(imgs)
     , mPlanet(glResources)
     , mShader(settings, pluginSettings, pGuiManager)
     , mRadii(cs::core::SolarSystem::getRadii(sCenterName)) {
@@ -52,29 +48,12 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     }
   });
 
-  pActiveTileSourceDEM = dems.begin()->second;
-  pActiveTileSourceIMG = imgs.begin()->second;
-
   mPlanet.setTerrainShader(&mShader);
 
   // per-planet settings -----------------------------------------------------
   mPlanet.setEquatorialRadius(static_cast<float>(mRadii[0]));
   mPlanet.setPolarRadius(static_cast<float>(mRadii[0]));
   pVisibleRadius = mRadii[0];
-
-  pActiveTileSourceDEM.connect(
-      [this](std::shared_ptr<TileSource> const& val) { mPlanet.setDEMSource(val.get()); });
-
-  pActiveTileSourceIMG.connect([this](std::shared_ptr<TileSource> const& val) {
-    if (val) {
-      mPlanet.setIMGSource(val.get());
-      mShader.pEnableTexture = true;
-      mShader.pTextureIsRGB  = (val->getDataType() == TileDataType::eU8Vec3);
-    } else {
-      mShader.pEnableTexture = false;
-      mPlanet.setIMGSource(nullptr);
-    }
-  });
 
   // scene-wide settings -----------------------------------------------------
   mHeightScaleConnection = mSettings->mGraphics.pHeightScale.connectAndTouch(
@@ -89,9 +68,6 @@ LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
     mPlanet.getLODVisitor().setUpdateLOD(!val);
     mPlanet.getLODVisitor().setUpdateCulling(!val);
   });
-
-  pActiveTileSourceDEM.touch();
-  pActiveTileSourceIMG.touch();
 
   // Add to scenegraph.
   VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
@@ -143,14 +119,36 @@ glm::dvec3 LodBody::getRadii() const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::map<std::string, std::shared_ptr<TileSource>> const& LodBody::getDEMtileSources() const {
-  return mDEMtileSources;
+void LodBody::setDEMtileSource(std::shared_ptr<TileSource> source) {
+  mPlanet.setDEMSource(source.get());
+  mDEMtileSource = std::move(source);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::map<std::string, std::shared_ptr<TileSource>> const& LodBody::getIMGtileSources() const {
-  return mIMGtileSources;
+void LodBody::setIMGtileSource(std::shared_ptr<TileSource> source) {
+  if (source) {
+    mPlanet.setIMGSource(source.get());
+    mShader.pEnableTexture = true;
+    mShader.pTextureIsRGB  = (source->getDataType() == TileDataType::eU8Vec3);
+  } else {
+    mShader.pEnableTexture = false;
+    mPlanet.setIMGSource(nullptr);
+  }
+
+  mIMGtileSource = std::move(source);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<TileSource> const& LodBody::getDEMtileSource() const {
+  return mDEMtileSource;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<TileSource> const& LodBody::getIMGtileSource() const {
+  return mIMGtileSource;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
