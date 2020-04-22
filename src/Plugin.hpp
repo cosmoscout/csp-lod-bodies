@@ -98,7 +98,7 @@ class Plugin : public cs::core::PluginBase {
     /// The maximum allowed elevation tiles.
     cs::utils::DefaultProperty<uint32_t> mMaxGPUTilesDEM{512};
 
-    /// Path to the map cache folder.
+    /// Path to the map cache folder, can be absolute or relative to the cosmoscout executable.
     cs::utils::DefaultProperty<std::string> mMapCache{"map-cache"};
 
     /// A single data set containing either elevation or image data.
