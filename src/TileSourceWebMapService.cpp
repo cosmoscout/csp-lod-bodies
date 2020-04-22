@@ -448,7 +448,7 @@ TileDataType TileSourceWebMapService::getDataType() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool TileSourceWebMapService::isSame(TileSource const* other) const {
-  auto casted = dynamic_cast<TileSourceWebMapService const*>(other);
+  auto const* casted = dynamic_cast<TileSourceWebMapService const*>(other);
 
   return casted != nullptr && mUrl == casted->mUrl && mCache == casted->mCache &&
          mLayers == casted->mLayers && mFormat == casted->mFormat && mMaxLevel == casted->mMaxLevel;
