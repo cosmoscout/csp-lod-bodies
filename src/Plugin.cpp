@@ -487,6 +487,8 @@ void Plugin::onLoad() {
 
   // Then add new lodBodies.
   for (auto const& settings : mPluginSettings->mBodies) {
+
+    // Skip already existing bodies.
     if (mLodBodies.find(settings.first) != mLodBodies.end()) {
       continue;
     }
@@ -504,6 +506,8 @@ void Plugin::onLoad() {
         mPluginSettings, mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources,
         tStartExistence, tEndExistence);
 
+    mLodBodies.emplace(settings.first, body);
+
     setImageSource(body, settings.second.mActiveImgDataset);
     setElevationSource(body, settings.second.mActiveDemDataset);
 
@@ -511,9 +515,9 @@ void Plugin::onLoad() {
 
     mSolarSystem->registerBody(body);
     mInputManager->registerSelectable(body);
-
-    mLodBodies.emplace(settings.first, body);
   }
+
+  mSolarSystem->pActiveBody.touch(mActiveBodyConnection);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,20 +531,20 @@ Plugin::Settings::Body& Plugin::getBodySettings(std::shared_ptr<LodBody> const& 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::setImageSource(std::shared_ptr<LodBody> const& body, std::string const& name) const {
+  auto& settings             = getBodySettings(body);
+  settings.mActiveImgDataset = name;
+
   if (name == "None") {
     body->setIMGtileSource(nullptr);
     mGuiManager->getGui()->callJavascript("CosmoScout.lodBodies.setMapDataCopyright", "");
   } else {
-    auto& settings = getBodySettings(body);
-    auto  dataset  = settings.mImgDatasets.find(name);
+    auto dataset = settings.mImgDatasets.find(name);
     if (dataset == settings.mImgDatasets.end()) {
       logger().warn("Cannot set image dataset '{}': There is no dataset defined with this name! "
                     "Using first dataset instead...",
           name);
       dataset = settings.mImgDatasets.begin();
     }
-
-    settings.mActiveImgDataset = name;
 
     auto source = std::make_shared<TileSourceWebMapService>();
     source->setCacheDirectory(mPluginSettings->mMapCache.get());
@@ -560,6 +564,7 @@ void Plugin::setImageSource(std::shared_ptr<LodBody> const& body, std::string co
 
 void Plugin::setElevationSource(
     std::shared_ptr<LodBody> const& body, std::string const& name) const {
+
   auto& settings = getBodySettings(body);
   auto  dataset  = settings.mDemDatasets.find(name);
   if (dataset == settings.mDemDatasets.end()) {

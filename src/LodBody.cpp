@@ -120,23 +120,29 @@ glm::dvec3 LodBody::getRadii() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LodBody::setDEMtileSource(std::shared_ptr<TileSource> source) {
-  mPlanet.setDEMSource(source.get());
-  mDEMtileSource = std::move(source);
+  if (!source->isSame(mDEMtileSource.get())) {
+    mPlanet.setDEMSource(source.get());
+    mDEMtileSource = std::move(source);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LodBody::setIMGtileSource(std::shared_ptr<TileSource> source) {
   if (source) {
-    mPlanet.setIMGSource(source.get());
-    mShader.pEnableTexture = true;
-    mShader.pTextureIsRGB  = (source->getDataType() == TileDataType::eU8Vec3);
+    if (!source->isSame(mIMGtileSource.get())) {
+      mPlanet.setIMGSource(source.get());
+      mShader.pEnableTexture = true;
+      mShader.pTextureIsRGB  = (source->getDataType() == TileDataType::eU8Vec3);
+      mIMGtileSource         = std::move(source);
+    }
   } else {
-    mShader.pEnableTexture = false;
-    mPlanet.setIMGSource(nullptr);
+    if (mIMGtileSource) {
+      mShader.pEnableTexture = false;
+      mPlanet.setIMGSource(nullptr);
+      mIMGtileSource = nullptr;
+    }
   }
-
-  mIMGtileSource = std::move(source);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

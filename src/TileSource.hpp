@@ -59,6 +59,10 @@ class TileSource {
 
   /// Returns the number of currently active async requests.
   virtual int getPendingRequests() = 0;
+
+  /// Derived classes should check whether the given TileSource has the same type and members. This
+  /// is used to prevent redundant tile source reloading.
+  virtual bool isSame(TileSource const* other) const = 0;
 };
 
 } // namespace csp::lodbodies

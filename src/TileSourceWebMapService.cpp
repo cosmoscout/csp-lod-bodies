@@ -310,8 +310,8 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 
   url.precision(std::numeric_limits<double>::max_digits10);
   url << mUrl << "&version=1.1.0&request=GetMap&tiled=true&layers=" << mLayers
-      << "&styles=" << mStyles << "&bbox=" << x * size << "," << y * size << "," << x * size + size
-      << "," << y * size + size << "&width=257&height=257&srs=EPSG:900914&format=" << format;
+      << "&bbox=" << x * size << "," << y * size << "," << x * size + size << "," << y * size + size
+      << "&width=257&height=257&srs=EPSG:900914&format=" << format;
 
   auto cacheFilePath(boost::filesystem::path(cacheFile.str()));
 
@@ -443,6 +443,15 @@ void TileSourceWebMapService::setDataType(TileDataType type) {
 
 TileDataType TileSourceWebMapService::getDataType() const {
   return mFormat;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TileSourceWebMapService::isSame(TileSource const* other) const {
+  auto casted = dynamic_cast<TileSourceWebMapService const*>(other);
+
+  return casted != nullptr && mUrl == casted->mUrl && mCache == casted->mCache &&
+         mLayers == casted->mLayers && mFormat == casted->mFormat && mMaxLevel == casted->mMaxLevel;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
