@@ -53,7 +53,7 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> settings,
     mPluginSettings->mColorMappingType.connect(
         [this](Plugin::Settings::ColorMappingType /*ignored*/) { mShaderDirty = true; });
     mPluginSettings->mTerrainProjectionType.connect(
-        [this](Plugin::Settings::TerrainProjectionType /*unused*/) { mShaderDirty = true; });
+        [this](Plugin::Settings::TerrainProjectionType /*ignored*/) { mShaderDirty = true; });
     mEnableLightingConnection = mSettings->mGraphics.pEnableLighting.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
     mEnableShadowsDebugConnection = mSettings->mGraphics.pEnableShadowsDebug.connect(
