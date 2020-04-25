@@ -104,14 +104,11 @@ void from_json(nlohmann::json const& j, Plugin::Settings& o) {
   cs::core::Settings::deserialize(j, "textureGamma", o.mTextureGamma);
   cs::core::Settings::deserialize(j, "enableHeightlines", o.mEnableHeightlines);
   cs::core::Settings::deserialize(j, "enableLatLongGrid", o.mEnableLatLongGrid);
-  cs::core::Settings::deserialize(j, "enableLatLongGridLabels", o.mEnableLatLongGridLabels);
   cs::core::Settings::deserialize(j, "colorMappingType", o.mColorMappingType);
   cs::core::Settings::deserialize(j, "terrainColorMap", o.mTerrainColorMap);
   cs::core::Settings::deserialize(j, "enableColorMixing", o.mEnableColorMixing);
-  cs::core::Settings::deserialize(j, "heightMax", o.mHeightMax);
-  cs::core::Settings::deserialize(j, "heightMin", o.mHeightMin);
-  cs::core::Settings::deserialize(j, "slopeMax", o.mSlopeMax);
-  cs::core::Settings::deserialize(j, "slopeMin", o.mSlopeMin);
+  cs::core::Settings::deserialize(j, "heightRange", o.mHeightRange);
+  cs::core::Settings::deserialize(j, "slopeRange", o.mSlopeRange);
   cs::core::Settings::deserialize(j, "enableWireframe", o.mEnableWireframe);
   cs::core::Settings::deserialize(j, "enableTilesDebug", o.mEnableTilesDebug);
   cs::core::Settings::deserialize(j, "enableTilesFreeze", o.mEnableTilesFreeze);
@@ -129,14 +126,11 @@ void to_json(nlohmann::json& j, Plugin::Settings const& o) {
   cs::core::Settings::serialize(j, "textureGamma", o.mTextureGamma);
   cs::core::Settings::serialize(j, "enableHeightlines", o.mEnableHeightlines);
   cs::core::Settings::serialize(j, "enableLatLongGrid", o.mEnableLatLongGrid);
-  cs::core::Settings::serialize(j, "enableLatLongGridLabels", o.mEnableLatLongGridLabels);
   cs::core::Settings::serialize(j, "colorMappingType", o.mColorMappingType);
   cs::core::Settings::serialize(j, "terrainColorMap", o.mTerrainColorMap);
   cs::core::Settings::serialize(j, "enableColorMixing", o.mEnableColorMixing);
-  cs::core::Settings::serialize(j, "heightMax", o.mHeightMax);
-  cs::core::Settings::serialize(j, "heightMin", o.mHeightMin);
-  cs::core::Settings::serialize(j, "slopeMax", o.mSlopeMax);
-  cs::core::Settings::serialize(j, "slopeMin", o.mSlopeMin);
+  cs::core::Settings::serialize(j, "heightRange", o.mHeightRange);
+  cs::core::Settings::serialize(j, "slopeRange", o.mSlopeRange);
   cs::core::Settings::serialize(j, "enableWireframe", o.mEnableWireframe);
   cs::core::Settings::serialize(j, "enableTilesDebug", o.mEnableTilesDebug);
   cs::core::Settings::serialize(j, "enableTilesFreeze", o.mEnableTilesFreeze);
@@ -168,110 +162,148 @@ void Plugin::init() {
       "If set to true, the level of detail and the frustum culling of the planet's tiles will not "
       "be updated anymore.",
       std::function([this](bool enable) { mPluginSettings->mEnableTilesFreeze = enable; }));
+  mPluginSettings->mEnableTilesFreeze.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableTilesFreeze", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesDebug",
       "Enables or disables debug coloring of the planet's tiles.",
       std::function([this](bool enable) { mPluginSettings->mEnableTilesDebug = enable; }));
+  mPluginSettings->mEnableTilesDebug.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableTilesDebug", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableWireframe",
       "Enables or disables wireframe rendering of the planet.",
       std::function([this](bool enable) { mPluginSettings->mEnableWireframe = enable; }));
+  mPluginSettings->mEnableWireframe.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableWireframe", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableHeightlines",
       "Enables or disables rendering of iso-altitude lines.",
       std::function([this](bool enable) { mPluginSettings->mEnableHeightlines = enable; }));
+  mPluginSettings->mEnableHeightlines.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableHeightlines", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGrid",
       "Enables or disables rendering of a latidude-longitude-grid.",
-      std::function([this](bool enable) {
-        mPluginSettings->mEnableLatLongGrid       = enable;
-        mPluginSettings->mEnableLatLongGridLabels = enable;
-      }));
-
-  mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGridLabels",
-      "If the latitude-longitude-grid is enabled, this function can be used to enable or disable "
-      "rendering of grid labels.",
-      std::function([this](bool enable) { mPluginSettings->mEnableLatLongGridLabels = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableLatLongGrid = enable; }));
+  mPluginSettings->mEnableLatLongGrid.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableLatLongGrid", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableColorMixing",
       "When enabled, the values of the colormap will be multiplied with the image channel.",
       std::function([this](bool enable) { mPluginSettings->mEnableColorMixing = enable; }));
+  mPluginSettings->mEnableColorMixing.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableColorMixing", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainLod",
       "Specifies the amount of detail of the planet's surface. Should be in the range 1-100.",
-      std::function([this](double value) {
-        if (!mPluginSettings->mAutoLOD.get()) {
-          mPluginSettings->mLODFactor = static_cast<float>(value);
-        }
-      }));
+      std::function(
+          [this](double value) { mPluginSettings->mLODFactor = static_cast<float>(value); }));
+  mPluginSettings->mLODFactor.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("lodBodies.setTerrainLod", value); });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableAutoTerrainLod",
       "If set to true, the level-of-detail will be chosen automatically based on the current "
       "rendering performance.",
       std::function([this](bool enable) { mPluginSettings->mAutoLOD = enable; }));
+  mPluginSettings->mAutoLOD.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableAutoTerrainLod", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTextureGamma",
       "A multiplier for the brightness of the image channel.", std::function([this](double value) {
         mPluginSettings->mTextureGamma = static_cast<float>(value);
       }));
+  mPluginSettings->mTextureGamma.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("lodBodies.setTextureGamma", value); });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setHeightRange",
       "Sets one end of the height range for the color mapping. The first parameter is the actual "
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
+        auto range = mPluginSettings->mHeightRange.get();
         if (handle == 0.0) {
-          mPluginSettings->mHeightMin = static_cast<float>(val * 1000);
+          range.x = static_cast<float>(val * 1000);
         } else {
-          mPluginSettings->mHeightMax = static_cast<float>(val * 1000);
+          range.y = static_cast<float>(val * 1000);
         }
+        mPluginSettings->mHeightRange = range;
       }));
+  mPluginSettings->mHeightRange.connectAndTouch([this](glm::vec2 const& value) {
+    mGuiManager->setSliderValue("lodBodies.setHeightRange", value);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSlopeRange",
       "Sets one end of the slope range for the color mapping. The first parameter is the actual "
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
+        auto range = mPluginSettings->mSlopeRange.get();
         if (handle == 0.0) {
-          mPluginSettings->mSlopeMin = static_cast<float>(cs::utils::convert::toRadians(val));
+          range.x = static_cast<float>(cs::utils::convert::toRadians(val));
         } else {
-          mPluginSettings->mSlopeMax = static_cast<float>(cs::utils::convert::toRadians(val));
+          range.y = static_cast<float>(cs::utils::convert::toRadians(val));
         }
+        mPluginSettings->mSlopeRange = range;
       }));
+  mPluginSettings->mSlopeRange.connectAndTouch([this](glm::vec2 const& value) {
+    mGuiManager->setSliderValue("lodBodies.setSlopeRange", value);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
       "Call this to deselect any surface coloring.", std::function([this] {
         mPluginSettings->mColorMappingType = Settings::ColorMappingType::eNone;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
       "Call this to enable height based surface coloring.", std::function([this] {
         mPluginSettings->mColorMappingType = Settings::ColorMappingType::eHeight;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
       "Call this to enable slope based surface coloring.", std::function([this] {
         mPluginSettings->mColorMappingType = Settings::ColorMappingType::eSlope;
       }));
+  mPluginSettings->mColorMappingType.connect([this](Settings::ColorMappingType type) {
+    if (type == Settings::ColorMappingType::eNone) {
+      mGuiManager->setRadioChecked("lodBodies.setSurfaceColoringMode0");
+    } else if (type == Settings::ColorMappingType::eHeight) {
+      mGuiManager->setRadioChecked("lodBodies.setSurfaceColoringMode1");
+    } else if (type == Settings::ColorMappingType::eSlope) {
+      mGuiManager->setRadioChecked("lodBodies.setSurfaceColoringMode2");
+    }
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0",
       "Call this to use a GPU-based HEALPix projection for the planet's surface.",
       std::function([this] {
         mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eHEALPix;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1",
       "Call this to use a CPU-based HEALPix projection and a linear interpolation on the GPU-side "
       "for the planet's surface.",
       std::function([this] {
         mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eLinear;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2",
       "Call this to choose a projection for the planet's surface based on the observer's distance.",
       std::function([this] {
         mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eHybrid;
       }));
+  mPluginSettings->mTerrainProjectionType.connect([this](Settings::TerrainProjectionType type) {
+    if (type == Settings::TerrainProjectionType::eHEALPix) {
+      mGuiManager->setRadioChecked("lodBodies.setTerrainProjectionMode0");
+    } else if (type == Settings::TerrainProjectionType::eLinear) {
+      mGuiManager->setRadioChecked("lodBodies.setTerrainProjectionMode1");
+    } else if (type == Settings::TerrainProjectionType::eHybrid) {
+      mGuiManager->setRadioChecked("lodBodies.setTerrainProjectionMode2");
+    }
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
       "Set the current planet's image channel to the TileSource with the given name.",
