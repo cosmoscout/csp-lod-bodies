@@ -339,14 +339,14 @@ void Plugin::init() {
     } else {
       mPluginSettings->mLODFactor = mNonAutoLod;
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", mNonAutoLod);
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", false, mNonAutoLod);
     }
   });
 
   mPluginSettings->mLODFactor.connect([this](float value) {
     if (mPluginSettings->mAutoLOD()) {
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", value);
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", false, value);
     }
   });
 
