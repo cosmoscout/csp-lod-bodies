@@ -67,17 +67,11 @@ class Plugin : public cs::core::PluginBase {
     /// When enabled, the values of the colormap will be multiplied with the image channel.
     cs::utils::DefaultProperty<bool> mEnableColorMixing{true};
 
-    /// The upper end of the height range for the color mapping.
-    cs::utils::DefaultProperty<float> mHeightMax{12000.F};
+    /// The height range for the color mapping.
+    cs::utils::DefaultProperty<glm::vec2> mHeightRange{glm::vec2(-8000.F, 12000.F)};
 
-    /// The lower end of the height range for the color mapping.
-    cs::utils::DefaultProperty<float> mHeightMin{-8000.F};
-
-    /// The upper end of the slope range for the slope mapping.
-    cs::utils::DefaultProperty<float> mSlopeMax{0.25F * glm::pi<float>()};
-
-    /// The lower end of the slope range for the slope mapping.
-    cs::utils::DefaultProperty<float> mSlopeMin{0.F};
+    /// The the slope range for the slope mapping.
+    cs::utils::DefaultProperty<glm::vec2> mSlopeRange{glm::vec2(0.F, 0.25F * glm::pi<float>())};
 
     /// Enables or disables wireframe rendering of the planet.
     cs::utils::DefaultProperty<bool> mEnableWireframe{false};

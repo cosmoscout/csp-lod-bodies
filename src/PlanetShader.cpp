@@ -66,8 +66,6 @@ PlanetShader::PlanetShader(std::shared_ptr<cs::core::Settings> settings,
         [this](int /*ignored*/) { mShaderDirty = true; });
     mPluginSettings->mEnableTilesDebug.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
-    mPluginSettings->mEnableLatLongGridLabels.connect(
-        [this](bool /*ignored*/) { mShaderDirty = true; });
     mPluginSettings->mEnableLatLongGrid.connect(
         [this](bool /*ignored*/) { mShaderDirty = true; });
     mPluginSettings->mEnableColorMixing.connect(
@@ -149,7 +147,7 @@ void PlanetShader::compile() {
   cs::utils::replaceString(mFragmentSource, "$SHOW_TILE_BORDER",
       cs::utils::toString(mPluginSettings->mEnableTilesDebug.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_LAT_LONG_LABELS",
-      cs::utils::toString(mPluginSettings->mEnableLatLongGridLabels.get()));
+      cs::utils::toString(mPluginSettings->mEnableLatLongGrid.get()));
   cs::utils::replaceString(mFragmentSource, "$SHOW_LAT_LONG",
       cs::utils::toString(mPluginSettings->mEnableLatLongGrid.get()));
   cs::utils::replaceString(mFragmentSource, "$MIX_COLORS",
@@ -176,16 +174,16 @@ void PlanetShader::bind() {
   mShader.SetUniform(loc, TEXUNITFONT);
 
   loc = mShader.GetUniformLocation("heightMin");
-  mShader.SetUniform(loc, mPluginSettings->mHeightMin.get());
+  mShader.SetUniform(loc, mPluginSettings->mHeightRange.get().x);
 
   loc = mShader.GetUniformLocation("heightMax");
-  mShader.SetUniform(loc, mPluginSettings->mHeightMax.get());
+  mShader.SetUniform(loc, mPluginSettings->mHeightRange.get().y);
 
   loc = mShader.GetUniformLocation("slopeMin");
-  mShader.SetUniform(loc, mPluginSettings->mSlopeMin.get());
+  mShader.SetUniform(loc, mPluginSettings->mSlopeRange.get().x);
 
   loc = mShader.GetUniformLocation("slopeMax");
-  mShader.SetUniform(loc, mPluginSettings->mSlopeMax.get());
+  mShader.SetUniform(loc, mPluginSettings->mSlopeRange.get().y);
 
   loc = mShader.GetUniformLocation("ambientBrightness");
   mShader.SetUniform(loc, mSettings->mGraphics.pAmbientBrightness.get());
