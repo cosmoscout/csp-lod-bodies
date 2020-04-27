@@ -76,8 +76,7 @@ Tile<T>::Tile(int level, glm::int64 patchIdx)
 }
 
 template <typename T>
-Tile<T>::~Tile() {
-}
+Tile<T>::~Tile() = default;
 
 template <typename T>
 std::type_info const& Tile<T>::getStaticTypeId() {

@@ -136,6 +136,11 @@ TerrainShader* VistaPlanet::getTerrainShader() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void VistaPlanet::setDEMSource(TileSource* srcDEM) {
+  // Don't do anything if nothing changed.
+  if (mSrcDEM == srcDEM) {
+    return;
+  }
+
   // shut down old source
   if (mSrcDEM) {
     mSrcDEM->fini();
@@ -166,6 +171,11 @@ TileSource* VistaPlanet::getDEMSource() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void VistaPlanet::setIMGSource(TileSource* srcIMG) {
+  // Don't do anything if nothing changed.
+  if (mSrcIMG == srcIMG) {
+    return;
+  }
+
   // shut down old source
   if (mSrcIMG) {
     mSrcIMG->fini();

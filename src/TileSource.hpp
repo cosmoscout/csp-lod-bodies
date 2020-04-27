@@ -60,27 +60,11 @@ class TileSource {
   /// Returns the number of currently active async requests.
   virtual int getPendingRequests() = 0;
 
-  /// Can be used to identify this tile source.
-  void setName(std::string const& name) {
-    mName = name;
-  }
-  std::string const& getName() const {
-    return mName;
-  }
-
-  /// Can be used to display required copyright information to the user.
-  void setCopyright(std::string const& copyright) {
-    mCopyright = copyright;
-  }
-
-  std::string const& getCopyright() const {
-    return mCopyright;
-  }
-
- private:
-  std::string mName;
-  std::string mCopyright;
+  /// Derived classes should check whether the given TileSource has the same type and members. This
+  /// is used to prevent redundant tile source reloading.
+  virtual bool isSame(TileSource const* other) const = 0;
 };
+
 } // namespace csp::lodbodies
 
 #endif // CSP_LOD_BODIES_TILESOURCE_HPP
