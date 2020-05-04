@@ -12,6 +12,7 @@
 #include "TileId.hpp"
 
 #include <boost/noncopyable.hpp>
+#include <memory>
 #include <typeinfo>
 
 namespace csp::lodbodies {
@@ -33,7 +34,7 @@ class TileBase : private boost::noncopyable {
   /// Number of samples stored in this tiles (i.e. including border samples), y direction.
   static int const SizeY = sOwnSizeY + 1;
 
-  virtual ~TileBase();
+  virtual ~TileBase() = default;
 
   /// Returns std::type_info for the data type stored in this tile.
   virtual std::type_info const& getTypeId() const = 0;
@@ -59,7 +60,7 @@ class TileBase : private boost::noncopyable {
   void       setPatchIdx(glm::int64 patchIdx);
 
   MinMaxPyramid* getMinMaxPyramid() const;
-  void           setMinMaxPyramid(MinMaxPyramid*);
+  void           setMinMaxPyramid(std::unique_ptr<MinMaxPyramid> pyramid);
 
  protected:
   explicit TileBase(int level, glm::int64 patchIdx);
@@ -67,7 +68,7 @@ class TileBase : private boost::noncopyable {
   TileId mTileId;
 
  private:
-  MinMaxPyramid* mMinMaxPyramid;
+  std::unique_ptr<MinMaxPyramid> mMinMaxPyramid;
 };
 
 template <typename T>

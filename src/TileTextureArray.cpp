@@ -7,7 +7,6 @@
 #include "TileTextureArray.hpp"
 
 #include "RenderData.hpp"
-#include "TileSource.hpp"
 #include "TreeManagerBase.hpp"
 
 #include <VistaBase/VistaStreamUtils.h>
@@ -17,10 +16,6 @@ namespace csp::lodbodies {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace {
-GLsizei const SizeX = TileBase::SizeX;
-GLsizei const SizeY = TileBase::SizeY;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // functions to obtain texture internal/external format and type
 // from TileDataType value
@@ -47,76 +42,30 @@ GLenum getInternalFormat(TileDataType dataType) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 GLenum getFormat(TileDataType dataType) {
-  GLenum result = GL_NONE;
-
   switch (dataType) {
   case TileDataType::eFloat32:
-    result = GL_RED;
-    break;
-
   case TileDataType::eUInt8:
-    result = GL_RED;
-    break;
-
+    return GL_RED;
   case TileDataType::eU8Vec3:
-    result = GL_RGB;
-    break;
+    return GL_RGB;
   }
 
-  return result;
+  return GL_NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 GLenum getType(TileDataType dataType) {
-  GLenum result = GL_NONE;
-
   switch (dataType) {
   case TileDataType::eFloat32:
-    result = GL_FLOAT;
-    break;
+    return GL_FLOAT;
 
   case TileDataType::eUInt8:
-    result = GL_UNSIGNED_BYTE;
-    break;
-
   case TileDataType::eU8Vec3:
-    result = GL_UNSIGNED_BYTE;
-    break;
+    return GL_UNSIGNED_BYTE;
   }
 
-  return result;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Functor to sort upload queue.
-// The queue is processed from the back, so older tiles are considered less
-// than younger tiles and in case of a tie levels closer to the root
-// are prioritized.
-class RDLess {
- public:
-  explicit RDLess(int frameCount);
-
-  bool operator()(RenderData const* lhs, RenderData const* rhs);
-
- private:
-  int frame_;
-};
-
-/* explicit */
-RDLess::RDLess(int frameCount)
-    : frame_(frameCount) {
-}
-
-bool RDLess::operator()(RenderData const* lhs, RenderData const* rhs) {
-  int ageL = lhs->getAge(frame_);
-  int ageR = rhs->getAge(frame_);
-
-  if (ageL == ageR)
-    return lhs->getTileId().level() > rhs->getTileId().level();
-
-  return ageL > ageR;
+  return GL_NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,14 +77,12 @@ bool RDLess::operator()(RenderData const* lhs, RenderData const* rhs) {
 /* explicit */
 TileTextureArray::TileTextureArray(TileDataType dataType, int maxLayerCount)
     : boost::noncopyable()
-    , mTexId(0u)
+    , mTexId(0U)
     , mIformat()
     , mFormat()
     , mType()
     , mDataType(dataType)
-    , mNumLayers(maxLayerCount)
-    , mFreeLayers()
-    , mUploadQueue() {
+    , mNumLayers(maxLayerCount) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,16 +113,18 @@ void TileTextureArray::releaseGPU(RenderData* rdata) {
 
     // avoid erasing an element in the middle of std::vector,
     // just invalidate the pointer and skip NULL entries when uploading
-    if (rIt != mUploadQueue.end())
-      *rIt = NULL;
+    if (rIt != mUploadQueue.end()) {
+      *rIt = nullptr;
+    }
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TileTextureArray::processQueue(int maxItems) {
-  if (mUploadQueue.empty())
+  if (mUploadQueue.empty()) {
     return;
+  }
 
   preUpload();
 
@@ -193,7 +142,7 @@ void TileTextureArray::processQueue(int maxItems) {
   int count = 0;
 
   while (!mUploadQueue.empty() && count < maxItems) {
-    if (mFreeLayers.size() == 0) {
+    if (mFreeLayers.empty()) {
       break;
     }
 
@@ -201,7 +150,7 @@ void TileTextureArray::processQueue(int maxItems) {
 
     // rdata could be NULL if a tile is removed before it is ever
     // uploaded to the GPU, c.f. releaseGPU
-    if (rdata != NULL) {
+    if (rdata != nullptr) {
       allocateLayer(rdata);
       ++count;
     }
@@ -242,16 +191,17 @@ std::size_t TileTextureArray::getUsedLayerCount() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TileTextureArray::allocateTexture(TileDataType dataType) {
-  if (mTexId > 0u)
+  if (mTexId > 0U) {
     return;
+  }
 
   // allocate a 2D array texture for storing tile data of type dataType
 
   glGenTextures(1, &mTexId);
 
   GLsizei const level  = 0;
-  GLsizei const width  = SizeX;
-  GLsizei const height = SizeY;
+  GLsizei const width  = TileBase::SizeX;
+  GLsizei const height = TileBase::SizeY;
   GLsizei const depth  = mNumLayers;
   GLint const   border = 0;
 
@@ -261,7 +211,7 @@ void TileTextureArray::allocateTexture(TileDataType dataType) {
 
   glBindTexture(GL_TEXTURE_2D_ARRAY, mTexId);
   glTexImage3D(
-      GL_TEXTURE_2D_ARRAY, level, mIformat, width, height, depth, border, mFormat, mType, NULL);
+      GL_TEXTURE_2D_ARRAY, level, mIformat, width, height, depth, border, mFormat, mType, nullptr);
 
   // set filter and wrapping parameters
   glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -269,23 +219,25 @@ void TileTextureArray::allocateTexture(TileDataType dataType) {
   glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  glBindTexture(GL_TEXTURE_2D_ARRAY, 0u);
+  glBindTexture(GL_TEXTURE_2D_ARRAY, 0U);
 
   // all layers of newly allocated texture are available for use
   mFreeLayers.reserve(mNumLayers);
 
-  for (int i = 0; i < mNumLayers; ++i)
+  for (int i = 0; i < mNumLayers; ++i) {
     mFreeLayers.push_back(mNumLayers - i - 1);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TileTextureArray::releaseTexture() {
-  if (mTexId == 0u)
+  if (mTexId == 0U) {
     return;
+  }
 
   glDeleteTextures(1, &mTexId);
-  mTexId = 0u;
+  mTexId = 0U;
   mFreeLayers.clear();
 }
 
@@ -306,8 +258,8 @@ void TileTextureArray::allocateLayer(RenderData* rdata) {
   GLint const   level   = 0;
   GLint const   xoffset = 0;
   GLint const   yoffset = 0;
-  GLsizei const width   = SizeX;
-  GLsizei const height  = SizeY;
+  GLsizei const width   = TileBase::SizeX;
+  GLsizei const height  = TileBase::SizeY;
   GLsizei const depth   = 1;
   GLvoid const* data    = tile->getDataPtr();
 
@@ -338,7 +290,7 @@ void TileTextureArray::preUpload() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TileTextureArray::postUpload() {
-  glBindTexture(GL_TEXTURE_2D_ARRAY, 0u);
+  glBindTexture(GL_TEXTURE_2D_ARRAY, 0U);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

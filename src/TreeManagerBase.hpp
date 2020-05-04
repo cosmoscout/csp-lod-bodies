@@ -46,7 +46,14 @@ class TileTextureArray;
 class TreeManagerBase : private boost::noncopyable {
  public:
   explicit TreeManagerBase(
-      PlanetParameters const& params, std::shared_ptr<GLResources> const& glResources);
+      PlanetParameters const& params, std::shared_ptr<GLResources> glResources);
+
+  TreeManagerBase(TreeManagerBase const& other) = delete;
+  TreeManagerBase(TreeManagerBase&& other)      = delete;
+
+  TreeManagerBase& operator=(TreeManagerBase const& other) = delete;
+  TreeManagerBase& operator=(TreeManagerBase&& other) = delete;
+
   virtual ~TreeManagerBase() = 0;
 
   /// Set tile source src to use.
@@ -126,8 +133,8 @@ class TreeManagerBase : private boost::noncopyable {
   std::size_t getNodeCountGPU() const;
 
  protected:
-  typedef std::unordered_map<TileId, RenderData*>::value_type RDMapValue;
-  typedef std::vector<RDMapValue*>                            AgeStore;
+  using RDMapValue = std::unordered_map<TileId, RenderData*>::value_type;
+  using AgeStore   = std::vector<RDMapValue*>;
 
   struct AgeLess;
 

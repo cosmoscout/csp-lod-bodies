@@ -23,6 +23,7 @@
 #include <VistaOGLExt/VistaTexture.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/io.hpp>
+#include <memory>
 
 namespace csp::lodbodies {
 
@@ -37,16 +38,16 @@ GLint const  texUnitIMG     = 1;
 
 GLint const texUnitShadow = 2;
 
-GLsizeiptr const SizeX = TileBase::SizeX;
-GLsizeiptr const SizeY = TileBase::SizeY;
+GLsizeiptr const SizeX = TileBase::SizeX; // NOLINT(cppcoreguidelines-interfaces-global-init)
+GLsizeiptr const SizeY = TileBase::SizeY; // NOLINT(cppcoreguidelines-interfaces-global-init)
 // number of vertices that make up a patch
 GLsizeiptr const NumVertices = SizeX * SizeY;
 // number of indices: (number of quads) * (2 triangles per quad)
 //                                      * (3 indices per triangle)
 GLsizeiptr const NumIndices = (SizeX - 1) * (SizeY - 1) * 6;
 
-std::string const BoundsVertexShaderName("VistaPlanetTileBounds.vert");
-std::string const BoundsFragmentShaderName("VistaPlanetTileBounds.frag");
+const char* BoundsVertexShaderName("VistaPlanetTileBounds.vert");
+const char* BoundsFragmentShaderName("VistaPlanetTileBounds.frag");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -78,7 +79,7 @@ std::string const BoundsFragmentShaderName("VistaPlanetTileBounds.frag");
 // so on.
 int buildTileIndices(GLuint* buffer, int idx, int level, int baseX, int baseY) {
   // number of quads along one side at this level
-  int const numQuads = (SizeX - 1) / (1 << level);
+  int const numQuads = static_cast<int32_t>(SizeX - 1) / (int32_t(1) << level);
 
   if (numQuads == 1) {
     // lowest level, split single quad into triangles alternating
@@ -96,21 +97,21 @@ int buildTileIndices(GLuint* buffer, int idx, int level, int baseX, int baseY) {
     GLuint const x1y1 = (baseY + 1) * SizeX + baseX + 1;
 
     if ((baseX + baseY) % 2 == 0) {
-      buffer[idx++] = x0y0;
-      buffer[idx++] = x1y0;
-      buffer[idx++] = x0y1;
+      buffer[idx++] = x0y0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x1y0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x0y1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-      buffer[idx++] = x0y1;
-      buffer[idx++] = x1y0;
-      buffer[idx++] = x1y1;
+      buffer[idx++] = x0y1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x1y0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x1y1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     } else {
-      buffer[idx++] = x0y1;
-      buffer[idx++] = x0y0;
-      buffer[idx++] = x1y1;
+      buffer[idx++] = x0y1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x0y0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x1y1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-      buffer[idx++] = x1y1;
-      buffer[idx++] = x0y0;
-      buffer[idx++] = x1y0;
+      buffer[idx++] = x1y1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x0y0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      buffer[idx++] = x1y0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
   } else {
     // next level "patches" are offset by half the number of quads on
@@ -146,16 +147,18 @@ void calcOffsetScale(TileId const& idDEM, TileId const& idIMG, glm::ivec3& imgOS
 
     // number of indices is number of indices for full patch divided by
     // 4^(level difference) == 2^(2 * level difference)
-    idxCount = NumIndices / (1 << (2 * deltaLvl));
+    idxCount = NumIndices / (int64_t(1) << (2 * deltaLvl));
 
-    imgOS = glm::ivec3(0, 0, (SizeX - 1) / (1 << deltaLvl));
-    demOS = glm::ivec3(0, 0, (SizeX - 1) / (1 << deltaLvl));
+    imgOS = glm::ivec3(0, 0, (SizeX - 1) / (int64_t(1) << deltaLvl));
+    demOS = glm::ivec3(0, 0, (SizeX - 1) / (int64_t(1) << deltaLvl));
 
     for (int i = deltaLvl; i > 0; --i) {
-      if (idx & 0x01)
-        demOS.x += (SizeX - 1) / (1 << i);
-      if (idx & 0x02)
-        demOS.y += (SizeY - 1) / (1 << i);
+      if (idx & 0x01) {
+        demOS.x += (SizeX - 1) / (int64_t(1) << i);
+      }
+      if (idx & 0x02) {
+        demOS.y += (SizeY - 1) / (int64_t(1) << i);
+      }
 
       idx >>= 2;
     }
@@ -164,15 +167,17 @@ void calcOffsetScale(TileId const& idDEM, TileId const& idIMG, glm::ivec3& imgOS
     glm::int64 idx      = idDEM.patchIdx();
     int        deltaLvl = idDEM.level() - idIMG.level();
 
-    imgOS    = glm::ivec3(0, 0, (SizeX - 1) * (1 << deltaLvl));
+    imgOS    = glm::ivec3(0, 0, (SizeX - 1) * (int64_t(1) << deltaLvl));
     demOS    = glm::ivec3(0, 0, SizeX - 1);
     idxCount = NumIndices;
 
     for (int i = 0; i < deltaLvl; ++i) {
-      if (idx & 0x01)
-        imgOS.x += (SizeX - 1) * (1 << i);
-      if (idx & 0x02)
-        imgOS.y += (SizeY - 1) * (1 << i);
+      if (idx & 0x01) {
+        imgOS.x += (SizeX - 1) * (int64_t(1) << i);
+      }
+      if (idx & 0x02) {
+        imgOS.y += (SizeY - 1) * (int64_t(1) << i);
+      }
 
       idx >>= 2;
     }
@@ -214,8 +219,9 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
     int        deltaLvl = idDEM.level() - idNE.level();
 
     for (int i = deltaLvl; i > 0; --i) {
-      if (idx & 0x02)
-        result[0] += (SizeY - 1) / (1 << i);
+      if (idx & 0x02) {
+        result[0] += (SizeY - 1) / (int64_t(1) << i);
+      }
 
       idx >>= 2;
     }
@@ -232,8 +238,9 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
     int        deltaLvl = idDEM.level() - idNW.level();
 
     for (int i = deltaLvl; i > 0; --i) {
-      if (idx & 0x01)
-        result[1] += (SizeX - 1) / (1 << i);
+      if (idx & 0x01) {
+        result[1] += (SizeX - 1) / (int64_t(1) << i);
+      }
 
       idx >>= 2;
     }
@@ -250,8 +257,9 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
     int        deltaLvl = idDEM.level() - idSW.level();
 
     for (int i = deltaLvl; i > 0; --i) {
-      if (idx & 0x02)
-        result[2] += (SizeY - 1) / (1 << i);
+      if (idx & 0x02) {
+        result[2] += (SizeY - 1) / (int64_t(1) << i);
+      }
 
       idx >>= 2;
     }
@@ -268,8 +276,9 @@ glm::ivec4 calcEdgeOffset(RenderDataDEM* rdDEM) {
     int        deltaLvl = idDEM.level() - idSE.level();
 
     for (int i = deltaLvl; i > 0; --i) {
-      if (idx & 0x01)
-        result[3] += (SizeX - 1) / (1 << i);
+      if (idx & 0x01) {
+        result[3] += (SizeX - 1) / (int64_t(1) << i);
+      }
 
       idx >>= 2;
     }
@@ -353,8 +362,9 @@ void TileRenderer::preRenderTiles(cs::graphics::ShadowMap* shadowMap) {
 
   glDisable(GL_BLEND);
 
-  if (mEnableWireframe)
+  if (mEnableWireframe) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  }
 
   if (mEnableFaceCulling) {
     glCullFace(GL_BACK);
@@ -374,36 +384,38 @@ void TileRenderer::preRenderTiles(cs::graphics::ShadowMap* shadowMap) {
 
   mVaoTerrain->Bind();
   mProgTerrain->bind();
-  VistaGLSLShader* shader = mProgTerrain->mShader;
+  VistaGLSLShader& shader = mProgTerrain->mShader;
 
   // update "frame global" uniforms
-  GLint loc = shader->GetUniformLocation("VP_matProjection");
+  GLint loc = shader.GetUniformLocation("VP_matProjection");
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(glm::fmat4x4(mMatP)));
-  loc = shader->GetUniformLocation("VP_matModelView");
+  loc = shader.GetUniformLocation("VP_matModelView");
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(glm::fmat4x4(mMatVM)));
-  loc = shader->GetUniformLocation("VP_heightScale");
-  shader->SetUniform(loc, static_cast<float>(mParams->mHeightScale));
-  loc = shader->GetUniformLocation("VP_radius");
-  shader->SetUniform(loc, mParams->mEquatorialRadius, mParams->mPolarRadius);
-  loc = shader->GetUniformLocation("VP_texDEM");
-  shader->SetUniform(loc, texUnitDEM);
-  loc = shader->GetUniformLocation("VP_texIMG");
-  shader->SetUniform(loc, texUnitIMG);
-  loc = shader->GetUniformLocation("VP_shadowMapMode");
-  shader->SetUniform(loc, shadowMap == nullptr);
+  loc = shader.GetUniformLocation("VP_heightScale");
+  shader.SetUniform(loc, static_cast<float>(mParams->mHeightScale));
+  loc = shader.GetUniformLocation("VP_radius");
+  shader.SetUniform(loc, static_cast<float>(mParams->mEquatorialRadius),
+      static_cast<float>(mParams->mPolarRadius));
+  loc = shader.GetUniformLocation("VP_texDEM");
+  shader.SetUniform(loc, texUnitDEM);
+  loc = shader.GetUniformLocation("VP_texIMG");
+  shader.SetUniform(loc, texUnitIMG);
+  loc = shader.GetUniformLocation("VP_shadowMapMode");
+  shader.SetUniform(loc, shadowMap == nullptr);
 
   if (shadowMap) {
-    shader->SetUniform(shader->GetUniformLocation("VP_shadowBias"), shadowMap->getBias());
-    shader->SetUniform(
-        shader->GetUniformLocation("VP_shadowCascades"), (int)shadowMap->getMaps().size());
-    for (int i = 0; i < shadowMap->getMaps().size(); ++i) {
+    shader.SetUniform(shader.GetUniformLocation("VP_shadowBias"), shadowMap->getBias());
+    shader.SetUniform(shader.GetUniformLocation("VP_shadowCascades"),
+        static_cast<int>(shadowMap->getMaps().size()));
+
+    for (size_t i = 0; i < shadowMap->getMaps().size(); ++i) {
       GLint locSamplers = glGetUniformLocation(
-          shader->GetProgram(), ("VP_shadowMaps[" + std::to_string(i) + "]").c_str());
-      GLint locMatrices = glGetUniformLocation(shader->GetProgram(),
+          shader.GetProgram(), ("VP_shadowMaps[" + std::to_string(i) + "]").c_str());
+      GLint locMatrices = glGetUniformLocation(shader.GetProgram(),
           ("VP_shadowProjectionViewMatrices[" + std::to_string(i) + "]").c_str());
 
-      shadowMap->getMaps()[i]->Bind(GL_TEXTURE0 + texUnitShadow + i);
-      glUniform1i(locSamplers, texUnitShadow + i);
+      shadowMap->getMaps()[i]->Bind(GL_TEXTURE0 + texUnitShadow + static_cast<int>(i));
+      glUniform1i(locSamplers, texUnitShadow + static_cast<int>(i));
 
       auto mat = shadowMap->getShadowMatrices()[i];
       glUniformMatrix4fv(locMatrices, 1, GL_FALSE, mat.GetData());
@@ -415,46 +427,42 @@ void TileRenderer::preRenderTiles(cs::graphics::ShadowMap* shadowMap) {
 
 void TileRenderer::renderTiles(
     std::vector<RenderData*> const& renderDEM, std::vector<RenderData*> const& renderIMG) {
-  VistaGLSLShader* shader = mProgTerrain->mShader;
+  VistaGLSLShader& shader = mProgTerrain->mShader;
 
   // query uniform locations once and store in locs
-  UniformLocs locs;
-  locs.demAverageHeight = shader->GetUniformLocation("VP_demAverageHeight");
-  locs.tileOffsetScale  = shader->GetUniformLocation("VP_tileOffsetScale");
-  locs.demOffsetScale   = shader->GetUniformLocation("VP_demOffsetScale");
-  locs.imgOffsetScale   = shader->GetUniformLocation("VP_imgOffsetScale");
-  locs.edgeDelta        = shader->GetUniformLocation("VP_edgeDelta");
-  locs.edgeLayerDEM     = shader->GetUniformLocation("VP_edgeLayerDEM");
-  locs.edgeOffset       = shader->GetUniformLocation("VP_edgeOffset");
-  locs.f1f2             = shader->GetUniformLocation("VP_f1f2");
-  locs.layerDEM         = shader->GetUniformLocation("VP_layerDEM");
-  locs.layerIMG         = shader->GetUniformLocation("VP_layerIMG");
+  UniformLocs locs{};
+  locs.demAverageHeight = shader.GetUniformLocation("VP_demAverageHeight");
+  locs.tileOffsetScale  = shader.GetUniformLocation("VP_tileOffsetScale");
+  locs.demOffsetScale   = shader.GetUniformLocation("VP_demOffsetScale");
+  locs.imgOffsetScale   = shader.GetUniformLocation("VP_imgOffsetScale");
+  locs.edgeDelta        = shader.GetUniformLocation("VP_edgeDelta");
+  locs.edgeLayerDEM     = shader.GetUniformLocation("VP_edgeLayerDEM");
+  locs.edgeOffset       = shader.GetUniformLocation("VP_edgeOffset");
+  locs.f1f2             = shader.GetUniformLocation("VP_f1f2");
+  locs.layerDEM         = shader.GetUniformLocation("VP_layerDEM");
+  locs.layerIMG         = shader.GetUniformLocation("VP_layerIMG");
 
   int missingDEM = 0;
   int missingIMG = 0;
 
   // iterate over both std::vector<RenderData*>s together
-  for (int i(0); i < renderDEM.size(); ++i) {
+  for (size_t i(0); i < renderDEM.size(); ++i) {
     // get data associated with nodes
-    RenderDataDEM* rdDEM = dynamic_cast<RenderDataDEM*>(renderDEM[i]);
+    auto*          rdDEM = dynamic_cast<RenderDataDEM*>(renderDEM[i]);
     RenderDataImg* rdIMG =
         i < renderIMG.size() ? dynamic_cast<RenderDataImg*>(renderIMG[i]) : nullptr;
 
     // count cases of data not being on GPU ...
-    if (rdDEM->getTexLayer() < 0)
+    if (rdDEM->getTexLayer() < 0) {
       ++missingDEM;
+    }
 
-    if (rdIMG && rdIMG->getTexLayer() < 0)
+    if (rdIMG && rdIMG->getTexLayer() < 0) {
       ++missingIMG;
+    }
 
     // ... but do not attempt to draw
     if (rdDEM->getTexLayer() < 0 || (rdIMG && rdIMG->getTexLayer() < 0)) {
-#if !defined(NDEBUG) && !defined(VISTAPLANET_NO_VERBOSE)
-      vstr::warnp() << "[TileRenderer::renderTiles] "
-                    << "tile " << rdDEM->getTileId() << " has missing"
-                    << (rdDEM->getTexLayer() < 0 ? " DEM" : "")
-                    << (rdIMG->getTexLayer() < 0 ? " IMG" : "") << " data.\n";
-#endif
       continue;
     }
 
@@ -474,8 +482,8 @@ void TileRenderer::renderTiles(
   // Iterate over std::vector<RenderData*>s a second time, reset edge deltas and flags.
   // Cannot be done during rendering because a TileNode/RenderData may
   // appear multiple times in renderDEM/renderIMG.
-  for (auto it : renderDEM) {
-    RenderDataDEM* rdDEM = dynamic_cast<RenderDataDEM*>(it);
+  for (auto* it : renderDEM) {
+    auto* rdDEM = dynamic_cast<RenderDataDEM*>(it);
     rdDEM->resetEdgeDeltas();
     rdDEM->resetEdgeRData();
     rdDEM->clearFlags();
@@ -485,11 +493,11 @@ void TileRenderer::renderTiles(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void TileRenderer::renderTile(RenderDataDEM* rdDEM, RenderDataImg* rdIMG, UniformLocs const& locs) {
-  VistaGLSLShader* shader   = mProgTerrain->mShader;
+  VistaGLSLShader& shader   = mProgTerrain->mShader;
   TileId const&    idDEM    = rdDEM->getTileId();
   GLuint           idxCount = NumIndices;
 
-  std::array<glm::dvec2, 4> cornersLngLat;
+  std::array<glm::dvec2, 4> cornersLngLat{};
 
   glm::ivec3 demOS(0, 0, 256);
   glm::ivec3 imgOS(0, 0, 256);
@@ -516,41 +524,42 @@ void TileRenderer::renderTile(RenderDataDEM* rdDEM, RenderDataImg* rdIMG, Unifor
   float averageHeight = rdDEM->getNode()->getTile()->getMinMaxPyramid()->getAverage();
 
   // update uniforms
-  shader->SetUniform(locs.demAverageHeight, averageHeight);
-  shader->SetUniform(locs.tileOffsetScale, 3, 1, glm::value_ptr(tileOS));
-  shader->SetUniform(locs.demOffsetScale, 3, 1, glm::value_ptr(demOS));
-  shader->SetUniform(locs.imgOffsetScale, 3, 1, glm::value_ptr(imgOS));
-  shader->SetUniform(locs.layerIMG, rdIMG ? rdIMG->getTexLayer() : 0);
-  shader->SetUniform(locs.layerDEM, rdDEM->getTexLayer());
-  shader->SetUniform(locs.edgeDelta, 4, 1, glm::value_ptr(edgeDelta));
-  shader->SetUniform(locs.edgeLayerDEM, 4, 1, glm::value_ptr(edgeLayerDEM));
-  shader->SetUniform(locs.edgeOffset, 4, 1, glm::value_ptr(edgeOffset));
-  shader->SetUniform(locs.f1f2, 2, 1, glm::value_ptr(patchF1F2));
+  shader.SetUniform(locs.demAverageHeight, averageHeight);
+  shader.SetUniform(locs.tileOffsetScale, 3, 1, glm::value_ptr(tileOS));
+  shader.SetUniform(locs.demOffsetScale, 3, 1, glm::value_ptr(demOS));
+  shader.SetUniform(locs.imgOffsetScale, 3, 1, glm::value_ptr(imgOS));
+  shader.SetUniform(locs.layerIMG, rdIMG ? rdIMG->getTexLayer() : 0);
+  shader.SetUniform(locs.layerDEM, rdDEM->getTexLayer());
+  shader.SetUniform(locs.edgeDelta, 4, 1, glm::value_ptr(edgeDelta));
+  shader.SetUniform(locs.edgeLayerDEM, 4, 1, glm::value_ptr(edgeLayerDEM));
+  shader.SetUniform(locs.edgeOffset, 4, 1, glm::value_ptr(edgeOffset));
+  shader.SetUniform(locs.f1f2, 2, 1, glm::value_ptr(patchF1F2));
 
   // order of components: N, W, S, E
-  std::array<glm::dvec3, 4> corners, normals;
-  glm::fvec3                cornersViewSpace[4];
-  glm::fvec3                normalsViewSpace[4];
+  std::array<glm::dvec3, 4> corners{};
+  std::array<glm::dvec3, 4> normals{};
+  std::array<glm::fvec3, 4> cornersViewSpace{};
+  std::array<glm::fvec3, 4> normalsViewSpace{};
 
   glm::dmat4 matNormal = glm::transpose(glm::inverse(mMatVM));
 
   for (int i(0); i < 4; ++i) {
-    corners[i] = cs::utils::convert::toCartesian(cornersLngLat[i], mParams->mEquatorialRadius,
+    corners.at(i) = cs::utils::convert::toCartesian(cornersLngLat.at(i), mParams->mEquatorialRadius,
         mParams->mPolarRadius, averageHeight * static_cast<float>(mParams->mHeightScale));
-    cornersViewSpace[i] = glm::fvec3(mMatVM * glm::dvec4(corners[i], 1.0));
+    cornersViewSpace.at(i) = glm::fvec3(mMatVM * glm::dvec4(corners.at(i), 1.0));
 
-    normals[i] = cs::utils::convert::lngLatToNormal(
-        cornersLngLat[i], mParams->mEquatorialRadius, mParams->mPolarRadius);
-    normalsViewSpace[i] = glm::fvec3(matNormal * glm::dvec4(normals[i], 0.0));
+    normals.at(i) = cs::utils::convert::lngLatToNormal(
+        cornersLngLat.at(i), mParams->mEquatorialRadius, mParams->mPolarRadius);
+    normalsViewSpace.at(i) = glm::fvec3(matNormal * glm::dvec4(normals.at(i), 0.0));
   }
 
-  glUniform3fv(glGetUniformLocation(shader->GetProgram(), "VP_corners"), 9,
+  glUniform3fv(glGetUniformLocation(shader.GetProgram(), "VP_corners"), 9,
       glm::value_ptr(cornersViewSpace[0]));
-  glUniform3fv(glGetUniformLocation(shader->GetProgram(), "VP_normals"), 4,
+  glUniform3fv(glGetUniformLocation(shader.GetProgram(), "VP_normals"), 4,
       glm::value_ptr(normalsViewSpace[0]));
 
   // draw tile
-  glDrawElements(GL_TRIANGLES, idxCount, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, idxCount, GL_UNSIGNED_INT, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -561,10 +570,10 @@ void TileRenderer::postRenderTiles(cs::graphics::ShadowMap* shadowMap) {
   mVaoTerrain->Release();
 
   glActiveTexture(texUnitNameDEM);
-  glBindTexture(GL_TEXTURE_2D_ARRAY, 0u);
+  glBindTexture(GL_TEXTURE_2D_ARRAY, 0U);
 
   glActiveTexture(texUnitNameIMG);
-  glBindTexture(GL_TEXTURE_2D_ARRAY, 0u);
+  glBindTexture(GL_TEXTURE_2D_ARRAY, 0U);
 
   if (mEnableFaceCulling) {
     glDisable(GL_CULL_FACE);
@@ -578,7 +587,7 @@ void TileRenderer::postRenderTiles(cs::graphics::ShadowMap* shadowMap) {
   glPopAttrib();
 
   if (shadowMap) {
-    for (auto map : shadowMap->getMaps()) {
+    for (auto* map : shadowMap->getMaps()) {
       map->Unbind();
     }
   }
@@ -604,7 +613,7 @@ void TileRenderer::renderBounds(
       if (it->hasBounds()) {
         BoundingBox<double> const& tb = it->getBounds();
 
-        glm::dvec4 cornersWorldSpace[8] = {
+        std::array<glm::dvec4, 8> cornersWorldSpace = {
             glm::dvec4(tb.getMin().x, tb.getMin().y, tb.getMin().z, 1.0),
             glm::dvec4(tb.getMax().x, tb.getMin().y, tb.getMin().z, 1.0),
             glm::dvec4(tb.getMax().x, tb.getMin().y, tb.getMax().z, 1.0),
@@ -615,15 +624,15 @@ void TileRenderer::renderBounds(
             glm::dvec4(tb.getMax().x, tb.getMax().y, tb.getMax().z, 1.0),
             glm::dvec4(tb.getMin().x, tb.getMax().y, tb.getMax().z, 1.0)};
 
-        glm::fvec3 controlPointsViewSpace[8];
+        std::array<glm::fvec3, 8> controlPointsViewSpace{};
         for (int i(0); i < 8; ++i) {
-          controlPointsViewSpace[i] = glm::fvec3(mMatVM * cornersWorldSpace[i]);
+          controlPointsViewSpace.at(i) = glm::fvec3(mMatVM * cornersWorldSpace.at(i));
         }
 
         glUniform3fv(glGetUniformLocation(mProgBounds->GetProgram(), "VP_corners"), 8,
             glm::value_ptr(controlPointsViewSpace[0]));
 
-        glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, nullptr);
       }
     }
   };
@@ -642,30 +651,35 @@ void TileRenderer::postRenderBounds() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TileRenderer::init() {
+void TileRenderer::init() const {
   if (mEnableDrawTiles) {
-    if (!mVboTerrain)
+    if (!mVboTerrain) {
       mVboTerrain = makeVBOTerrain();
-
-    if (!mIboTerrain)
+    }
+    if (!mIboTerrain) {
       mIboTerrain = makeIBOTerrain();
+    }
 
-    if (!mVaoTerrain)
+    if (!mVaoTerrain) {
       mVaoTerrain = makeVAOTerrain(mVboTerrain.get(), mIboTerrain.get());
+    }
   }
 
   if (mEnableDrawBounds) {
-    if (!mVboBounds)
+    if (!mVboBounds) {
       mVboBounds = makeVBOBounds();
+    }
 
-    if (!mIboBounds)
+    if (!mIboBounds) {
       mIboBounds = makeIBOBounds();
+    }
 
-    if (!mVaoBounds)
+    if (!mVaoBounds) {
       mVaoBounds = makeVAOBounds(mVboBounds.get(), mIboBounds.get());
-
-    if (!mProgBounds)
+    }
+    if (!mProgBounds) {
       mProgBounds = makeProgBounds();
+    }
   }
 }
 
@@ -676,17 +690,20 @@ void TileRenderer::init() {
 // the corresponding relative position inside the patch - as well as texture
 // coordinates.
 std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOTerrain() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = NumVertices * sizeof(GLushort) * 2;
 
   result->BindAsVertexDataBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  GLuint    idx    = 0;
-  GLushort* buffer = static_cast<GLushort*>(result->MapBuffer(GL_WRITE_ONLY));
+  GLuint idx    = 0;
+  auto*  buffer = static_cast<GLushort*>(result->MapBuffer(GL_WRITE_ONLY));
   for (int y = 0; y < SizeY; ++y) {
     for (int x = 0; x < SizeX; ++x) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       buffer[idx++] = static_cast<GLushort>(x);
+
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       buffer[idx++] = static_cast<GLushort>(y);
     }
   }
@@ -699,14 +716,14 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOTerrain() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOTerrain() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = NumIndices * sizeof(GLuint);
 
   result->BindAsIndexBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  int     idx    = 0;
-  GLuint* buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
+  int   idx    = 0;
+  auto* buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
 
   // tile
   idx = buildTileIndices(buffer, idx, 0, 0, 0);
@@ -722,7 +739,7 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOTerrain() {
 // Sets up the VertexArrayObject for rendering a Tile
 std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOTerrain(
     VistaBufferObject* vbo, VistaBufferObject* ibo) {
-  auto result = std::unique_ptr<VistaVertexArrayObject>(new VistaVertexArrayObject());
+  auto result = std::make_unique<VistaVertexArrayObject>();
   result->Bind();
   result->EnableAttributeArray(0);
   result->SpecifyAttributeArrayInteger(0, 2, GL_UNSIGNED_SHORT, 0, 0, vbo);
@@ -735,23 +752,23 @@ std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOTerrain(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOBounds() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = 8 * sizeof(GLubyte);
 
   result->BindAsVertexDataBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  GLuint   idx    = 0;
-  GLubyte* buffer = static_cast<GLubyte*>(result->MapBuffer(GL_WRITE_ONLY));
+  GLuint idx    = 0;
+  auto*  buffer = static_cast<GLubyte*>(result->MapBuffer(GL_WRITE_ONLY));
 
-  buffer[idx++] = 0;
-  buffer[idx++] = 1;
-  buffer[idx++] = 2;
-  buffer[idx++] = 3;
-  buffer[idx++] = 4;
-  buffer[idx++] = 5;
-  buffer[idx++] = 6;
-  buffer[idx++] = 7;
+  buffer[idx++] = 0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 2; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 3; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 4; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 5; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 6; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 7; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
   result->UnmapBuffer();
   result->Release();
@@ -762,44 +779,44 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeVBOBounds() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOBounds() {
-  auto             result = std::unique_ptr<VistaBufferObject>(new VistaBufferObject());
+  auto             result = std::make_unique<VistaBufferObject>();
   GLsizeiptr const size   = 24 * sizeof(GLuint);
 
   result->BindAsIndexBuffer();
   result->BufferData(size, nullptr, GL_STATIC_DRAW);
 
-  GLuint  idx    = 0;
-  GLuint* buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
+  GLuint idx    = 0;
+  auto*  buffer = static_cast<GLuint*>(result->MapBuffer(GL_WRITE_ONLY));
 
   // bottom "ring"
-  buffer[idx++] = 0;
-  buffer[idx++] = 1;
-  buffer[idx++] = 1;
-  buffer[idx++] = 2;
-  buffer[idx++] = 2;
-  buffer[idx++] = 3;
-  buffer[idx++] = 3;
-  buffer[idx++] = 0;
+  buffer[idx++] = 0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 2; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 2; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 3; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 3; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
   // verticals
-  buffer[idx++] = 0;
-  buffer[idx++] = 4;
-  buffer[idx++] = 1;
-  buffer[idx++] = 5;
-  buffer[idx++] = 2;
-  buffer[idx++] = 6;
-  buffer[idx++] = 3;
-  buffer[idx++] = 7;
+  buffer[idx++] = 0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 4; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 1; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 5; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 2; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 6; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 3; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 7; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
   // top "ring"
-  buffer[idx++] = 4;
-  buffer[idx++] = 5;
-  buffer[idx++] = 5;
-  buffer[idx++] = 6;
-  buffer[idx++] = 6;
-  buffer[idx++] = 7;
-  buffer[idx++] = 7;
-  buffer[idx++] = 4;
+  buffer[idx++] = 4; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 5; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 5; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 6; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 6; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 7; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 7; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  buffer[idx++] = 4; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
   result->UnmapBuffer();
   result->Release();
@@ -812,7 +829,7 @@ std::unique_ptr<VistaBufferObject> TileRenderer::makeIBOBounds() {
 // Sets up the VertexArrayObject for rendering bounds of a Tile
 std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOBounds(
     VistaBufferObject* vbo, VistaBufferObject* ibo) {
-  auto result = std::unique_ptr<VistaVertexArrayObject>(new VistaVertexArrayObject());
+  auto result = std::make_unique<VistaVertexArrayObject>();
   result->Bind();
   result->EnableAttributeArray(0);
   result->SpecifyAttributeArrayInteger(0, 1, GL_UNSIGNED_BYTE, 0, 0, vbo);
@@ -827,7 +844,7 @@ std::unique_ptr<VistaVertexArrayObject> TileRenderer::makeVAOBounds(
 std::unique_ptr<VistaGLSLShader> TileRenderer::makeProgBounds() {
   VistaShaderRegistry& reg = VistaShaderRegistry::GetInstance();
 
-  auto result = std::unique_ptr<VistaGLSLShader>(new VistaGLSLShader());
+  auto result = std::make_unique<VistaGLSLShader>();
   result->InitVertexShaderFromString(reg.RetrieveShader(BoundsVertexShaderName));
   result->InitFragmentShaderFromString(reg.RetrieveShader(BoundsFragmentShaderName));
 

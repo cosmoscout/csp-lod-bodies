@@ -7,17 +7,13 @@
 #include "Plugin.hpp"
 
 #include "LodBody.hpp"
-#include "TileSourceWebMapService.hpp"
+#include "logger.hpp"
 
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/InputManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-utils/convert.hpp"
 #include "../../../src/cs-utils/logger.hpp"
-
-#include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
-#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
-#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +24,7 @@ EXPORT_FN cs::core::PluginBase* create() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
-  delete pluginBase;
+  delete pluginBase; // NOLINT(cppcoreguidelines-owning-memory)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,66 +33,124 @@ namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void from_json(const nlohmann::json& j, TileDataType& o) {
-  if (j.get<std::string>() == "Float32") {
+void from_json(nlohmann::json const& j, TileDataType& o) {
+  auto s = j.get<std::string>();
+  if (s == "Float32") {
     o = TileDataType::eFloat32;
-    return;
-  }
-
-  if (j.get<std::string>() == "UInt8") {
+  } else if (s == "UInt8") {
     o = TileDataType::eUInt8;
-    return;
-  }
-
-  if (j.get<std::string>() == "U8Vec3") {
+  } else if (s == "U8Vec3") {
     o = TileDataType::eU8Vec3;
-    return;
+  } else {
+    throw std::runtime_error(
+        "Failed to parse TileDataType! Only 'Float32', 'UInt8' or 'U8Vec3' are allowed.");
   }
-
-  throw std::runtime_error("Invalid data set format \"" + j.get<std::string>() + "\" in config!");
 }
 
-void from_json(const nlohmann::json& j, Plugin::Settings::Dataset& o) {
-  o.mFormat    = cs::core::parseProperty<TileDataType>("format", j);
-  o.mName      = cs::core::parseProperty<std::string>("name", j);
-  o.mCopyright = cs::core::parseProperty<std::string>("copyright", j);
-  o.mLayers    = cs::core::parseProperty<std::string>("layers", j);
-  o.mMaxLevel  = cs::core::parseProperty<uint32_t>("maxLevel", j);
-  o.mURL       = cs::core::parseProperty<std::string>("url", j);
-}
-
-void from_json(const nlohmann::json& j, Plugin::Settings::Body& o) {
-  o.mDemDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("demDatasets", j);
-  o.mImgDatasets = cs::core::parseVector<Plugin::Settings::Dataset>("imgDatasets", j);
-}
-
-void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  cs::core::parseSection("csp-lod-bodies", [&] {
-    o.mMaxGPUTilesColor = cs::core::parseProperty<uint32_t>("maxGPUTilesColor", j);
-    o.mMaxGPUTilesGray  = cs::core::parseProperty<uint32_t>("maxGPUTilesGray", j);
-    o.mMaxGPUTilesDEM   = cs::core::parseProperty<uint32_t>("maxGPUTilesDEM", j);
-    o.mMapCache         = cs::core::parseProperty<std::string>("mapCache", j);
-
-    o.mBodies = cs::core::parseMap<std::string, Plugin::Settings::Body>("bodies", j);
-  });
+void to_json(nlohmann::json& j, TileDataType o) {
+  switch (o) {
+  case TileDataType::eFloat32:
+    j = "Float32";
+    break;
+  case TileDataType::eUInt8:
+    j = "UInt8";
+    break;
+  case TileDataType::eU8Vec3:
+    j = "U8Vec3";
+    break;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Plugin::Plugin()
-    : mProperties(std::make_shared<Properties>()) {
+void from_json(nlohmann::json const& j, Plugin::Settings::Dataset& o) {
+  cs::core::Settings::deserialize(j, "format", o.mFormat);
+  cs::core::Settings::deserialize(j, "copyright", o.mCopyright);
+  cs::core::Settings::deserialize(j, "layers", o.mLayers);
+  cs::core::Settings::deserialize(j, "maxLevel", o.mMaxLevel);
+  cs::core::Settings::deserialize(j, "url", o.mURL);
+}
 
-  // Create default logger for this plugin.
-  spdlog::set_default_logger(cs::utils::logger::createLogger("csp-lod-bodies"));
+void to_json(nlohmann::json& j, Plugin::Settings::Dataset const& o) {
+  cs::core::Settings::serialize(j, "format", o.mFormat);
+  cs::core::Settings::serialize(j, "copyright", o.mCopyright);
+  cs::core::Settings::serialize(j, "layers", o.mLayers);
+  cs::core::Settings::serialize(j, "maxLevel", o.mMaxLevel);
+  cs::core::Settings::serialize(j, "url", o.mURL);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void from_json(nlohmann::json const& j, Plugin::Settings::Body& o) {
+  cs::core::Settings::deserialize(j, "activeDemDataset", o.mActiveDemDataset);
+  cs::core::Settings::deserialize(j, "activeImgDataset", o.mActiveImgDataset);
+  cs::core::Settings::deserialize(j, "demDatasets", o.mDemDatasets);
+  cs::core::Settings::deserialize(j, "imgDatasets", o.mImgDatasets);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings::Body const& o) {
+  cs::core::Settings::serialize(j, "activeDemDataset", o.mActiveDemDataset);
+  cs::core::Settings::serialize(j, "activeImgDataset", o.mActiveImgDataset);
+  cs::core::Settings::serialize(j, "demDatasets", o.mDemDatasets);
+  cs::core::Settings::serialize(j, "imgDatasets", o.mImgDatasets);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void from_json(nlohmann::json const& j, Plugin::Settings& o) {
+  cs::core::Settings::deserialize(j, "terrainProjectionType", o.mTerrainProjectionType);
+  cs::core::Settings::deserialize(j, "lodFactor", o.mLODFactor);
+  cs::core::Settings::deserialize(j, "autoLod", o.mAutoLOD);
+  cs::core::Settings::deserialize(j, "textureGamma", o.mTextureGamma);
+  cs::core::Settings::deserialize(j, "enableHeightlines", o.mEnableHeightlines);
+  cs::core::Settings::deserialize(j, "enableLatLongGrid", o.mEnableLatLongGrid);
+  cs::core::Settings::deserialize(j, "colorMappingType", o.mColorMappingType);
+  cs::core::Settings::deserialize(j, "terrainColorMap", o.mTerrainColorMap);
+  cs::core::Settings::deserialize(j, "enableColorMixing", o.mEnableColorMixing);
+  cs::core::Settings::deserialize(j, "heightRange", o.mHeightRange);
+  cs::core::Settings::deserialize(j, "slopeRange", o.mSlopeRange);
+  cs::core::Settings::deserialize(j, "enableWireframe", o.mEnableWireframe);
+  cs::core::Settings::deserialize(j, "enableTilesDebug", o.mEnableTilesDebug);
+  cs::core::Settings::deserialize(j, "enableTilesFreeze", o.mEnableTilesFreeze);
+  cs::core::Settings::deserialize(j, "maxGPUTilesColor", o.mMaxGPUTilesColor);
+  cs::core::Settings::deserialize(j, "maxGPUTilesGray", o.mMaxGPUTilesGray);
+  cs::core::Settings::deserialize(j, "maxGPUTilesDEM", o.mMaxGPUTilesDEM);
+  cs::core::Settings::deserialize(j, "mapCache", o.mMapCache);
+  cs::core::Settings::deserialize(j, "bodies", o.mBodies);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings const& o) {
+  cs::core::Settings::serialize(j, "terrainProjectionType", o.mTerrainProjectionType);
+  cs::core::Settings::serialize(j, "lodFactor", o.mLODFactor);
+  cs::core::Settings::serialize(j, "autoLod", o.mAutoLOD);
+  cs::core::Settings::serialize(j, "textureGamma", o.mTextureGamma);
+  cs::core::Settings::serialize(j, "enableHeightlines", o.mEnableHeightlines);
+  cs::core::Settings::serialize(j, "enableLatLongGrid", o.mEnableLatLongGrid);
+  cs::core::Settings::serialize(j, "colorMappingType", o.mColorMappingType);
+  cs::core::Settings::serialize(j, "terrainColorMap", o.mTerrainColorMap);
+  cs::core::Settings::serialize(j, "enableColorMixing", o.mEnableColorMixing);
+  cs::core::Settings::serialize(j, "heightRange", o.mHeightRange);
+  cs::core::Settings::serialize(j, "slopeRange", o.mSlopeRange);
+  cs::core::Settings::serialize(j, "enableWireframe", o.mEnableWireframe);
+  cs::core::Settings::serialize(j, "enableTilesDebug", o.mEnableTilesDebug);
+  cs::core::Settings::serialize(j, "enableTilesFreeze", o.mEnableTilesFreeze);
+  cs::core::Settings::serialize(j, "maxGPUTilesColor", o.mMaxGPUTilesColor);
+  cs::core::Settings::serialize(j, "maxGPUTilesGray", o.mMaxGPUTilesGray);
+  cs::core::Settings::serialize(j, "maxGPUTilesDEM", o.mMaxGPUTilesDEM);
+  cs::core::Settings::serialize(j, "mapCache", o.mMapCache);
+  cs::core::Settings::serialize(j, "bodies", o.mBodies);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::init() {
 
-  spdlog::info("Loading plugin...");
+  logger().info("Loading plugin...");
 
-  mPluginSettings = mAllSettings->mPlugins.at("csp-lod-bodies");
+  mOnLoadConnection = mAllSettings->onLoad().connect([this]() { onLoad(); });
+
+  mOnSaveConnection = mAllSettings->onSave().connect(
+      [this]() { mAllSettings->mPlugins["csp-lod-bodies"] = *mPluginSettings; });
 
   mGuiManager->addPluginTabToSideBarFromHTML(
       "Body Settings", "landscape", "../share/resources/gui/lod_body_tab.html");
@@ -107,171 +161,174 @@ void Plugin::init() {
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesFreeze",
       "If set to true, the level of detail and the frustum culling of the planet's tiles will not "
       "be updated anymore.",
-      std::function([this](bool enable) { mProperties->mEnableTilesFreeze = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableTilesFreeze = enable; }));
+  mPluginSettings->mEnableTilesFreeze.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableTilesFreeze", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableTilesDebug",
-      "Enables or disables coloring of the planet's tiles.",
-      std::function([this](bool enable) { mProperties->mEnableTilesDebug = enable; }));
+      "Enables or disables debug coloring of the planet's tiles.",
+      std::function([this](bool enable) { mPluginSettings->mEnableTilesDebug = enable; }));
+  mPluginSettings->mEnableTilesDebug.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableTilesDebug", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableWireframe",
       "Enables or disables wireframe rendering of the planet.",
-      std::function([this](bool enable) { mProperties->mEnableWireframe = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableWireframe = enable; }));
+  mPluginSettings->mEnableWireframe.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableWireframe", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableHeightlines",
       "Enables or disables rendering of iso-altitude lines.",
-      std::function([this](bool enable) { mProperties->mEnableHeightlines = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableHeightlines = enable; }));
+  mPluginSettings->mEnableHeightlines.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableHeightlines", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGrid",
       "Enables or disables rendering of a latidude-longitude-grid.",
-      std::function([this](bool enable) {
-        mProperties->mEnableLatLongGrid       = enable;
-        mProperties->mEnableLatLongGridLabels = enable;
-      }));
-
-  mGuiManager->getGui()->registerCallback("lodBodies.setEnableLatLongGridLabels",
-      "If the latitude-longitude-grid is enabled, this function can be used to enable or disable "
-      "rendering of grid labels.",
-      std::function([this](bool enable) { mProperties->mEnableLatLongGridLabels = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableLatLongGrid = enable; }));
+  mPluginSettings->mEnableLatLongGrid.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableLatLongGrid", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableColorMixing",
       "When enabled, the values of the colormap will be multiplied with the image channel.",
-      std::function([this](bool enable) { mProperties->mEnableColorMixing = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mEnableColorMixing = enable; }));
+  mPluginSettings->mEnableColorMixing.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableColorMixing", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainLod",
       "Specifies the amount of detail of the planet's surface. Should be in the range 1-100.",
-      std::function([this](double value) {
-        if (!mProperties->mAutoLOD.get()) {
-          mProperties->mLODFactor = value;
-        }
-      }));
+      std::function(
+          [this](double value) { mPluginSettings->mLODFactor = static_cast<float>(value); }));
+  mPluginSettings->mLODFactor.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("lodBodies.setTerrainLod", value); });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setEnableAutoTerrainLod",
       "If set to true, the level-of-detail will be chosen automatically based on the current "
       "rendering performance.",
-      std::function([this](bool enable) { mProperties->mAutoLOD = enable; }));
+      std::function([this](bool enable) { mPluginSettings->mAutoLOD = enable; }));
+  mPluginSettings->mAutoLOD.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("lodBodies.setEnableAutoTerrainLod", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTextureGamma",
-      "A multiplier for the brightness of the image channel.",
-      std::function([this](double value) { mProperties->mTextureGamma = value; }));
+      "A multiplier for the brightness of the image channel.", std::function([this](double value) {
+        mPluginSettings->mTextureGamma = static_cast<float>(value);
+      }));
+  mPluginSettings->mTextureGamma.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("lodBodies.setTextureGamma", value); });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setHeightRange",
       "Sets one end of the height range for the color mapping. The first parameter is the actual "
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
-        if (handle == 0.0)
-          mProperties->mHeightMin = val * 1000;
-        else
-          mProperties->mHeightMax = val * 1000;
+        auto range = mPluginSettings->mHeightRange.get();
+        if (handle == 0.0) {
+          range.x = static_cast<float>(val * 1000);
+        } else {
+          range.y = static_cast<float>(val * 1000);
+        }
+        mPluginSettings->mHeightRange = range;
       }));
+  mPluginSettings->mHeightRange.connectAndTouch([this](glm::vec2 const& value) {
+    mGuiManager->setSliderValue("lodBodies.setHeightRange", value);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSlopeRange",
       "Sets one end of the slope range for the color mapping. The first parameter is the actual "
       "value, the second specifies which end to set: Zero for the lower end; One for the upper "
       "end.",
       std::function([this](double val, double handle) {
-        if (handle == 0.0)
-          mProperties->mSlopeMin = cs::utils::convert::toRadians(val);
-        else
-          mProperties->mSlopeMax = cs::utils::convert::toRadians(val);
+        auto range = mPluginSettings->mSlopeRange.get();
+        if (handle == 0.0) {
+          range.x = static_cast<float>(cs::utils::convert::toRadians(val));
+        } else {
+          range.y = static_cast<float>(cs::utils::convert::toRadians(val));
+        }
+        mPluginSettings->mSlopeRange = range;
       }));
+  mPluginSettings->mSlopeRange.connectAndTouch([this](glm::vec2 const& value) {
+    mGuiManager->setSliderValue("lodBodies.setSlopeRange", value);
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode0",
       "Call this to deselect any surface coloring.", std::function([this] {
-        mProperties->mColorMappingType = Properties::ColorMappingType::eNone;
+        mPluginSettings->mColorMappingType = Settings::ColorMappingType::eNone;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode1",
       "Call this to enable height based surface coloring.", std::function([this] {
-        mProperties->mColorMappingType = Properties::ColorMappingType::eHeight;
+        mPluginSettings->mColorMappingType = Settings::ColorMappingType::eHeight;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setSurfaceColoringMode2",
       "Call this to enable slope based surface coloring.", std::function([this] {
-        mProperties->mColorMappingType = Properties::ColorMappingType::eSlope;
+        mPluginSettings->mColorMappingType = Settings::ColorMappingType::eSlope;
       }));
+  mPluginSettings->mColorMappingType.connect([this](Settings::ColorMappingType type) {
+    if (type == Settings::ColorMappingType::eNone) {
+      mGuiManager->setRadioChecked("lodBodies.setSurfaceColoringMode0");
+    } else if (type == Settings::ColorMappingType::eHeight) {
+      mGuiManager->setRadioChecked("lodBodies.setSurfaceColoringMode1");
+    } else if (type == Settings::ColorMappingType::eSlope) {
+      mGuiManager->setRadioChecked("lodBodies.setSurfaceColoringMode2");
+    }
+  });
 
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode0",
       "Call this to use a GPU-based HEALPix projection for the planet's surface.",
       std::function([this] {
-        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHEALPix;
+        mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eHEALPix;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode1",
       "Call this to use a CPU-based HEALPix projection and a linear interpolation on the GPU-side "
       "for the planet's surface.",
       std::function([this] {
-        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eLinear;
+        mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eLinear;
       }));
-
   mGuiManager->getGui()->registerCallback("lodBodies.setTerrainProjectionMode2",
       "Call this to choose a projection for the planet's surface based on the observer's distance.",
       std::function([this] {
-        mProperties->mTerrainProjectionType = Properties::TerrainProjectionType::eHybrid;
+        mPluginSettings->mTerrainProjectionType = Settings::TerrainProjectionType::eHybrid;
+      }));
+  mPluginSettings->mTerrainProjectionType.connect([this](Settings::TerrainProjectionType type) {
+    if (type == Settings::TerrainProjectionType::eHEALPix) {
+      mGuiManager->setRadioChecked("lodBodies.setTerrainProjectionMode0");
+    } else if (type == Settings::TerrainProjectionType::eLinear) {
+      mGuiManager->setRadioChecked("lodBodies.setTerrainProjectionMode1");
+    } else if (type == Settings::TerrainProjectionType::eHybrid) {
+      mGuiManager->setRadioChecked("lodBodies.setTerrainProjectionMode2");
+    }
+  });
+
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
+      "Set the current planet's image channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
+        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
+        if (body) {
+          setImageSource(body, name);
+        }
       }));
 
-  mGLResources = std::make_shared<csp::lodbodies::GLResources>(mPluginSettings.mMaxGPUTilesDEM,
-      mPluginSettings.mMaxGPUTilesGray, mPluginSettings.mMaxGPUTilesColor);
+  mGuiManager->getGui()->registerCallback("lodBodies.setTilesDem",
+      "Set the current planet's elevation channel to the TileSource with the given name.",
+      std::function([this](std::string&& name) {
+        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
+        if (body) {
+          setElevationSource(body, name);
+        }
+      }));
 
-  for (auto const& bodySettings : mPluginSettings.mBodies) {
-    auto anchor = mAllSettings->mAnchors.find(bodySettings.first);
-
-    if (anchor == mAllSettings->mAnchors.end()) {
-      throw std::runtime_error(
-          "There is no Anchor \"" + bodySettings.first + "\" defined in the settings.");
-    }
-
-    auto   existence       = cs::core::getExistenceFromSettings(*anchor);
-    double tStartExistence = existence.first;
-    double tEndExistence   = existence.second;
-
-    std::vector<std::shared_ptr<TileSource>> DEMs;
-    std::vector<std::shared_ptr<TileSource>> IMGs;
-    for (auto const& dataset : bodySettings.second.mDemDatasets) {
-      auto dem = std::make_shared<TileSourceWebMapService>();
-      dem->setCacheDirectory(mPluginSettings.mMapCache);
-      dem->setMaxLevel(dataset.mMaxLevel);
-      dem->setLayers(dataset.mLayers);
-      dem->setUrl(dataset.mURL);
-      dem->setDataType(dataset.mFormat);
-      dem->setName(dataset.mName);
-      dem->setCopyright(dataset.mCopyright);
-      DEMs.push_back(dem);
-    }
-
-    for (auto const& dataset : bodySettings.second.mImgDatasets) {
-      auto img = std::make_shared<TileSourceWebMapService>();
-      img->setCacheDirectory(mPluginSettings.mMapCache);
-      img->setMaxLevel(dataset.mMaxLevel);
-      img->setLayers(dataset.mLayers);
-      img->setUrl(dataset.mURL);
-      img->setDataType(dataset.mFormat);
-      img->setName(dataset.mName);
-      img->setCopyright(dataset.mCopyright);
-      IMGs.push_back(img);
-    }
-
-    auto body = std::make_shared<LodBody>(mGraphicsEngine, mSolarSystem, mProperties, mGuiManager,
-        anchor->second.mCenter, anchor->second.mFrame, mGLResources, DEMs, IMGs, tStartExistence,
-        tEndExistence);
-
-    mSolarSystem->registerBody(body);
-
-    body->setSun(mSolarSystem->getSun());
-    auto parent = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), body.get());
-    VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
-        parent, static_cast<int>(cs::utils::DrawOrder::ePlanets));
-
-    mInputManager->registerSelectable(body);
-    mLodBodies.push_back(body);
-  }
-
-  mActiveBodyConnection = mSolarSystem->pActiveBody.onChange().connect(
+  mActiveBodyConnection = mSolarSystem->pActiveBody.connectAndTouch(
       [this](std::shared_ptr<cs::scene::CelestialBody> const& body) {
         auto lodBody = std::dynamic_pointer_cast<LodBody>(body);
 
         mGuiManager->getGui()->callJavascript(
-            "CosmoScout.sidebar.setTabEnabled", "collapse-Body-Settings", lodBody != nullptr);
+            "CosmoScout.sidebar.setTabEnabled", "Body Settings", lodBody != nullptr);
 
         if (!lodBody) {
           return;
@@ -283,77 +340,81 @@ void Plugin::init() {
             "CosmoScout.gui.clearDropdown", "lodBodies.setTilesDem");
         mGuiManager->getGui()->callJavascript(
             "CosmoScout.gui.addDropdownValue", "lodBodies.setTilesImg", "None", "None", "false");
-        for (auto const& source : lodBody->getIMGtileSources()) {
-          bool active = source->getName() == lodBody->pActiveTileSourceIMG.get();
+
+        auto const& settings = getBodySettings(lodBody);
+        for (auto const& source : settings.mImgDatasets) {
+          bool active = source.first == settings.mActiveImgDataset;
           mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
-              "lodBodies.setTilesImg", source->getName(), source->getName(), active);
+              "lodBodies.setTilesImg", source.first, source.first, active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setMapDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setMapDataCopyright", source.second.mCopyright);
           }
         }
-        for (auto const& source : lodBody->getDEMtileSources()) {
-          bool active = source->getName() == lodBody->pActiveTileSourceDEM.get();
+
+        for (auto const& source : settings.mDemDatasets) {
+          bool active = source.first == settings.mActiveDemDataset;
           mGuiManager->getGui()->callJavascript("CosmoScout.gui.addDropdownValue",
-              "lodBodies.setTilesDem", source->getName(), source->getName(), active);
+              "lodBodies.setTilesDem", source.first, source.first, active);
           if (active) {
             mGuiManager->getGui()->callJavascript(
-                "CosmoScout.lodBodies.setElevationDataCopyright", source->getCopyright());
+                "CosmoScout.lodBodies.setElevationDataCopyright", source.second.mCopyright);
           }
         }
       });
 
-  mGuiManager->getGui()->registerCallback("lodBodies.setTilesImg",
-      "Set the current planet's image channel to the TileSource with the given name.",
-      std::function([this](std::string&& name) {
-        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
-        if (body) {
-          body->pActiveTileSourceIMG = name;
-        }
-      }));
+  mNonAutoLod = mPluginSettings->mLODFactor.get();
 
-  mGuiManager->getGui()->registerCallback("lodBodies.setTilesDem",
-      "Set the current planet's elevation channel to the TileSource with the given name.",
-      std::function([this](std::string&& name) {
-        auto body = std::dynamic_pointer_cast<LodBody>(mSolarSystem->pActiveBody.get());
-        if (body) {
-          body->pActiveTileSourceDEM = name;
-        }
-      }));
-
-  mNonAutoLod = mProperties->mLODFactor.get();
-
-  mProperties->mAutoLOD.onChange().connect([this](bool enabled) {
+  mPluginSettings->mAutoLOD.connect([this](bool enabled) {
     if (enabled) {
-      mNonAutoLod = mProperties->mLODFactor.get();
+      mNonAutoLod = mPluginSettings->mLODFactor.get();
     } else {
-      mProperties->mLODFactor = mNonAutoLod;
+      mPluginSettings->mLODFactor = mNonAutoLod;
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", mNonAutoLod);
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", false, mNonAutoLod);
     }
   });
 
-  mProperties->mLODFactor.onChange().connect([this](float value) {
-    if (mProperties->mAutoLOD()) {
+  mPluginSettings->mLODFactor.connect([this](float value) {
+    if (mPluginSettings->mAutoLOD()) {
       mGuiManager->getGui()->callJavascript(
-          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", value);
+          "CosmoScout.gui.setSliderValue", "lodBodies.setTerrainLod", false, value);
     }
   });
 
-  spdlog::info("Loading done.");
+  mPluginSettings->mMapCache.connect([this](std::string const& val) {
+    for (auto&& body : mLodBodies) {
+      auto src =
+          std::dynamic_pointer_cast<TileSourceWebMapService>(body.second->getDEMtileSource());
+      if (src) {
+        src->setCacheDirectory(val);
+      }
+      src = std::dynamic_pointer_cast<TileSourceWebMapService>(body.second->getIMGtileSource());
+      if (src) {
+        src->setCacheDirectory(val);
+      }
+    }
+  });
+
+  onLoad();
+
+  logger().info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
-  spdlog::info("Unloading plugin...");
+  logger().info("Unloading plugin...");
 
   for (auto const& body : mLodBodies) {
-    mInputManager->unregisterSelectable(body);
-    mSolarSystem->unregisterBody(body);
+    mInputManager->unregisterSelectable(body.second);
+    mSolarSystem->unregisterBody(body.second);
   }
 
-  mSolarSystem->pActiveBody.onChange().disconnect(mActiveBodyConnection);
+  mSolarSystem->pActiveBody.disconnect(mActiveBodyConnection);
+
+  mGuiManager->removePluginTab("Body Settings");
+  mGuiManager->removeSettingsSection("Body Settings");
 
   mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesFreeze");
   mGuiManager->getGui()->unregisterCallback("lodBodies.setEnableTilesDebug");
@@ -376,13 +437,13 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesImg");
   mGuiManager->getGui()->unregisterCallback("lodBodies.setTilesDem");
 
-  spdlog::info("Unloading done.");
+  logger().info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::update() {
-  if (mProperties->mAutoLOD.get()) {
+  if (mPluginSettings->mAutoLOD.get()) {
 
     double minLODFactor = 15.0;
     double maxLODFactor = 50.0;
@@ -390,15 +451,174 @@ void Plugin::update() {
     double maxTime      = 14.5;
 
     if (mFrameTimings->pFrameTime.get() > maxTime) {
-      mProperties->mLODFactor = std::max(
-          minLODFactor, mProperties->mLODFactor.get() -
-                            std::min(1.0, 0.1 * (mFrameTimings->pFrameTime.get() - maxTime)));
+      mPluginSettings->mLODFactor = static_cast<float>(std::max(
+          minLODFactor, mPluginSettings->mLODFactor.get() -
+                            std::min(1.0, 0.1 * (mFrameTimings->pFrameTime.get() - maxTime))));
     } else if (mFrameTimings->pFrameTime.get() < minTime) {
-      mProperties->mLODFactor = std::min(
-          maxLODFactor, mProperties->mLODFactor.get() +
-                            std::min(1.0, 0.02 * (minTime - mFrameTimings->pFrameTime.get())));
+      mPluginSettings->mLODFactor = static_cast<float>(std::min(
+          maxLODFactor, mPluginSettings->mLODFactor.get() +
+                            std::min(1.0, 0.02 * (minTime - mFrameTimings->pFrameTime.get()))));
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::onLoad() {
+
+  // Read settings from JSON.
+  from_json(mAllSettings->mPlugins.at("csp-lod-bodies"), *mPluginSettings);
+
+  // For now, we cannot re-create the GLResources.
+  if (!mGLResources) {
+    mGLResources =
+        std::make_shared<csp::lodbodies::GLResources>(mPluginSettings->mMaxGPUTilesDEM.get(),
+            mPluginSettings->mMaxGPUTilesGray.get(), mPluginSettings->mMaxGPUTilesColor.get());
+
+    mPluginSettings->mMaxGPUTilesColor.connect([](uint32_t /*val*/) {
+      logger().warn("Changing the maximum number of allocated color tiles at run-time is not "
+                    "supported. Please restart CosmoScout VR!");
+    });
+
+    mPluginSettings->mMaxGPUTilesGray.connect([](uint32_t /*val*/) {
+      logger().warn("Changing the maximum number of allocated gray-scale tiles at run-time is not "
+                    "supported. Please restart CosmoScout VR!");
+    });
+
+    mPluginSettings->mMaxGPUTilesDEM.connect([](uint32_t /*val*/) {
+      logger().warn("Changing the maximum number of allocated elevation tiles at run-time is not "
+                    "supported. Please restart CosmoScout VR!");
+    });
+  }
+
+  // First try to re-configure existing lodBodies. We assume that they are similar if they have
+  // the same name in the settings (which means they are attached to an anchor with the same name).
+  auto lodBody = mLodBodies.begin();
+  while (lodBody != mLodBodies.end()) {
+    auto settings = mPluginSettings->mBodies.find(lodBody->first);
+    if (settings != mPluginSettings->mBodies.end()) {
+      // If there are settings for this lodBody, reconfigure it.
+      auto anchor                           = mAllSettings->mAnchors.find(settings->first);
+      auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
+      lodBody->second->setStartExistence(tStartExistence);
+      lodBody->second->setEndExistence(tEndExistence);
+      lodBody->second->setCenterName(anchor->second.mCenter);
+      lodBody->second->setFrameName(anchor->second.mFrame);
+
+      setImageSource(lodBody->second, settings->second.mActiveImgDataset);
+      setElevationSource(lodBody->second, settings->second.mActiveDemDataset);
+
+      ++lodBody;
+    } else {
+      // Else delete it.
+      mSolarSystem->unregisterBody(lodBody->second);
+      mInputManager->unregisterSelectable(lodBody->second);
+      lodBody = mLodBodies.erase(lodBody);
+    }
+  }
+
+  // Then add new lodBodies.
+  for (auto const& settings : mPluginSettings->mBodies) {
+
+    // Skip already existing bodies.
+    if (mLodBodies.find(settings.first) != mLodBodies.end()) {
+      continue;
+    }
+
+    auto anchor = mAllSettings->mAnchors.find(settings.first);
+
+    if (anchor == mAllSettings->mAnchors.end()) {
+      throw std::runtime_error(
+          "There is no Anchor \"" + settings.first + "\" defined in the settings.");
+    }
+
+    auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
+
+    auto body = std::make_shared<LodBody>(mAllSettings, mGraphicsEngine, mSolarSystem,
+        mPluginSettings, mGuiManager, anchor->second.mCenter, anchor->second.mFrame, mGLResources,
+        tStartExistence, tEndExistence);
+
+    mLodBodies.emplace(settings.first, body);
+
+    setImageSource(body, settings.second.mActiveImgDataset);
+    setElevationSource(body, settings.second.mActiveDemDataset);
+
+    body->setSun(mSolarSystem->getSun());
+
+    mSolarSystem->registerBody(body);
+    mInputManager->registerSelectable(body);
+  }
+
+  mSolarSystem->pActiveBody.touch(mActiveBodyConnection);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Plugin::Settings::Body& Plugin::getBodySettings(std::shared_ptr<LodBody> const& body) const {
+  auto name = std::find_if(
+      mLodBodies.begin(), mLodBodies.end(), [&](auto const& pair) { return pair.second == body; });
+  return mPluginSettings->mBodies.at(name->first);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::setImageSource(std::shared_ptr<LodBody> const& body, std::string const& name) const {
+  auto& settings             = getBodySettings(body);
+  settings.mActiveImgDataset = name;
+
+  if (name == "None") {
+    body->setIMGtileSource(nullptr);
+    mGuiManager->getGui()->callJavascript("CosmoScout.lodBodies.setMapDataCopyright", "");
+  } else {
+    auto dataset = settings.mImgDatasets.find(name);
+    if (dataset == settings.mImgDatasets.end()) {
+      logger().warn("Cannot set image dataset '{}': There is no dataset defined with this name! "
+                    "Using first dataset instead...",
+          name);
+      dataset = settings.mImgDatasets.begin();
+    }
+
+    auto source = std::make_shared<TileSourceWebMapService>();
+    source->setCacheDirectory(mPluginSettings->mMapCache.get());
+    source->setMaxLevel(dataset->second.mMaxLevel);
+    source->setLayers(dataset->second.mLayers);
+    source->setUrl(dataset->second.mURL);
+    source->setDataType(dataset->second.mFormat);
+
+    body->setIMGtileSource(source);
+
+    mGuiManager->getGui()->callJavascript(
+        "CosmoScout.lodBodies.setMapDataCopyright", dataset->second.mCopyright);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::setElevationSource(
+    std::shared_ptr<LodBody> const& body, std::string const& name) const {
+
+  auto& settings = getBodySettings(body);
+  auto  dataset  = settings.mDemDatasets.find(name);
+  if (dataset == settings.mDemDatasets.end()) {
+    logger().warn("Cannot set elevation dataset '{}': There is no dataset defined with this name! "
+                  "Using first dataset instead...",
+        name);
+    dataset = settings.mDemDatasets.begin();
+  }
+
+  settings.mActiveDemDataset = name;
+
+  auto source = std::make_shared<TileSourceWebMapService>();
+  source->setCacheDirectory(mPluginSettings->mMapCache.get());
+  source->setMaxLevel(dataset->second.mMaxLevel);
+  source->setLayers(dataset->second.mLayers);
+  source->setUrl(dataset->second.mURL);
+  source->setDataType(dataset->second.mFormat);
+
+  body->setDEMtileSource(source);
+
+  mGuiManager->getGui()->callJavascript(
+      "CosmoScout.lodBodies.setElevationDataCopyright", dataset->second.mCopyright);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

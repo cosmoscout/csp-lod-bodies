@@ -8,9 +8,9 @@
 #define CSP_LOD_BODIES_UTIL_HPP
 
 #define _USE_MATH_DEFINES // Use Math.h defines like M_PI
+#include <cmath>          // C++ Math
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-#include <math.h> // C++ Math
 
 class VistaTransformNode;
 class VistaOpenGLNode;
@@ -44,7 +44,7 @@ double getHeight(
 /// @param rayDir Ray direction in world space
 /// @param pos    Gives (first) intersection in cartesian
 bool intersectPlanet(
-    VistaPlanet const* planet, glm::dvec3 rayPos, glm::dvec3 rayDir, glm::dvec3& pos);
+    VistaPlanet const* planet, glm::dvec3 rayOrigin, glm::dvec3 rayDir, glm::dvec3& pos);
 
 /// Retrieve entry and exit distance along a ray on the bbox of a tile node. The ray parameters must
 /// be transformed into the planet coordinate system before!

@@ -8,6 +8,7 @@
 
 #include "HEALPix.hpp"
 #include "TileNode.hpp"
+#include "logger.hpp"
 
 #include "../../../src/cs-utils/filesystem.hpp"
 
@@ -18,7 +19,6 @@
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
 #include <fstream>
-#include <spdlog/spdlog.h>
 #include <sstream>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -48,46 +48,53 @@ bool loadImpl(
   try {
     cacheFile = source->loadData(level, x, y);
   } catch (std::exception const& e) {
-    spdlog::error("Tile loading failed: {}", e.what());
+    logger().error("Tile loading failed: {}", e.what());
     return false;
   }
 
   if (tile->getDataType() == TileDataType::eFloat32) {
     TIFFSetWarningHandler(nullptr);
-    auto data = TIFFOpen(cacheFile.c_str(), "r");
+    auto* data = TIFFOpen(cacheFile.c_str(), "r");
     if (!data) {
-      spdlog::error("Tile loading failed: Cannot open '{}' with libtiff!", cacheFile);
+      logger().error("Tile loading failed: Cannot open '{}' with libtiff!", cacheFile);
       return false;
     }
 
-    unsigned imagelength;
+    int imagelength{};
     TIFFGetField(data, TIFFTAG_IMAGELENGTH, &imagelength);
-    for (unsigned y = 0; y < imagelength; y++) {
+    for (int y = 0; y < imagelength; y++) {
       if (which == CopyPixels::eAll) {
         TIFFReadScanline(data, &tile->data()[257 * y], y);
       } else if (which == CopyPixels::eAboveDiagonal) {
-        std::array<float, 257> tmp;
+        std::array<float, 257> tmp{};
         TIFFReadScanline(data, tmp.data(), y);
         int offset = 257 * y;
         int count  = 257 - y - 1;
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, tmp.data(), count * sizeof(float));
       } else if (which == CopyPixels::eBelowDiagonal) {
-        std::array<float, 257> tmp;
+        std::array<float, 257> tmp{};
         TIFFReadScanline(data, tmp.data(), y);
         int offset = 257 * y + (257 - y);
         int count  = y;
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, tmp.data() + 257 - y, count * sizeof(float));
       }
     }
     TIFFClose(data);
   } else {
-    int width, height, bpp;
+    int width{};
+    int height{};
+    int bpp{};
     int channels = tile->getDataType() == TileDataType::eU8Vec3 ? 3 : 1;
 
-    auto data = reinterpret_cast<T*>(stbi_load(cacheFile.c_str(), &width, &height, &bpp, channels));
+    auto* data =
+        reinterpret_cast<T*>(stbi_load(cacheFile.c_str(), &width, &height, &bpp, channels));
 
     if (!data) {
-      spdlog::error("Tile loading failed: Cannot open '{}' with stbi!", cacheFile);
+      logger().error("Tile loading failed: Cannot open '{}' with stbi!", cacheFile);
       return false;
     }
 
@@ -97,12 +104,16 @@ bool loadImpl(
       for (int y = 0; y < height; ++y) {
         int offset = width * y;
         int count  = channels * (width - y - 1);
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, data + offset, count);
       }
     } else if (which == CopyPixels::eBelowDiagonal) {
       for (int y = 0; y < height; ++y) {
         int offset = width * y + (width - y);
         int count  = channels * y;
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(tile->data().data() + offset, data + offset, count);
       }
     }
@@ -118,7 +129,7 @@ bool loadImpl(
 template <typename T>
 void fillDiagonal(TileNode* node) {
   auto tile = static_cast<Tile<T>*>(node->getTile());
-  for (unsigned y = 1; y <= 257; y++) {
+  for (int y = 1; y <= 257; y++) {
     int pixelPos           = y * (257 - 1);
     tile->data()[pixelPos] = (y < 257) ? tile->data()[pixelPos - 1] : tile->data()[pixelPos + 1];
   }
@@ -128,16 +139,17 @@ void fillDiagonal(TileNode* node) {
 
 template <typename T>
 TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 patchIdx) {
-  TileNode* node = new TileNode();
+  auto* node = new TileNode(); // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
 
-  node->setTile(new Tile<T>(level, patchIdx));
+  node->setTile(std::make_unique<Tile<T>>(level, patchIdx));
   node->setChildMaxLevel(std::min(level + 1, source->getMaxLevel()));
 
-  int  x, y;
-  bool onDiag = source->getXY(level, patchIdx, x, y);
+  int  x{};
+  int  y{};
+  bool onDiag = csp::lodbodies::TileSourceWebMapService::getXY(level, patchIdx, x, y);
   if (onDiag) {
     if (!loadImpl<T>(source, node, level, x, y, CopyPixels::eBelowDiagonal)) {
-      delete node;
+      delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
       return nullptr;
     }
 
@@ -145,14 +157,14 @@ TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 p
     y -= 4 * (1 << level);
 
     if (!loadImpl<T>(source, node, level, x, y, CopyPixels::eAboveDiagonal)) {
-      delete node;
+      delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
       return nullptr;
     }
 
     fillDiagonal<T>(node);
   } else {
     if (!loadImpl<T>(source, node, level, x, y, CopyPixels::eAll)) {
-      delete node;
+      delete node; // NOLINT(cppcoreguidelines-owning-memory): TODO this is bad!
       return nullptr;
     }
   }
@@ -194,7 +206,9 @@ TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 p
   // flip y --- that shouldn't be requiered, but somehow is how it was
   // implemented in the original databases
   for (int i = 0; i < 257 / 2; i++) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::swap_ranges(tile->data().data() + i * 257, tile->data().data() + (i + 1) * 257,
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         tile->data().data() + (256 - i) * 257);
   }
 
@@ -203,9 +217,8 @@ TileNode* loadImpl(TileSourceWebMapService* source, uint32_t level, glm::int64 p
     // 128x128
     // The MinMaxPyramid is later needed to deduce height information from this
     // coarser level DEM tile to deeper level IMG tiles
-    auto demTile       = reinterpret_cast<Tile<float>*>(tile);
-    auto minMaxPyramid = new MinMaxPyramid(demTile);
-    demTile->setMinMaxPyramid(minMaxPyramid);
+    auto* demTile = reinterpret_cast<Tile<float>*>(tile);
+    demTile->setMinMaxPyramid(std::make_unique<MinMaxPyramid>(demTile));
   }
 
   return node;
@@ -222,19 +235,23 @@ std::mutex TileSourceWebMapService::mTileSystemMutex;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TileSourceWebMapService::TileSourceWebMapService()
-    : TileSource()
-    , mThreadPool(32) {
+    : mThreadPool(32) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* virtual */ TileNode* TileSourceWebMapService::loadTile(int level, glm::int64 patchIdx) {
-  if (mFormat == TileDataType::eFloat32)
+  if (mFormat == TileDataType::eFloat32) {
     return loadImpl<float>(this, level, patchIdx);
-  if (mFormat == TileDataType::eUInt8)
+  }
+  if (mFormat == TileDataType::eUInt8) {
     return loadImpl<glm::uint8>(this, level, patchIdx);
-  if (mFormat == TileDataType::eU8Vec3)
+  }
+  if (mFormat == TileDataType::eU8Vec3) {
     return loadImpl<glm::u8vec3>(this, level, patchIdx);
+  }
+
+  throw std::domain_error(fmt::format("Unsupported format: {}!", mFormat));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,10 +263,10 @@ bool TileSourceWebMapService::getXY(int level, glm::int64 patchIdx, int& x, int&
 
   glm::i64vec3 baseXY = HEALPix::getBaseXY(TileId(level, patchIdx));
 
-  x = basePatchExtends[baseXY[0]][0] * (1 << level) + baseXY[1];
-  y = basePatchExtends[baseXY[0]][1] * (1 << level) + baseXY[2];
+  x = static_cast<int32_t>(basePatchExtends.at(baseXY[0])[0] * (1 << level) + baseXY[1]);
+  y = static_cast<int32_t>(basePatchExtends.at(baseXY[0])[1] * (1 << level) + baseXY[2]);
 
-  if (basePatchExtends[baseXY[0]][0] == 0 && basePatchExtends[baseXY[0]][1] == 4) {
+  if (basePatchExtends.at(baseXY[0])[0] == 0 && basePatchExtends.at(baseXY[0])[1] == 4) {
     // check if tile is located above the diagonal
     if (y > x + 4 * (1 << level)) {
       x += 4 * (1 << level);
@@ -293,8 +310,8 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 
   url.precision(std::numeric_limits<double>::max_digits10);
   url << mUrl << "&version=1.1.0&request=GetMap&tiled=true&layers=" << mLayers
-      << "&styles=" << mStyles << "&bbox=" << x * size << "," << y * size << "," << x * size + size
-      << "," << y * size + size << "&width=257&height=257&srs=EPSG:900914&format=" << format;
+      << "&bbox=" << x * size << "," << y * size << "," << x * size + size << "," << y * size + size
+      << "&width=257&height=257&srs=EPSG:900914&format=" << format;
 
   auto cacheFilePath(boost::filesystem::path(cacheFile.str()));
 
@@ -319,7 +336,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
         cs::utils::filesystem::createDirectoryRecursively(
             cacheDirPath, boost::filesystem::perms::all_all);
       } catch (std::exception& e) {
-        spdlog::error("Failed to create cache directory: {}", e.what());
+        logger().error("Failed to create cache directory: {}", e.what());
       }
     }
   }
@@ -330,7 +347,8 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
     out.open(cacheFile.str(), std::ofstream::out | std::ofstream::binary);
 
     if (!out) {
-      spdlog::error("Failed to download tile data: Cannot open '{}' for writing!", cacheFile.str());
+      logger().error(
+          "Failed to download tile data: Cannot open '{}' for writing!", cacheFile.str());
     }
 
     curlpp::Easy request;
@@ -351,13 +369,13 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 
     std::remove(cacheFile.str().c_str());
     throw std::runtime_error(sstr.str());
-  } else {
-    boost::filesystem::perms filePerms =
-        boost::filesystem::perms::owner_read | boost::filesystem::perms::owner_write |
-        boost::filesystem::perms::group_read | boost::filesystem::perms::group_write |
-        boost::filesystem::perms::others_read | boost::filesystem::perms::others_write;
-    boost::filesystem::permissions(cacheFilePath, filePerms);
   }
+
+  boost::filesystem::perms filePerms =
+      boost::filesystem::perms::owner_read | boost::filesystem::perms::owner_write |
+      boost::filesystem::perms::group_read | boost::filesystem::perms::group_write |
+      boost::filesystem::perms::others_read | boost::filesystem::perms::others_write;
+  boost::filesystem::permissions(cacheFilePath, filePerms);
 
   return cacheFile.str();
 }
@@ -367,7 +385,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 /* virtual */ void TileSourceWebMapService::loadTileAsync(
     int level, glm::int64 patchIdx, OnLoadCallback cb) {
   mThreadPool.enqueue([=]() {
-    auto n = loadTile(level, patchIdx);
+    auto* n = loadTile(level, patchIdx);
     cb(this, level, patchIdx, n);
   });
 }
@@ -375,7 +393,7 @@ std::string TileSourceWebMapService::loadData(int level, int x, int y) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int TileSourceWebMapService::getPendingRequests() {
-  return mThreadPool.getPendingTaskCount() + mThreadPool.getRunningTaskCount();
+  return static_cast<int>(mThreadPool.getPendingTaskCount() + mThreadPool.getRunningTaskCount());
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -425,6 +443,15 @@ void TileSourceWebMapService::setDataType(TileDataType type) {
 
 TileDataType TileSourceWebMapService::getDataType() const {
   return mFormat;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TileSourceWebMapService::isSame(TileSource const* other) const {
+  auto const* casted = dynamic_cast<TileSourceWebMapService const*>(other);
+
+  return casted != nullptr && mUrl == casted->mUrl && mCache == casted->mCache &&
+         mLayers == casted->mLayers && mFormat == casted->mFormat && mMaxLevel == casted->mMaxLevel;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -10,17 +10,23 @@
 #include <memory>
 #include <string>
 
-class VistaGLSLShader;
+#include <VistaOGLExt/VistaGLSLShader.h>
 
 namespace csp::lodbodies {
 
 /// The base class for the PlanetShader. It builds the shader from various sources and links it.
 class TerrainShader {
  public:
-  TerrainShader() {
-  }
-  TerrainShader(std::string const& vertexSource, std::string const& fragmentSource);
-  virtual ~TerrainShader();
+  TerrainShader() = default;
+  TerrainShader(std::string vertexSource, std::string fragmentSource);
+
+  TerrainShader(TerrainShader const& other) = delete;
+  TerrainShader(TerrainShader&& other)      = delete;
+
+  TerrainShader& operator=(TerrainShader const& other) = delete;
+  TerrainShader& operator=(TerrainShader&& other) = delete;
+
+  virtual ~TerrainShader() = default;
 
   virtual void bind();
   virtual void release();
@@ -30,10 +36,10 @@ class TerrainShader {
  protected:
   virtual void compile();
 
-  bool             mShaderDirty = true;
-  std::string      mVertexSource;
-  std::string      mFragmentSource;
-  VistaGLSLShader* mShader = nullptr;
+  bool            mShaderDirty = true;
+  std::string     mVertexSource;
+  std::string     mFragmentSource;
+  VistaGLSLShader mShader;
 };
 
 } // namespace csp::lodbodies

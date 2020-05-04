@@ -32,6 +32,13 @@ class TreeManagerBase;
 class TileTextureArray : private boost::noncopyable {
  public:
   explicit TileTextureArray(TileDataType dataType, int maxLayerCount);
+
+  TileTextureArray(TileTextureArray const& other) = delete;
+  TileTextureArray(TileTextureArray&& other)      = delete;
+
+  TileTextureArray& operator=(TileTextureArray const& other) = delete;
+  TileTextureArray& operator=(TileTextureArray&& other) = delete;
+
   ~TileTextureArray();
 
   /// Requests that data for the tile associated with rdata be uploaded to the GPU.
@@ -60,8 +67,8 @@ class TileTextureArray : private boost::noncopyable {
   void allocateLayer(RenderData* rdata);
   void releaseLayer(RenderData* rdata);
 
-  void preUpload();
-  void postUpload();
+  void        preUpload();
+  static void postUpload();
 
   GLuint       mTexId;
   GLenum       mIformat;
@@ -79,16 +86,16 @@ class TileTextureArray : private boost::noncopyable {
 class GLResources {
  public:
   GLResources(int maxLayersFloat32, int maxLayersUInt8, int maxLayersU8Vec3) {
-    mextureArrays[(int)TileDataType::eFloat32].reset(
-        new TileTextureArray(TileDataType::eFloat32, maxLayersFloat32));
-    mextureArrays[(int)TileDataType::eUInt8].reset(
-        new TileTextureArray(TileDataType::eUInt8, maxLayersUInt8));
-    mextureArrays[(int)TileDataType::eU8Vec3].reset(
-        new TileTextureArray(TileDataType::eU8Vec3, maxLayersU8Vec3));
+    mextureArrays[static_cast<int>(TileDataType::eFloat32)] =
+        std::make_unique<TileTextureArray>(TileDataType::eFloat32, maxLayersFloat32);
+    mextureArrays[static_cast<int>(TileDataType::eUInt8)] =
+        std::make_unique<TileTextureArray>(TileDataType::eUInt8, maxLayersUInt8);
+    mextureArrays[static_cast<int>(TileDataType::eU8Vec3)] =
+        std::make_unique<TileTextureArray>(TileDataType::eU8Vec3, maxLayersU8Vec3);
   }
 
   TileTextureArray& operator[](TileDataType type) {
-    return *mextureArrays[(int)type];
+    return *mextureArrays.at(static_cast<int>(type));
   }
 
  private:

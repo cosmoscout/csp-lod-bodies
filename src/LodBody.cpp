@@ -11,98 +11,79 @@
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-gui/GuiItem.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
-
 #include "utils.hpp"
+
+#include <VistaKernel/GraphicsManager/VistaGroupNode.h>
+#include <VistaKernel/GraphicsManager/VistaOpenGLNode.h>
+#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
+#include <VistaKernel/VistaSystem.h>
+#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
 
 namespace csp::lodbodies {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-LodBody::LodBody(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-    std::shared_ptr<cs::core::SolarSystem> const&                 solarSystem,
-    std::shared_ptr<Plugin::Properties> const&                    pProperties,
+LodBody::LodBody(std::shared_ptr<cs::core::Settings> const& settings,
+    std::shared_ptr<cs::core::GraphicsEngine>               graphicsEngine,
+    std::shared_ptr<cs::core::SolarSystem>                  solarSystem,
+    std::shared_ptr<Plugin::Settings> const&                pluginSettings,
     std::shared_ptr<cs::core::GuiManager> const& pGuiManager, std::string const& sCenterName,
     std::string const& sFrameName, std::shared_ptr<GLResources> const& glResources,
-    std::vector<std::shared_ptr<TileSource>> const& dems,
-    std::vector<std::shared_ptr<TileSource>> const& imgs, double tStartExistence,
-    double tEndExistence)
+    double tStartExistence, double tEndExistence)
     : cs::scene::CelestialBody(sCenterName, sFrameName, tStartExistence, tEndExistence)
-    , mGraphicsEngine(graphicsEngine)
-    , mSolarSystem(solarSystem)
-    , mProperties(pProperties)
+    , mSettings(settings)
+    , mGraphicsEngine(std::move(graphicsEngine))
+    , mSolarSystem(std::move(solarSystem))
+    , mPluginSettings(pluginSettings)
     , mGuiManager(pGuiManager)
     , mPlanet(glResources)
-    , mShader(graphicsEngine, pProperties, pGuiManager)
-    , mRadii(cs::core::SolarSystem::getRadii(sCenterName))
-    , mDEMtileSources(dems)
-    , mIMGtileSources(imgs) {
+    , mShader(settings, pluginSettings, pGuiManager)
+    , mRadii(cs::core::SolarSystem::getRadii(sCenterName)) {
 
-  pVisible.onChange().connect([this](bool val) {
-    if (val)
+  pVisible.connect([this](bool val) {
+    if (val) {
       mGraphicsEngine->registerCaster(&mPlanet);
-    else
+    } else {
       mGraphicsEngine->unregisterCaster(&mPlanet);
+    }
   });
-
-  pActiveTileSourceDEM = dems.front()->getName();
-  pActiveTileSourceIMG = imgs.front()->getName();
 
   mPlanet.setTerrainShader(&mShader);
-  mPlanet.setLODFactor(mProperties->mLODFactor.get());
 
   // per-planet settings -----------------------------------------------------
-  mPlanet.setEquatorialRadius(mRadii[0]);
-  mPlanet.setPolarRadius(mRadii[0]);
+  mPlanet.setEquatorialRadius(static_cast<float>(mRadii[0]));
+  mPlanet.setPolarRadius(static_cast<float>(mRadii[0]));
   pVisibleRadius = mRadii[0];
 
-  pActiveTileSourceDEM.onChange().connect([this](std::string const& val) {
-    for (auto const& s : mDEMtileSources) {
-      if (s->getName() == val) {
-        mPlanet.setDEMSource(s.get());
-        break;
-      }
-    }
-  });
-
-  pActiveTileSourceIMG.onChange().connect([this](std::string const& val) {
-    if (val == "None") {
-      mShader.pEnableTexture = false;
-      mPlanet.setIMGSource(nullptr);
-    } else {
-      for (auto const& s : mIMGtileSources) {
-        if (s->getName() == val) {
-          mShader.pEnableTexture = true;
-          mShader.pTextureIsRGB  = (s->getDataType() == TileDataType::eU8Vec3);
-          mPlanet.setIMGSource(s.get());
-          break;
-        }
-      }
-    }
-  });
-
   // scene-wide settings -----------------------------------------------------
-  mHeightScaleConnection = mGraphicsEngine->pHeightScale.onChange().connect(
+  mHeightScaleConnection = mSettings->mGraphics.pHeightScale.connectAndTouch(
       [this](float val) { mPlanet.setHeightScale(val); });
 
-  mProperties->mLODFactor.onChange().connect([this](float val) { mPlanet.setLODFactor(val); });
+  mPluginSettings->mLODFactor.connectAndTouch([this](float val) { mPlanet.setLODFactor(val); });
 
-  mProperties->mEnableWireframe.onChange().connect(
+  mPluginSettings->mEnableWireframe.connectAndTouch(
       [this](bool val) { mPlanet.getTileRenderer().setWireframe(val); });
 
-  mProperties->mEnableTilesFreeze.onChange().connect([this](bool val) {
+  mPluginSettings->mEnableTilesFreeze.connectAndTouch([this](bool val) {
     mPlanet.getLODVisitor().setUpdateLOD(!val);
     mPlanet.getLODVisitor().setUpdateCulling(!val);
   });
 
-  pActiveTileSourceDEM.touch();
-  pActiveTileSourceIMG.touch();
+  // Add to scenegraph.
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  mGLNode.reset(pSG->NewOpenGLNode(pSG->GetRoot(), this));
+  VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
+      mGLNode.get(), static_cast<int>(cs::utils::DrawOrder::ePlanets));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 LodBody::~LodBody() {
   mGraphicsEngine->unregisterCaster(&mPlanet);
-  mGraphicsEngine->pHeightScale.onChange().disconnect(mHeightScaleConnection);
+  mSettings->mGraphics.pHeightScale.disconnect(mHeightScaleConnection);
+
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  pSG->GetRoot()->DisconnectChild(mGLNode.get());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,14 +119,42 @@ glm::dvec3 LodBody::getRadii() const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::shared_ptr<TileSource>> const& LodBody::getDEMtileSources() const {
-  return mDEMtileSources;
+void LodBody::setDEMtileSource(std::shared_ptr<TileSource> source) {
+  if (!source->isSame(mDEMtileSource.get())) {
+    mPlanet.setDEMSource(source.get());
+    mDEMtileSource = std::move(source);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::shared_ptr<TileSource>> const& LodBody::getIMGtileSources() const {
-  return mIMGtileSources;
+void LodBody::setIMGtileSource(std::shared_ptr<TileSource> source) {
+  if (source) {
+    if (!source->isSame(mIMGtileSource.get())) {
+      mPlanet.setIMGSource(source.get());
+      mShader.pEnableTexture = true;
+      mShader.pTextureIsRGB  = (source->getDataType() == TileDataType::eU8Vec3);
+      mIMGtileSource         = std::move(source);
+    }
+  } else {
+    if (mIMGtileSource) {
+      mShader.pEnableTexture = false;
+      mPlanet.setIMGSource(nullptr);
+      mIMGtileSource = nullptr;
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<TileSource> const& LodBody::getDEMtileSource() const {
+  return mDEMtileSource;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<TileSource> const& LodBody::getIMGtileSource() const {
+  return mIMGtileSource;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +167,7 @@ void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
 
     if (mSun) {
       double sunIlluminance = 1.0;
-      if (mGraphicsEngine->pEnableHDR.get()) {
+      if (mSettings->mGraphics.pEnableHDR.get()) {
         sunIlluminance = mSolarSystem->getSunIlluminance(getWorldTransform()[3]);
       }
 
@@ -166,7 +175,7 @@ void LodBody::update(double tTime, cs::scene::CelestialObserver const& oObs) {
           glm::normalize(glm::inverse(getWorldTransform()) *
                          glm::dvec4(mSolarSystem->getSunDirection(getWorldTransform()[3]), 0.0));
 
-      mShader.setSun(sunDirection, sunIlluminance);
+      mShader.setSun(sunDirection, static_cast<float>(sunIlluminance));
     }
   }
 }
@@ -184,7 +193,7 @@ bool LodBody::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool LodBody::GetBoundingBox(VistaBoundingBox& bb) {
+bool LodBody::GetBoundingBox(VistaBoundingBox& /*bb*/) {
   return false;
 }
 

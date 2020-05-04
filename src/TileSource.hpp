@@ -20,9 +20,17 @@ class TileNode;
 class TileSource {
  public:
   /// Type of the callback functor that can be passed to loadTileAsync.
-  typedef std::function<void(TileSource*, int, glm::int64, TileNode*)> OnLoadCallback;
+  using OnLoadCallback = std::function<void(TileSource*, int, glm::int64, TileNode*)>;
 
-  virtual ~TileSource(){};
+  TileSource() = default;
+
+  TileSource(TileSource const& other)     = default;
+  TileSource(TileSource&& other) noexcept = default;
+
+  TileSource& operator=(TileSource const& other) = default;
+  TileSource& operator=(TileSource&& other) noexcept = default;
+
+  virtual ~TileSource() = default;
 
   /// Perform initialization of the source. Must be called before the first tile is requested with
   /// loadTile or loadTileAsync. Sub-classes need to make sure that it is safe to call this
@@ -52,27 +60,11 @@ class TileSource {
   /// Returns the number of currently active async requests.
   virtual int getPendingRequests() = 0;
 
-  /// Can be used to identify this tile source.
-  void setName(std::string const& name) {
-    mName = name;
-  }
-  std::string const& getName() const {
-    return mName;
-  }
-
-  /// Can be used to display required copyright information to the user.
-  void setCopyright(std::string const& copyright) {
-    mCopyright = copyright;
-  }
-
-  std::string const& getCopyright() const {
-    return mCopyright;
-  }
-
- private:
-  std::string mName;
-  std::string mCopyright;
+  /// Derived classes should check whether the given TileSource has the same type and members. This
+  /// is used to prevent redundant tile source reloading.
+  virtual bool isSame(TileSource const* other) const = 0;
 };
+
 } // namespace csp::lodbodies
 
 #endif // CSP_LOD_BODIES_TILESOURCE_HPP

@@ -58,9 +58,9 @@ class TileNode;
 template <typename DerivedT>
 class TileVisitor {
  public:
-  typedef DerivedT DerivedType;
+  using DerivedType = DerivedT;
 
-  explicit TileVisitor(TileQuadTree* treeDEM, TileQuadTree* treeIMG = NULL);
+  explicit TileVisitor(TileQuadTree* treeDEM, TileQuadTree* treeIMG = nullptr);
 
   /// Start traversal of the trees passed to the constructor.
   void visit();
@@ -81,9 +81,9 @@ class TileVisitor {
  protected:
   class StateBase {
    public:
-    std::array<bool, 4> mChildren;
-    TileNode*           mNodeDEM;
-    TileNode*           mNodeIMG;
+    std::array<bool, 4> mChildren{};
+    TileNode*           mNodeDEM{};
+    TileNode*           mNodeIMG{};
     TileId              mTileId;
   };
 
@@ -94,44 +94,49 @@ class TileVisitor {
   void visitRoot(TileNode* rootDEM, TileNode* rootIMG, TileId tileId);
   void visitLevel(TileNode* nodeDEM, TileNode* nodeIMG, TileId tileId);
 
-  /// Called before visiting the first root node. Returns if traversal should commence or not.
+  /// Called before visiting the first root node. Returns if traversal should commence or
+  /// not.
   /// Reimplement in the derived class, the default just returns true.
-  bool preTraverse();
+  virtual bool preTraverse();
 
-  /// Called after visiting the last node. Reimplement in the derived class, the default just does
+  /// Called after visiting the last node. Reimplement in the derived class, the default
+  /// just does
   /// nothing.
-  void postTraverse();
+  virtual void postTraverse();
 
-  /// Called for each root node visited, before visiting any children. Returns if any children
+  /// Called for each root node visited, before visiting any children. Returns if any
+  /// children
   /// should be visited (true) or skipped (false).
   /// Reimplement in the derived class, the default just returns false.
   ///
   /// For finer grained control over which children to visit, set the corresponding entries of
-  /// StateBase::children to true (visit child - the default) or false (skip child). These entries
-  /// are only considered if this functions returns true.
-  bool preVisitRoot(TileId const& tileId);
+  /// StateBase::children to true (visit child - the default) or false (skip child). These
+  /// entries are only considered if this functions returns true.
+  virtual bool preVisitRoot(TileId const& tileId);
 
-  /// Called for each root node visited, after visiting any children. Reimplement in the derived
+  /// Called for each root node visited, after visiting any children. Reimplement in the
+  /// derived
   /// class, the default just does nothing.
-  void postVisitRoot(TileId const& tileId);
+  virtual void postVisitRoot(TileId const& tileId);
 
   /// Called for each non-root node visited, before visiting the child nodes.
   /// Returns if children should be visited (true) or skipped (false).
   /// Reimplement in the derived class, the default just returns false.
   ///
-  /// For finer grained control over which children to visit, set the corresponding entries of
-  /// StateBase::children to true (visit child - the default) or false (skip child). These entries
-  /// are only considered if this functions returns true.
-  bool preVisit(TileId const& tileId);
+  /// For finer grained control over which children to visit, set the corresponding entries
+  /// of StateBase::children to true (visit child - the default) or false (skip child).
+  /// These entries are only considered if this functions returns true.
+  virtual bool preVisit(TileId const& tileId);
 
-  /// Called for each node visited, after visiting the child nodes. Reimplement in the derived
+  /// Called for each node visited, after visiting the child nodes. Reimplement in the
+  /// derived
   /// class, the default just does nothing.
-  void postVisit(TileId const& tileId);
+  virtual void postVisit(TileId const& tileId);
 
-  void             pushState();
-  void             popState();
-  StateBase&       getState();
-  StateBase const& getState() const;
+  virtual void             pushState();
+  virtual void             popState();
+  virtual StateBase&       getState();
+  virtual StateBase const& getState() const;
 
   TileQuadTree* mTreeDEM;
   TileQuadTree* mTreeIMG;
@@ -150,7 +155,7 @@ void TileVisitor<DerivedT>::visit() {
   if (self().preTraverse()) {
     for (int i = 0; i < TileQuadTree::sNumRoots; ++i) {
       TileNode* rootDEM = mTreeDEM->getRoot(i);
-      TileNode* rootIMG = mTreeIMG ? mTreeIMG->getRoot(i) : NULL;
+      TileNode* rootIMG = mTreeIMG ? mTreeIMG->getRoot(i) : nullptr;
 
       // if (i==7)
       visitRoot(rootDEM, rootIMG, TileId(0, i));
@@ -235,11 +240,12 @@ void TileVisitor<DerivedT>::visitRoot(TileNode* rootDEM, TileNode* rootIMG, Tile
 
   if (self().preVisitRoot(tileId)) {
     for (int i = 0; i < 4; ++i) {
-      if (!state.mChildren[i])
+      if (!state.mChildren[i]) {
         continue;
+      }
 
-      TileNode* childDEM = rootDEM ? rootDEM->getChild(i) : NULL;
-      TileNode* childIMG = rootIMG ? rootIMG->getChild(i) : NULL;
+      TileNode* childDEM = rootDEM ? rootDEM->getChild(i) : nullptr;
+      TileNode* childIMG = rootIMG ? rootIMG->getChild(i) : nullptr;
 
       if (childDEM || childIMG) {
         TileId childId = HEALPix::getChildTileId(tileId, i);
@@ -272,11 +278,12 @@ void TileVisitor<DerivedT>::visitLevel(TileNode* nodeDEM, TileNode* nodeIMG, Til
 
   if (self().preVisit(tileId)) {
     for (int i = 0; i < 4; ++i) {
-      if (!state.mChildren[i])
+      if (!state.mChildren[i]) {
         continue;
+      }
 
-      TileNode* childDEM = nodeDEM ? nodeDEM->getChild(i) : NULL;
-      TileNode* childIMG = nodeIMG ? nodeIMG->getChild(i) : NULL;
+      TileNode* childDEM = nodeDEM ? nodeDEM->getChild(i) : nullptr;
+      TileNode* childIMG = nodeIMG ? nodeIMG->getChild(i) : nullptr;
 
       if (childDEM || childIMG) {
         TileId childId = HEALPix::getChildTileId(tileId, i);
@@ -301,7 +308,7 @@ void TileVisitor<DerivedT>::postTraverse() {
 }
 
 template <typename DerivedT>
-bool TileVisitor<DerivedT>::preVisitRoot(TileId const& tileId) {
+bool TileVisitor<DerivedT>::preVisitRoot(TileId const& /*tileId*/) {
   // default impl - do not visit children
   return false;
 }
@@ -312,7 +319,7 @@ void TileVisitor<DerivedT>::postVisitRoot(TileId const& tileId) {
 }
 
 template <typename DerivedT>
-bool TileVisitor<DerivedT>::preVisit(TileId const& tileId) {
+bool TileVisitor<DerivedT>::preVisit(TileId const& /*tileId*/) {
   // default impl - do not visit children
   return false;
 }

@@ -32,8 +32,8 @@ class TreeManagerBase;
 /// Renders tiles with elevation (DEM) and optionally image (IMG) data.
 class TileRenderer : private boost::noncopyable {
  public:
-  explicit TileRenderer(PlanetParameters const& params, TreeManagerBase* treeMgrDEM = NULL,
-      TreeManagerBase* treeMgrIMG = NULL);
+  explicit TileRenderer(PlanetParameters const& params, TreeManagerBase* treeMgrDEM = nullptr,
+      TreeManagerBase* treeMgrIMG = nullptr);
 
   TreeManagerBase* getTreeManagerDEM() const;
   void             setTreeManagerDEM(TreeManagerBase* treeMgr);
@@ -103,25 +103,26 @@ class TileRenderer : private boost::noncopyable {
   };
 
   void preRenderTiles(cs::graphics::ShadowMap* shadowMap);
-  void renderTiles(std::vector<RenderData*> const& reqDEM, std::vector<RenderData*> const& reqIMG);
+  void renderTiles(
+      std::vector<RenderData*> const& renderDEM, std::vector<RenderData*> const& renderIMG);
   void renderTile(RenderDataDEM* rdDEM, RenderDataImg* rdIMG, UniformLocs const& locs);
   void postRenderTiles(cs::graphics::ShadowMap* shadowMap);
 
   void preRenderBounds();
   void renderBounds(std::vector<RenderData*> const& reqDEM, std::vector<RenderData*> const& reqIMG);
-  void postRenderBounds();
+  static void postRenderBounds();
 
-  void                                    init();
-  std::unique_ptr<VistaBufferObject>      makeVBOTerrain();
-  std::unique_ptr<VistaBufferObject>      makeIBOTerrain();
-  std::unique_ptr<VistaVertexArrayObject> makeVAOTerrain(
+  void                                           init() const;
+  static std::unique_ptr<VistaBufferObject>      makeVBOTerrain();
+  static std::unique_ptr<VistaBufferObject>      makeIBOTerrain();
+  static std::unique_ptr<VistaVertexArrayObject> makeVAOTerrain(
       VistaBufferObject* vbo, VistaBufferObject* ibo);
 
-  std::unique_ptr<VistaBufferObject>      makeVBOBounds();
-  std::unique_ptr<VistaBufferObject>      makeIBOBounds();
-  std::unique_ptr<VistaVertexArrayObject> makeVAOBounds(
+  static std::unique_ptr<VistaBufferObject>      makeVBOBounds();
+  static std::unique_ptr<VistaBufferObject>      makeIBOBounds();
+  static std::unique_ptr<VistaVertexArrayObject> makeVAOBounds(
       VistaBufferObject* vbo, VistaBufferObject* ibo);
-  std::unique_ptr<VistaGLSLShader> makeProgBounds();
+  static std::unique_ptr<VistaGLSLShader> makeProgBounds();
 
   PlanetParameters const* mParams;
   TreeManagerBase*        mTreeMgrDEM;

@@ -22,9 +22,10 @@ This plugin can be enabled with the following configuration in your `settings.js
       "mapCache": <string>,          // The path to map cache folder>.
       "bodies": {
         <anchor name>: {
-          "imgDatasets": [
-            {
-              "name": <string>,      // The name of the data set as shown in the UI.
+          "activeImgDataset": <string>,   // The name on the currently active image data set.
+          "activeDemDataset": <string>,   // The name on the currently active elevation data set.
+          "imgDatasets": {
+            <dataset name>: {        // The name of the data set as shown in the UI.
               "copyright": <string>, // The copyright holder of the data set (also shown in the UI).
               "format": <string>,    // "Float32", "UInt8" or "U8Vec3".
               "url": <string>,       // The URL of the mapserver including the "SERVICE=wms" parameter.
@@ -32,10 +33,9 @@ This plugin can be enabled with the following configuration in your `settings.js
               "maxLevel": <int>      // The maximum quadtree depth to load.
             },
             ... <more image datasets> ...
-          ],
-          "demDatasets": [
-            {
-              "name": <string>,      // The name of the data set as shown in the UI.
+          },
+          "demDatasets": {
+            <dataset name>: {        // The name of the data set as shown in the UI.
               "copyright": <string>, // The copyright holder of the data set (also shown in the UI).
               "format": <string>,    // "Float32", "UInt8" or "U8Vec3".
               "url": <string>,       // The URL of the mapserver including the "SERVICE=wms" parameter.
@@ -43,7 +43,7 @@ This plugin can be enabled with the following configuration in your `settings.js
               "maxLevel": <int>      // The maximum quadtree depth to load.
             },
             ... <more elevation datasets> ...
-          ]
+          }
         },
         ... <more bodies> ...
       }

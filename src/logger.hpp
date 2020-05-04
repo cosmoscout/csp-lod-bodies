@@ -4,20 +4,17 @@
 //                        Copyright: (c) 2019 German Aerospace Center (DLR)                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CSP_LOD_BODIES_RENDERDATAIMG_HPP
-#define CSP_LOD_BODIES_RENDERDATAIMG_HPP
+#ifndef CSP_LOD_BODIES_LOGGER_HPP
+#define CSP_LOD_BODIES_LOGGER_HPP
 
-#include "RenderData.hpp"
+#include <spdlog/spdlog.h>
 
 namespace csp::lodbodies {
 
-/// Render data for image data.
-class RenderDataImg : public RenderData {
- public:
-  explicit RenderDataImg(TileNode* node = nullptr);
-  ~RenderDataImg() override;
-};
+/// This creates the default singleton logger for "csp-lodbodies" when called for the first time
+/// and returns it. See cs-utils/logger.hpp for more logging details.
+spdlog::logger& logger();
 
 } // namespace csp::lodbodies
 
-#endif // CSP_LOD_BODIES_RENDERDATAIMG_HPP
+#endif // CSP_LOD_BODIES_LOGGER_HPP

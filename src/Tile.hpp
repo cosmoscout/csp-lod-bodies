@@ -16,18 +16,25 @@ template <typename T>
 class Tile : public TileBase {
  public:
   typedef std::array<T, TileBase::SizeX * TileBase::SizeY> Storage;
-  typedef T                                                value_type;
+  using value_type = T;
 
   explicit Tile(int level, glm::int64 patchIdx);
-  virtual ~Tile();
+
+  Tile(Tile const& other) = delete;
+  Tile(Tile&& other)      = delete;
+
+  Tile& operator=(Tile const& other) = delete;
+  Tile& operator=(Tile&& other) = delete;
+
+  ~Tile() override;
 
   static std::type_info const& getStaticTypeId();
   static TileDataType          getStaticDataType();
 
-  virtual std::type_info const& getTypeId() const;
-  virtual TileDataType          getDataType() const;
+  std::type_info const& getTypeId() const override;
+  TileDataType          getDataType() const override;
 
-  virtual void const* getDataPtr() const;
+  void const* getDataPtr() const override;
 
   Storage const& data() const;
   Storage&       data();
@@ -69,8 +76,7 @@ Tile<T>::Tile(int level, glm::int64 patchIdx)
 }
 
 template <typename T>
-Tile<T>::~Tile() {
-}
+Tile<T>::~Tile() = default;
 
 template <typename T>
 std::type_info const& Tile<T>::getStaticTypeId() {
